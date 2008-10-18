@@ -1,0 +1,15 @@
+16.10.2008
+New features:
+- Alternate Frequency (AF) decoding
+- Completed the RadioText implementation
+- Clocktime (CT) decoding
+- Enhanced Other Networks (EON) decoding
+Draft features:
+- Slow labelling codes (type 1) decoding
+- Traffic Message Control (TMC) decoding
+Miscellaneous:
+- Added lots of comments, matching existing features with their descriptions in the standard(s).
+- Several code changes all over the place, to make the code more manageable.
+
+26.07.2008
+This code was adobted from Matteo Campanella. It is still available at http://digilander.libero.it/iz2eeq/ It was updated to compile with the latest versions of GnuRadio. Small corrections were made to fix warning messages during compilation. All mc4020-related code was removed.

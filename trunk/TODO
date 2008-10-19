@@ -1,5 +1,0 @@
-- Complete TMC implementation
-- Add scanning for stations
-- Add qa code
-- Fix the rx-block separation
-- Fix too common "lost sync"

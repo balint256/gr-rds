@@ -1,3 +1,10 @@
+17.10.2008
+New features:
+- Added display of CT, AF to panel
+Miscellaneous:
+- Minor bug fixes
+- Cleaned up diff decoder
+
 16.10.2008
 New features:
 - Alternate Frequency (AF) decoding

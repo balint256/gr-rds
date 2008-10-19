@@ -1,5 +1,5 @@
 - Complete TMC implementation
 - Add scanning for stations
 - Add qa code
-- Display AF, CT etc on the panel
 - Fix the rx-block separation
+- Fix too common "lost sync"

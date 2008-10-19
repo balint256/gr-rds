@@ -229,6 +229,10 @@ private:
 	enum state_t { ST_NO_SYNC, ST_SYNC };
 	state_t d_state;
 	char radiotext[65];
+	char clocktime_string[33];
+	char af1_string[10];
+	char af2_string[10];
+	char af_string[20];
 	bool radiotext_AB_flag;
 	bool traffic_program;
 	bool traffic_announcement;

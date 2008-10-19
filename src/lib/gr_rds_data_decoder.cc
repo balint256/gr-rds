@@ -30,7 +30,7 @@
 #endif
 
 #ifdef DEBUG
-#define DBG(x) x 
+#define DBG(x) x
 #else
 #define DBG(x)
 #endif
@@ -93,7 +93,7 @@ void gr_rds_data_decoder::reset_rds_data() {
 void gr_rds_data_decoder::enter_no_sync() {
 	presync=false;
 	d_state = ST_NO_SYNC;
-	send_message(6,"");
+	send_message(9,"");
 }
 
 void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number) {
@@ -126,7 +126,10 @@ unsigned long gr_rds_data_decoder::bin2dec(char *string) {
 		type 1 = PS
 		type 2 = PTY
 		type 3 = flagstring: TP, TA, MuSp, MoSt, AH, CMP, stPTY
-		type 4 = RadioText */
+		type 4 = RadioText 
+		type 5 = ClockTime
+		type 6 = Alternative Frequencies 
+		type 9 = lost sync - reset */
 void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext) {
 	if (!d_msgq->full_p()) {
 		gr_message_sptr msg = gr_make_message_from_string(msgtext,msgtype,0,0);
@@ -209,12 +212,17 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	std::cout << "==>" << program_service_name << "<== ";
 	std::cout << '-' << (traffic_program?"TP":"  ") << '-' << (traffic_announcement?"TA":"  ");
 	std::cout << '-' << (music_speech?"Music":"Speech") << '-' << (mono_stereo?"MONO":"STEREO");
+
+	for (int i=0; i<9; i++) af1_string[i]=af2_string[i]=' ';
+	af_string[10]='\0';
 	if (af_1||af_2) {
-		std::cout << " - AF:";
-		if (af_1>50e3) printf(" %2.2fMHz", af_1/1e3);
-		else if ((af_1<10e3)&&(af_1>100)) printf(" %ikHz", (int)af_1);
-		if (af_2>50e3) printf(" %2.2fMHz", af_2/1e3);
-		else if ((af_2<10e3)&&(af_2>100)) printf(" %ikHz", (int)af_2);
+		if (af_1>50e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
+		else if ((af_1<10e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
+		if (af_2>50e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
+		else if ((af_2<10e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
+		sprintf(af_string, "%s %s", af1_string, af2_string);
+		printf(" - AF:%s", af_string);
+		send_message(6,af_string);
 	}
 	std::cout << std::endl;
 
@@ -326,8 +334,8 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
 
 /* when the A/B flag is toggled, flush your current radiotext */
 	if (radiotext_AB_flag!=((group[1]>>4)&0x01)) {
-		send_message(4,radiotext);
-		for(int i= 0; i < 64; i++) radiotext[i] = ' ';
+//		send_message(4,radiotext);
+		for(int i=0; i<64; i++) radiotext[i]=' ';
 		radiotext[64] = '\0';
 	}
 	radiotext_AB_flag=(group[1]>>4)&0x01;
@@ -343,19 +351,18 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
 		radiotext[text_segment_address_code*2+1]=transform_char(group[3]&0xff);
 	}
 	printf("Radio Text %c: %s\n", (radiotext_AB_flag?'A':'B'), radiotext);
+	send_message(4,radiotext);
 }
 
 /* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
 void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
 	unsigned int hours, minutes, year, month, day_of_month=0;
 	double modified_julian_date=0;
-	signed int local_time_offset=0;			// multiples of half hours
+	signed int local_time_offset=0;		// multiples of half hours
 	bool K=0;
 
-// TODO sometimes this gives 33:11
-	hours=((group[2]&0x01)<<5)|((group[3]>>12)&0x0f);
+	hours=((group[2]&0x01)<<4)|((group[3]>>12)&0x0f);
 	minutes=(group[3]>>6)&0x3f;
-/* should we check if it's possible to send crazy times, like 31:61 ??? */
 	local_time_offset=group[3]&0x1f;
 	if((group[3]>>5)&0x01) local_time_offset *= -1;
 	modified_julian_date=((group[1]&0x03)<<15)|((group[2]>>1)&0x7fff);
@@ -368,12 +375,13 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
 	year+=K;
 	month-=1+K*12;
 
-/* let's print out what we've got so far */
-	std::cout << "ClockTime - " << (int)day_of_month << '.';
-	std::cout << month << '.' << (1900+year) << ", ";
-	std::cout << hours << ':' << minutes;
-	std::cout << " (" << (local_time_offset>=0?'+':'-');
-	std::cout << local_time_offset << ')' << std::endl;
+// concatenate into a string, print and send message
+	for (int i=0; i<32; i++) clocktime_string[i]=' ';
+	clocktime_string[32]='\0';
+	sprintf(clocktime_string, "%2i.%2i.%4i, %2i:%2i (%c%i)", (int)day_of_month, month, 
+		(1900+year), hours, minutes, (local_time_offset>=0?'+':'-'), local_time_offset);
+	std::cout << "Clocktime - " << clocktime_string << std::endl;
+	send_message(5,clocktime_string);
 }
 
 /* TMC: see page 32 of the standard
@@ -444,7 +452,7 @@ void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
 			case 3:			// PS(ON)
 				ps_on[variant_code*2]=transform_char((information>>8)&0xff);
 				ps_on[variant_code*2+1]=transform_char(information&0xff);
-				std::cout << "PS(ON): ==>" << ps_on << "<==";
+				printf("PS(ON): ==>%8s<==", ps_on);
 			break;
 			case 4:			// AF
 				af_1 = (double)(((information>>8)&0xff)+875)*100;
@@ -497,7 +505,7 @@ void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
 /* FAST BASIC TUNING: see page 39 in the standard */
 void gr_rds_data_decoder::decode_type15b(unsigned int *group){
 /* here we get twice the first two blocks... nothing to be done */
-	std::cout << std::endl;
+	printf("\n");
 }
 
 /* See page 17 Table 3 in paragraph 3.1.3 of the standard. */
@@ -506,7 +514,7 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	bool version_code=(group[1]>>11) & 0x01;
 /*	printf("g1:%x%x g2:%x%x g3:%x%x\n", (group[1]>>8)&0xff, group[1]&0xff,
 		(group[2]>>8)&0xff, group[2]&0xff, (group[3]>>8)&0xff, group[3]&0xff);*/
-	std::cout << (int)group_type_code << (version_code?'B':'A');
+	printf("%i%c", (int)group_type_code, (version_code?'B':'A'));
 
 	program_identification=group[0];			// "PI"
 	program_type=(group[1]>>5) & 0x1F;			// "PTY"
@@ -613,7 +621,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 							DBG(printf("%lu,%lu\n",block_distance,bit_distance);)
 							if ((block_distance*26)!=bit_distance) presync=false;
 							else {
-								printf("Sync State Detected\n");
+								printf("@@@@@ Sync State Detected\n");
 								enter_sync(j);
 							}	
 						}
@@ -701,7 +709,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 					blocks_counter++;
 					if (blocks_counter==50) {
 						if (wrong_blocks_counter>35) {
-							printf("Lost Sync (Got %u bad blocks on %u total)\n",
+							printf("@@@@@ Lost Sync (Got %u bad blocks on %u total)\n",
 								wrong_blocks_counter,blocks_counter);
 							enter_no_sync();
 						}

@@ -61,10 +61,9 @@ static const int MAX_OUT = 1;	// maximum number of output streams
  * The private constructor
  */
 gr_rds_diff_decoder::gr_rds_diff_decoder ()
-  : gr_sync_block ("gr_rds_diff_decoder",
-	      gr_make_io_signature (MIN_IN, MAX_IN, sizeof (bool)),
-	      gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool))) 
-	      
+	: gr_sync_block ("gr_rds_diff_decoder",
+		gr_make_io_signature (MIN_IN, MAX_IN, sizeof (bool)),
+		gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool)))
 {
 	d_last = 0;
 }
@@ -72,29 +71,22 @@ gr_rds_diff_decoder::gr_rds_diff_decoder ()
 /*
  * Our virtual destructor.
  */
-gr_rds_diff_decoder::~gr_rds_diff_decoder ()
-{
-  // nothing else required in this example
+gr_rds_diff_decoder::~gr_rds_diff_decoder (){
 }
 
 int 
 gr_rds_diff_decoder::work (int noutput_items,
-			       gr_vector_const_void_star &input_items,
-			       gr_vector_void_star &output_items)
+					gr_vector_const_void_star &input_items,
+					gr_vector_void_star &output_items)
 {
-  const bool *in = (const bool *) input_items[0];
-  bool *out = (bool *) output_items[0];
+	const bool *in = (const bool *) input_items[0];
+	bool *out = (bool *) output_items[0];
 
-  
-  if(in[0] == d_last) {out[0] = false;}
-  else { out[0] = true; }
-  for (int i = 1; i < noutput_items; i++){
-	  if(in[i] == in[i-1]) { out[i] = false;}
-	  else { out[i] = true;}
-  }
+	out[0] = (in[0]==d_last)?false:true;
+	for (int i = 1; i < noutput_items; i++)
+		out[i] = (in[i]==in[i-1])?false:true;
+	d_last = in[noutput_items-1];
 
-  d_last = in[noutput_items-1];
-
-  // Tell runtime system how many output items we produced.
-  return noutput_items;
+// Tell runtime system how many output items we produced.
+	return noutput_items;
 }

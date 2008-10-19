@@ -46,7 +46,6 @@
  */
 gr_rds_biphase_decoder_sptr 
 gr_rds_make_biphase_decoder (double sampling_rate)
-	
 {
   return gr_rds_biphase_decoder_sptr (new gr_rds_biphase_decoder (sampling_rate));
 }
@@ -58,7 +57,7 @@ gr_rds_make_biphase_decoder (double sampling_rate)
  * output signatures are used by the runtime system to
  * check that a valid number and type of inputs and outputs
  * are connected to this block.  In this case, we accept
- * only 1 input and 1 output.
+ * 2 inputs and 1 to 8 outputs.
  */
 static const int MIN_IN = 2;	// mininum number of input streams
 static const int MAX_IN = 2;	// maximum number of input streams
@@ -71,12 +70,12 @@ static const int MAX_OUT = 8;	// maximum number of output streams
  * The private constructor
  */
 gr_rds_biphase_decoder::gr_rds_biphase_decoder (double input_sampling_rate)
-  : gr_block("gr_rds_biphase_decoder",
-	      gr_make_io_signature (MIN_IN, MAX_IN, sizeof (float)),
-	      gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool)) )
-{	
+	: gr_block("gr_rds_biphase_decoder",
+			gr_make_io_signature (MIN_IN, MAX_IN, sizeof (float)),
+			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool)))
+{
 	SYMBOL_LENGTH = (int)(input_sampling_rate/57000*48.0);
-	DBG(printf("SYMBOL_LENGTH= %d,\n", SYMBOL_LENGTH);)
+	printf("SYMBOL_LENGTH= %d\n", SYMBOL_LENGTH);
 	set_relative_rate((input_sampling_rate/57e3/48));
 	reset();
 }
@@ -84,8 +83,7 @@ gr_rds_biphase_decoder::gr_rds_biphase_decoder (double input_sampling_rate)
 /*
  * Our virtual destructor.
  */
-gr_rds_biphase_decoder::~gr_rds_biphase_decoder ()
-{
+gr_rds_biphase_decoder::~gr_rds_biphase_decoder (){
 }
 
 void gr_rds_biphase_decoder::reset() {
@@ -98,137 +96,92 @@ void gr_rds_biphase_decoder::reset() {
 
 void gr_rds_biphase_decoder::enter_looking () {
 	printf (">>> biphase decoder enter_looking\n");
-  	d_state = ST_LOOKING;
+	d_state = ST_LOOKING;
 }
 
-void  gr_rds_biphase_decoder::enter_locked () { 
-	 printf(">>> biphase decoder enter_locked\n");	 
-     d_state = ST_LOCKED;
-	 d_symbol_integrator = 0;
-	 d_sign_last = 0;
+void  gr_rds_biphase_decoder::enter_locked () {
+	printf(">>> biphase decoder enter_locked\n");
+	d_state = ST_LOCKED;
+	d_symbol_integrator = 0;
+	d_sign_last = 0;
 }
 
+
+
+////////////////////////////////////////////////////////////////
 int gr_rds_biphase_decoder::general_work (int noutput_items,
-			       gr_vector_int &ninput_items,
-			       gr_vector_const_void_star &input_items,
-			       gr_vector_void_star &output_items)
+					gr_vector_int &ninput_items,
+					gr_vector_const_void_star &input_items,
+					gr_vector_void_star &output_items)
 {
-  const float *in = (const float *) input_items[0];
-  const float *clk  =  (const float *) input_items [1];
-  
-  bool *out = (bool *) output_items[0];
-  //float *out = (float *) output_items[0];
-  
+	const float *in = (const float *) input_items[0];
+	const float *clk  =  (const float *) input_items [1];
+	bool *out = (bool *) output_items[0];
+	int n_in = ninput_items[0];
+	int n_clk_in = ninput_items[1];
+	int i = 0;
+	int n = 0;			// number of output items created
+	int cons;
+	int sign_current = 0;
 
-	  
-  int n_in = ninput_items[0];
-  int n_clk_in = ninput_items[1];
-  int i = 0;
-  int n = 0;
-  int cons;
-  int sign_current = 0;
-
-  DBG(printf("Biphase decoder at work: n_in = %d, n_clk_in = %d\n", n_in, n_clk_in);)
-  
-  switch (d_state){
-    case ST_LOCKED:
-		if(d_sign_last == 0) { d_sign_last = (clk[0] > 0 ? 1: -1);}
-		for( i = 0; (i < n_in) && (i < n_clk_in); i++) {
-	
-			//fileone << i << " " << in[i] << " " << clk[i] << '\n';
-			
-			sign_current = (clk[i] > 0 ? 1: -1);
-			if(sign_current != d_sign_last) {
-				// a zero cross in clk
-				d_zc++;
-			}
-			d_sign_last = sign_current;
-			d_symbol_integrator += (in[i] * clk[i]);
-			if(d_zc >=  2) {
-				// Two zero crossings in clock - that's a symbol
-				if(d_symbol_integrator > 0) {
-					DBG(printf("1"););
-					out[n] = 1;
-				} else  {
-					DBG(printf("0"););
-					out[n] = 0;
+	switch (d_state){
+		case ST_LOCKED:
+			if(d_sign_last == 0) d_sign_last = (clk[0]>0?1:-1);
+			for(i=0; (i<n_in)&&(i<n_clk_in); i++) {
+				sign_current = (clk[i]>0?1:-1);
+				if(sign_current != d_sign_last) d_zc++; // a zero cross in clk
+				d_sign_last = sign_current;
+				d_symbol_integrator += (in[i]*clk[i]);
+				if(d_zc >= 2) { // Two zero crossings in clock - that's a symbol
+					out[n] = (d_symbol_integrator>0?1:0);
+					n++;
+					d_symbol_integrator = 0;
+					d_zc = 0;
 				}
-				n++;
-				d_symbol_integrator = 0;
-				d_zc = 0;
-			}			
-		}
-		fflush(stdout);
-		//fileone.close();
-		//exit(1);
-		consume_each (i);
-		return n; // Tell the runtime system how many output items we created..
-    case ST_LOOKING:
-		// adjust clock and signal; if fine: go locked 
-		if(d_sign_last == 0) { d_sign_last = (in[0] > 0 ? 1 : -1); }
-		for( i = 0; i < n_in; i++) {
-			
-			//filetwo << i << " " << in[i] << " " << clk[i] << '\n';
-			
-			sign_current = (in[i] > 0 ? 1 : -1);
-			if(sign_current != d_sign_last) {
-				// Remember the zero crossing and check next time if it was a half or a whole symbol...
-				DBG(printf("Zero Crossing at i = %d\n", i);)
-				if(d_last_zc != 0) {
-					int delta = i - d_last_zc;
-					DBG(printf("Delta of Zero Crossing = %d\n", delta);)
-					//if((delta  >= SYMBOL_LENGTH - 5)) {
-					if(abs(delta-SYMBOL_LENGTH)<10) {					
-						// That was a 1, 0 or 0, 1 in signal; i is now pointing the middle of a symbol
-						DBG(printf("sync... consume: %d\n",  (i-(delta/2)) );)
-						consume(0, i-(delta/2));
-						// From this point sync clk
-						/*
-	                    d_sign_last = (clk[0] > 0 ? 1: -1);
-		                for (i = 0; i < n_clk_in ; i++) {
-		                	std::cout << i << " " << clk[i] << std::endl; 
-	    	                sign_current = (clk[i] > 0 ? 1: -1);
-	            	        if(sign_current != d_sign_last) {
-	            	                // zero crossing in clock
-	                   		        consume(1,i);
-	                   		        DBG(printf("clock sync... consume: %d\n",i);)
-	                            	break;
-	                    	}
-	                    	d_sign_last = sign_current;
-	                	}
-	                	*/
-	                	
-	                	i=i-(delta/2);
-	                	d_sign_last = (clk[i] > 0 ? 1: -1);
-	                	for (; i < n_clk_in ; i++) {
-		                	//std::cout << i << " " << clk[i] << std::endl; 
-	    	                sign_current = (clk[i] > 0 ? 1: -1);
-	            	        if(sign_current != d_sign_last) {
-	            	                // zero crossing in clock
-	                   		        consume(1,i);
-	                   		        DBG(printf("clock sync... consume: %d\n",i);)
-	                            	break;
-	                    	}
-	                    	d_sign_last = sign_current;
-	                	}	                	
-	                    if (synccounter++==100) enter_locked();
-	                    //filetwo.close();
-	                    return 0;	// No output produced, but now clock and signal are synced
-					}			
-				}
-				d_last_zc = i;
 			}
-			d_sign_last = sign_current;
-		}
-		d_last_zc = d_last_zc - n_in;
-		cons = (n_in > n_clk_in ? n_clk_in : n_in );
-		DBG(printf("clock and data consume: %d\n",cons);)
-		consume(0, cons);
-		consume(1, cons);
-		return 0;	 
-    default:
-      enter_looking();
-      consume_each(0);
-      return 0;
-    }
+			fflush(stdout);
+			consume_each (i);
+			return n; 
+		case ST_LOOKING:
+// adjust clock and signal; if fine: go locked 
+			if(d_sign_last == 0) d_sign_last = (in[0]>0?1:-1);
+			for(i=0; i<n_in; i++) {
+				sign_current = (in[i]>0?1:-1);
+				if(sign_current != d_sign_last) {
+// Remember the zero crossing and check next time if it was a half or a whole symbol
+					if(d_last_zc!=0) {
+						int delta = i-d_last_zc;
+						if(abs(delta-SYMBOL_LENGTH)<10) {
+// That was a 1, 0 or 0, 1 in signal; i is now pointing at the middle of a symbol
+							consume(0, i-(delta/2));
+							i=i-(delta/2);
+							d_sign_last = (clk[i]>0?1:-1);
+							for (; i<n_clk_in; i++) {
+								sign_current = (clk[i]>0?1:-1);
+								if(sign_current!=d_sign_last) { // zero crossing in clock
+									consume(1,i);
+									break;
+								}
+								d_sign_last = sign_current;
+								if (synccounter++==100) enter_locked();
+								return 0;
+// No output produced, but now clock and signal are synced
+							}
+						}
+						d_last_zc = i;
+					}
+					d_sign_last = sign_current;
+				}
+			}
+			d_last_zc = d_last_zc-n_in;
+			cons = (n_in>n_clk_in?n_clk_in:n_in);
+			consume(0, cons);
+			consume(1, cons);
+			return 0;
+		default:
+			enter_looking();
+			consume_each(0);
+			return 0;
+		break;
+	}
 }

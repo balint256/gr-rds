@@ -17,7 +17,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		parser=OptionParser(option_class=eng_option)
 		parser.add_option("-R", "--rx-subdev-spec", type="subdev", default=None,
 						  help="select USRP Rx side A or B (default=A)")
-		parser.add_option("-f", "--freq", type="eng_float", default=106.5e6,
+		parser.add_option("-f", "--freq", type="eng_float", default=89.8e6,
 						  help="set frequency to FREQ", metavar="FREQ")
 		parser.add_option("-g", "--gain", type="eng_float", default=10,
 						  help="set gain in dB (default is 10)")
@@ -174,7 +174,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
-		if 0:
+		if 1:
 			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=demod_rate, y_per_div=10, ref_level=0)
 			self.connect (self.guts.fm_demod, post_fm_demod_fft)
@@ -206,7 +206,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		hbox.Add((5,0), 0)
 		myform['freq_slider'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
-			weight=3, range=(87.5e6, 108e6, 0.05e6), callback=self.set_freq)
+			weight=3, range=(87.5e6, 108e6, 0.1e6), callback=self.set_freq)
 		hbox.Add((5,0), 0)
 		vbox.Add(hbox, 0, wx.EXPAND)
 

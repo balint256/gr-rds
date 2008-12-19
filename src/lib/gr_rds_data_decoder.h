@@ -232,7 +232,7 @@ private:
 	char clocktime_string[33];
 	char af1_string[10];
 	char af2_string[10];
-	char af_string[20];
+	char af_string[21];
 	bool radiotext_AB_flag;
 	bool traffic_program;
 	bool traffic_announcement;

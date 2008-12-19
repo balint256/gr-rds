@@ -201,33 +201,6 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 		default:
 		break;
 	}
-	if (!version_code) {			// type 0A
-		af_code_1=(int)(group[2]>>8)&0xff;
-		af_code_2=(int) group[2]&0xff;
-		af_1=decode_af(af_code_1);
-		af_2=decode_af(af_code_2);
-	}
-
-/* let's print out what we've got so far */
-	std::cout << "==>" << program_service_name << "<== ";
-	std::cout << '-' << (traffic_program?"TP":"  ") << '-' << (traffic_announcement?"TA":"  ");
-	std::cout << '-' << (music_speech?"Music":"Speech") << '-' << (mono_stereo?"MONO":"STEREO");
-
-	for (int i=0; i<9; i++) af1_string[i]=af2_string[i]=' ';
-	af_string[10]='\0';
-	if (af_1||af_2) {
-		if (af_1>50e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
-		else if ((af_1<10e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
-		if (af_2>50e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
-		else if ((af_2<10e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
-		sprintf(af_string, "%s %s", af1_string, af2_string);
-		printf(" - AF:%s", af_string);
-		send_message(6,af_string);
-	}
-	std::cout << std::endl;
-
-// sending the messages to the queue
-	send_message(1,program_service_name);
 	flagstring[0]=traffic_program?'1':'0';
 	flagstring[1]=traffic_announcement?'1':'0';
 	flagstring[2]=music_speech?'1':'0';
@@ -235,7 +208,33 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	flagstring[4]=artificial_head?'1':'0';
 	flagstring[5]=compressed?'1':'0';
 	flagstring[6]=static_pty?'1':'0';
+	if (!version_code) {			// type 0A
+		af_code_1=(int)(group[2]>>8)&0xff;
+		af_code_2=(int) group[2]&0xff;
+		af_1=decode_af(af_code_1);
+		af_2=decode_af(af_code_2);
+		for (int i=0; i<9; i++) af1_string[i]=af2_string[i]=' ';
+		for (int i=0; i<20; i++) af_string[i]=' ';
+		af_string[20]='\0';
+		if (af_1||af_2) {
+			if (af_1>50e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
+			else if ((af_1<10e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
+			if (af_2>50e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
+			else if ((af_2<10e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
+			sprintf(af_string, "%s %s", af1_string, af2_string);
+		}
+	}
+
+/* let's print out what we've got so far */
+	std::cout << "==>" << program_service_name << "<== ";
+	std::cout << '-' << (traffic_program?"TP":"  ") << '-' << (traffic_announcement?"TA":"  ");
+	std::cout << '-' << (music_speech?"Music":"Speech") << '-' << (mono_stereo?"MONO":"STEREO");
+	std::cout << " - AF:" << af_string << std::endl;
+
+/* sending the messages to the queue */
+	send_message(1,program_service_name);
 	send_message(3,flagstring);
+	send_message(6,af_string);
 }
 
 /* see page 41 in the standard

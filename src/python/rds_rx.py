@@ -54,9 +54,12 @@ class rds_rx(gr.hier_block2):
 		if audio_rate <= 120e3:
 			raise ValueError, "Audio_rate is too small. Needs to be at least 120k!"
 
+#		This is necessary because it's not (yet) possible to connect
+#		a hier_block2's input to >1 blocks, as described here:
+#		http://www.ruby-forum.com/topic/125660
 		# Dummy inpoint block
-		self.inpoint = gr.add_ff()
-	
+		self.inpoint = gr.kludge_copy(gr.sizeof_float)
+
 		# Pilot reconstruction filter
 		self.pilot_filter_coeffs = gr.firdes_band_pass(1, 
 								   audio_rate,
@@ -100,8 +103,9 @@ class rds_rx(gr.hier_block2):
 		self.rds_decoder = rds.data_decoder(msgq)
 
 		# wire the block together
-		fg.connect((self.inpoint), self.pilot_filter)
-		fg.connect((self.inpoint), self.rds_filter)
+		fg.connect(self, self.inpoint)
+		fg.connect(self.inpoint, self.pilot_filter)
+		fg.connect(self.inpoint, self.rds_filter)
 		fg.connect(self.pilot_filter, (self.mixer, 0))
 		fg.connect(self.pilot_filter, (self.mixer, 1))
 		fg.connect(self.pilot_filter, (self.mixer, 2))
@@ -110,5 +114,4 @@ class rds_rx(gr.hier_block2):
 		fg.connect(self.mixer, self.rds_bb_filter)
 		fg.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
 		fg.connect(self.data_clock, (self.bpsk_demod, 1))
-		fg.connect(self.bpsk_demod, self.differential_decoder)
-		fg.connect(self.differential_decoder, self.rds_decoder)
+		fg.connect(self.bpsk_demod, self.differential_decoder, self.rds_decoder)

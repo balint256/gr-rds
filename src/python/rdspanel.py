@@ -189,8 +189,8 @@ class rdsPanel(wx.Panel):
 			self.radiotext.SetLabel(message.to_string())
 		elif (message.type()==5):	#clocktime
 			self.clocktime.SetLabel(message.to_string())
-		elif (message.type()==6):	#alternative frequencies
-			self.alt_freq.SetLabel(message.to_string())
+#		elif (message.type()==6):	#alternative frequencies
+#			self.alt_freq.SetLabel(message.to_string())
 		elif (message.type()==9):	#lost sync - reset
 			self.program_information.SetLabel("xxxx")
 			self.station_name.SetLabel("xxxxxxxx")

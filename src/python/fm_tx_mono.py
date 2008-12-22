@@ -50,6 +50,7 @@ class fm_tx_block(stdgui2.std_top_block):
 		sample_rate = self.src.sample_rate()
 		bits_per_sample = self.src.bits_per_sample()
 		print nchans, "channels,", sample_rate, "kS/s,", bits_per_sample, "bits/sample"
+
 		# resample to 32kS/s
 		if sample_rate == 44100:
 			self.resample = blks2.rational_resampler_fff(8,11)
@@ -58,15 +59,13 @@ class fm_tx_block(stdgui2.std_top_block):
 		else:
 			print sample_rate, "is an unsupported sample rate"
 			exit()
-		# apply preemphasis
-		self.emph = blks2.fm_preemph(self.audio_rate, tau=75e-6)
 
-		# fm modulation & gain
+		# interpolation, preemphasis, fm modulation & gain
 		self.fmtx = blks2.wfm_tx (self.audio_rate, self.usrp_rate, tau=75e-6, max_dev=15e3)
 		self.gain = gr.multiply_const_cc (4e3)
 
 		# connect it all
-		self.connect (self.src, self.resample, self.emph, self.fmtx, self.gain, self.u)
+		self.connect (self.src, self.resample, self.fmtx, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want
 		pre_mod = fftsink2.fft_sink_f(panel, title="Pre-Modulation",

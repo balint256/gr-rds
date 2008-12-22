@@ -75,25 +75,24 @@ class fm_tx_block(stdgui2.std_top_block):
 		self.connect (self.resample_right, (self.audio_lpr, 1))
 		self.connect (self.resample_right, (self.audio_lmr, 1))
 
-		# add preemphasis and a low-pass filter for L+R
-		self.emph_lpr = blks2.fm_preemph(self.audio_rate, tau=75e-6)
-		self.emph_lmr = blks2.fm_preemph(self.audio_rate, tau=75e-6)
+		# low-pass filter for L+R
 		audio_lpr_taps = gr.firdes.low_pass (0.3,	# gain
 											self.audio_rate,	# sampling rate
 											15e3,				# passband cutoff
 											2e3,				# transition width
 											gr.firdes.WIN_HANN)
 		self.audio_lpr_filter = gr.fir_filter_fff (1, audio_lpr_taps)
-		self.connect (self.audio_lpr, self.emph_lpr, self.audio_lpr_filter)
-		self.connect (self.audio_lmr, self.emph_lmr)
+		self.connect (self.audio_lpr, self.audio_lpr_filter)
 
-		# create pilot tone at 19 kHz with a pass-band filter
+		# create pilot tone at 19 kHz
 		self.pilot = gr.sig_source_f(self.audio_rate, gr.GR_SIN_WAVE, 19e3, 7e-4)
 
 		# create the L-R signal carrier at 38 kHz
 		self.stereo_carrier = gr.multiply_ff()
 		self.connect (self.pilot, (self.stereo_carrier, 0))
 		self.connect (self.pilot, (self.stereo_carrier, 1))
+
+		# upconvert L-R to 23-53 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
 		audio_lmr_taps = gr.firdes.band_pass (3e3,	# gain
 											self.audio_rate,	# sampling rate
@@ -102,17 +101,17 @@ class fm_tx_block(stdgui2.std_top_block):
 											2e3,				# transition width
 											gr.firdes.WIN_HANN)
 		self.audio_lmr_filter = gr.fir_filter_fff (1, audio_lmr_taps)
-		self.connect (self.emph_lmr, (self.mix_stereo, 0))
+		self.connect (self.audio_lmr, (self.mix_stereo, 0))
 		self.connect (self.stereo_carrier, (self.mix_stereo, 1))
 		self.connect (self.mix_stereo, self.audio_lmr_filter)
 
-		# mix L+R, pilot, L-R before modulating
+		# mix L+R, pilot and L-R
 		self.mixer = gr.add_ff()
 		self.connect (self.audio_lpr_filter, (self.mixer, 0))
 		self.connect (self.pilot, (self.mixer, 1))
 		self.connect (self.audio_lmr_filter, (self.mixer, 2))
 
-		# interpolation, fm modulation & gain
+		# interpolation & pre-emphasis
 		interp_taps = optfir.low_pass (self.sw_interp,		# gain
 										self.usrp_rate,		# Fs
 										60e3,				# passband cutoff
@@ -120,16 +119,20 @@ class fm_tx_block(stdgui2.std_top_block):
 										0.1,				# passband ripple dB
 										40)					# stopband atten dB
 		self.interpolator = gr.interp_fir_filter_fff (self.sw_interp, interp_taps)
+		self.pre_emph = blks2.fm_preemph(self.usrp_rate, tau=75e-6)
+		self.connect (self.mixer, self.interpolator, self.pre_emph)
+
+		# fm modulation, gain & TX
 		max_dev = 100e3
 		k = 2 * math.pi * max_dev / self.usrp_rate		# modulator sensitivity
 		self.modulator = gr.frequency_modulator_fc (k)
 		self.gain = gr.multiply_const_cc (1e3)
-		self.connect (self.mixer, self.interpolator, self.modulator, self.gain, self.u)
+		self.connect (self.pre_emph, self.modulator, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want
 		pre_mod = fftsink2.fft_sink_f(panel, title="Pre-Modulation",
 			fft_size=512, sample_rate=self.usrp_rate, y_per_div=20, ref_level=20)
-		self.connect (self.interpolator, pre_mod)
+		self.connect (self.pre_emph, pre_mod)
 		vbox.Add (pre_mod.win, 1, wx.EXPAND)
 
 if __name__ == '__main__':

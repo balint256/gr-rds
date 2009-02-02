@@ -10,25 +10,29 @@ class rds_rx_graph (gr.top_block):
 
 ####################
 		vol = .5
-		freq = 96.3e6
+		freq = 89.8e6
 		usrp_decim = 256
 		audio_decim = 8
 ####################
 
 		self.u = usrp.source_c(0, usrp_decim)
+		print "USRP Serial: ", self.u.serial_number()
 		adc_rate = self.u.adc_rate()				# 64 MS/s
 		demod_rate = adc_rate / usrp_decim			# 256 kS/s
 		audio_rate = demod_rate / audio_decim		# 32 kHz
-		#demod_rate = demod_rate * 19 / 16
 
 		rx_subdev_spec = usrp.pick_subdev(self.u, [usrp_dbid.BASIC_RX])
 		self.u.set_mux(usrp.determine_rx_mux_value(self.u, rx_subdev_spec))
 		self.subdev = usrp.selected_subdev(self.u, rx_subdev_spec)
+		print "Using d'board", self.subdev.side_and_name()
 
 		g = self.subdev.gain_range()
 		gain = float(g[0]+g[1])/2
 		self.subdev.set_gain(gain)
-		self.u.tune(0, self.subdev, freq)
+		if self.u.tune(0, self.subdev, freq):
+			print "Tuned to", freq/1e6, "MHz"
+		else:
+			sys.exit(1)
 
 		chan_filt_coeffs = optfir.low_pass (1,
 											demod_rate,

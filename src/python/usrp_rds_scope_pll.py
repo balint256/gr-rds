@@ -44,6 +44,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# build graph
 
 		self.u = usrp.source_c()					# usrp is data source
+		print "USRP Serial: ", self.u.serial_number()
 		adc_rate = self.u.adc_rate()				# 64 MS/s
 		usrp_decim = 250
 		self.u.set_decim_rate(usrp_decim)
@@ -59,6 +60,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		self.u.set_mux(usrp.determine_rx_mux_value(self.u, options.rx_subdev_spec))
 		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
+		print "Using d'board", self.subdev.side_and_name()
 
 		chan_filt_coeffs = optfir.low_pass (1,
 											demod_rate,

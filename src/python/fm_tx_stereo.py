@@ -41,7 +41,7 @@ class fm_tx_block(stdgui2.std_top_block):
 
 		# set max Tx gain, tune frequency and enable transmitter
 		self.subdev.set_gain(self.subdev.gain_range()[1])
-		self.u.tune(self.subdev._which, self.subdev, options.freq)
+		self.u.tune(self.subdev.which(), self.subdev, options.freq)
 		self.subdev.set_enable(True)
 
 		# open wav file containing floats in the [-1, 1] range, repeat

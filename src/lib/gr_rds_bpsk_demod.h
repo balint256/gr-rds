@@ -30,17 +30,14 @@
  */
 
 
-#ifndef INCLUDED_gr_rds_biphase_decoder_H
-#define INCLUDED_gr_rds_biphase_decoder_H
+#ifndef INCLUDED_gr_rds_bpsk_demod_H
+#define INCLUDED_gr_rds_bpsk_demod_H
 
 #include <gr_block.h>
 #include <iostream>
 #include <fstream>
 
-//static std::ofstream fileone("pippo", std::ios::out);
-//static std::ofstream filetwo("pluto", std::ios::out);
-
-class gr_rds_biphase_decoder;
+class gr_rds_bpsk_demod;
 
 /*
  * We use boost::shared_ptr's instead of raw pointers for all access
@@ -54,47 +51,46 @@ class gr_rds_biphase_decoder;
  *
  * As a convention, the _sptr suffix indicates a boost::shared_ptr
  */
-typedef boost::shared_ptr<gr_rds_biphase_decoder> gr_rds_biphase_decoder_sptr;
+typedef boost::shared_ptr<gr_rds_bpsk_demod> gr_rds_bpsk_demod_sptr;
 
 /*!
- * \brief Return a shared_ptr to a new instance of gr_rds_biphase_decoder.
+ * \brief Return a shared_ptr to a new instance of gr_rds_bpsk_demod.
  *
- * To avoid accidental use of raw pointers, gr_rds_biphase_decoder's
- * constructor is private. gr_rds_make_biphase_decoder is the public
+ * To avoid accidental use of raw pointers, gr_rds_bpsk_demod's
+ * constructor is private. gr_rds_make_bpsk_demod is the public
  * interface for creating new instances.
  */
-gr_rds_biphase_decoder_sptr gr_rds_make_biphase_decoder (double input_sample_rate);
+gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);
 
 /*!
  * \brief Decodes a biphase or manchester coded signal to 1, 0 as bool
- * \ingroup **FIXME**
- *
- * \sa **FIXME**
+ * \ingroup RDS
  */
-class gr_rds_biphase_decoder : public gr_block
+class gr_rds_bpsk_demod : public gr_block
 {
 private:
+	enum state_t { ST_LOOKING, ST_LOCKED };
+	int SYMBOL_LENGTH;
+	state_t d_state;
+	int d_zc;				// Zero crosses in clk
+	int d_last_zc;
+	int d_sign_last;
+	float d_symbol_integrator;
+	unsigned int synccounter;
+// The friend declaration allows gr_rds_make_bpsk_demod to
+// access the private constructor.
+	friend gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);
+	gr_rds_bpsk_demod (double input_samping_rate);	// private constructor
+	void enter_looking();
+	void enter_locked();
 
-  enum state_t { ST_LOOKING, ST_LOCKED };
-
-  int 		 SYMBOL_LENGTH;
-  state_t    d_state;
-  int		 d_zc;				// Zero crosses in clk
-  int 		 d_last_zc;
-  int		 d_sign_last;
-  float 	 d_symbol_integrator;
-  unsigned int synccounter;
-
-  friend gr_rds_biphase_decoder_sptr gr_rds_make_biphase_decoder (double input_sample_rate);
-  gr_rds_biphase_decoder (double input_samping_rate);  	// private constructor
-  
-  void enter_looking();
-  void enter_locked();  
-
- public:
-  ~gr_rds_biphase_decoder ();
-  int general_work (int noutput_items,gr_vector_int &ninput_items,gr_vector_const_void_star &input_items,gr_vector_void_star &output_items);
-  void reset();		    	    
+public:
+	~gr_rds_bpsk_demod ();
+	int general_work (int noutput_items,
+				gr_vector_int &ninput_items,
+				gr_vector_const_void_star &input_items,
+				gr_vector_void_star &output_items);
+	void reset();
 };
 
-#endif /* INCLUDED_gr_rds_biphase_decoder_H */
+#endif /* INCLUDED_gr_rds_bpsk_demod_H */

@@ -35,19 +35,18 @@
 #define DBG(x)
 #endif
 
-#include <gr_rds_biphase_decoder.h>
+#include <gr_rds_bpsk_demod.h>
 #include <gr_io_signature.h>
 
 #include <fstream>
 
 /*
- * Create a new instance of gr_rds_biphase_decoder and return
+ * Create a new instance of gr_rds_bpsk_demod and return
  * a boost shared_ptr.  This is effectively the public constructor.
  */
-gr_rds_biphase_decoder_sptr 
-gr_rds_make_biphase_decoder (double sampling_rate)
+gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double sampling_rate)
 {
-  return gr_rds_biphase_decoder_sptr (new gr_rds_biphase_decoder (sampling_rate));
+	return gr_rds_bpsk_demod_sptr (new gr_rds_bpsk_demod (sampling_rate));
 }
 
 /*
@@ -69,8 +68,8 @@ static const int MAX_OUT = 8;	// maximum number of output streams
 /*
  * The private constructor
  */
-gr_rds_biphase_decoder::gr_rds_biphase_decoder (double input_sampling_rate)
-	: gr_block("gr_rds_biphase_decoder",
+gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
+	: gr_block("gr_rds_bpsk_demod",
 			gr_make_io_signature (MIN_IN, MAX_IN, sizeof (float)),
 			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool)))
 {
@@ -83,10 +82,10 @@ gr_rds_biphase_decoder::gr_rds_biphase_decoder (double input_sampling_rate)
 /*
  * Our virtual destructor.
  */
-gr_rds_biphase_decoder::~gr_rds_biphase_decoder (){
+gr_rds_bpsk_demod::~gr_rds_bpsk_demod (){
 }
 
-void gr_rds_biphase_decoder::reset() {
+void gr_rds_bpsk_demod::reset() {
 	d_zc = 0;
 	d_last_zc=0;
 	d_sign_last = 0;
@@ -94,13 +93,13 @@ void gr_rds_biphase_decoder::reset() {
 	enter_looking();
 }
 
-void gr_rds_biphase_decoder::enter_looking () {
-	printf (">>> biphase decoder enter_looking\n");
+void gr_rds_bpsk_demod::enter_looking () {
+	printf (">>> bpsk demodulator enter_looking\n");
 	d_state = ST_LOOKING;
 }
 
-void  gr_rds_biphase_decoder::enter_locked () {
-	printf(">>> biphase decoder enter_locked\n");
+void  gr_rds_bpsk_demod::enter_locked () {
+	printf(">>> bpsk demodulator enter_locked\n");
 	d_state = ST_LOCKED;
 	d_symbol_integrator = 0;
 	d_sign_last = 0;
@@ -109,7 +108,7 @@ void  gr_rds_biphase_decoder::enter_locked () {
 
 
 ////////////////////////////////////////////////////////////////
-int gr_rds_biphase_decoder::general_work (int noutput_items,
+int gr_rds_bpsk_demod::general_work (int noutput_items,
 					gr_vector_int &ninput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)

@@ -75,7 +75,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-DIST_COMMON = $(noinst_PYTHON) $(srcdir)/Makefile.am \
+DIST_COMMON = README $(noinst_PYTHON) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/run_tests.in \
 	$(top_srcdir)/Makefile.common
 subdir = src/python

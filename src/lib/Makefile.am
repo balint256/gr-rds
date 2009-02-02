@@ -62,6 +62,7 @@ ourlib_LTLIBRARIES = _rds.la
 _rds_la_SOURCES = 			\
 	rds.cc				\
 	gr_rds_diff_decoder.cc 		\
+	gr_rds_diff_encoder.cc 		\
 	gr_rds_biphase_decoder.cc	\
 	gr_rds_data_decoder.cc		\
 	gr_rds_freq_divider.cc
@@ -82,6 +83,7 @@ rds.cc rds.py: rds.i $(ALL_IFILES)
 # These headers get installed in ${prefix}/include/gnuradio
 grinclude_HEADERS =			\
 	gr_rds_diff_decoder.h		\
+	gr_rds_diff_encoder.h		\
 	gr_rds_biphase_decoder.h 	\
 	gr_rds_data_decoder.h		\
 	gr_rds_freq_divider.h

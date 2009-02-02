@@ -57,39 +57,30 @@ typedef boost::shared_ptr<gr_rds_freq_divider> gr_rds_freq_divider_sptr;
  * To avoid accidental use of raw pointers, gr_rds_freq_divider's
  * constructor is private. make_square_ff is the public
  * interface for creating new instances.
+ *
+ * \ingroup RDS
  */
 gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);
 
-/*!
- * \brief **FIXME**
- * \ingroup **FIXME**
- *
- * \sa **FIXME**
- */
 class gr_rds_freq_divider : public gr_sync_block
 {
 private:
-  // The friend declaration allows howto_make_square_ff to
-  // access the private constructor.
-  friend gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);
+// The friend declaration allows gr_rds_make_freq_divider to
+// access the private constructor.
+	friend gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);
 
-  int d_divider;
-  int DIVIDER;
+	int d_divider;
+	int DIVIDER;
+	float d_out;
+	bool d_sign_current, d_sign_last;
 
-  float d_out;
-  
-  bool d_sign_current, d_sign_last;
+	gr_rds_freq_divider (int divider);  	// private constructor
 
-  gr_rds_freq_divider (int divider);  	// private constructor
-
- public:
-  ~gr_rds_freq_divider ();	// public destructor
-
-  // Where all the action really happens
-
-  int work (int noutput_items,
-		    gr_vector_const_void_star &input_items,
-		    gr_vector_void_star &output_items);
+public:
+	~gr_rds_freq_divider ();	// public destructor
+	int work (int noutput_items,
+			gr_vector_const_void_star &input_items,
+			gr_vector_void_star &output_items);
 };
 
 #endif /* INCLUDED_gr_rds_freq_divider_H */

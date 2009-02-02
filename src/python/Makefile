@@ -75,7 +75,7 @@ POST_UNINSTALL = :
 build_triplet = i686-pc-linux-gnu
 host_triplet = i686-pc-linux-gnu
 target_triplet = i686-pc-linux-gnu
-DIST_COMMON = $(noinst_PYTHON) $(srcdir)/Makefile.am \
+DIST_COMMON = README $(noinst_PYTHON) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/run_tests.in \
 	$(top_srcdir)/Makefile.common
 subdir = src/python
@@ -109,7 +109,7 @@ AUTOCONF = ${SHELL} /media/data/gr/installation/all_rds/radio_data_system/trunk/
 AUTOHEADER = ${SHELL} /media/data/gr/installation/all_rds/radio_data_system/trunk/missing --run autoheader
 AUTOMAKE = ${SHELL} /media/data/gr/installation/all_rds/radio_data_system/trunk/missing --run automake-1.10
 AWK = mawk
-BOOST_CFLAGS = -I/opt/boost_1_36_0/include/boost-1_36
+BOOST_CFLAGS = 
 CC = gcc
 CCAS = gcc
 CCASDEPMODE = depmode=gcc3
@@ -135,9 +135,9 @@ ECHO_T =
 EGREP = /bin/grep -E
 EXEEXT = 
 FGREP = /bin/grep -F
-GNURADIO_CORE_CFLAGS = -pthread -DOMNITHREAD_POSIX=1 -I/opt/boost_1_36_0/include/boost-1_36 -I/usr/local/include/gnuradio -I/usr/local/include  
+GNURADIO_CORE_CFLAGS = -pthread -DOMNITHREAD_POSIX=1 -I/usr/local/include/gnuradio -I/usr/local/include  
 GNURADIO_CORE_INCLUDEDIR = /usr/local/include/gnuradio
-GNURADIO_CORE_LIBS = -L/usr/local/lib -L/opt/boost_1_36_0/lib -lgnuradio-core -lboost_thread-gcc43-mt-1_36 -lrt -lboost_date_time-gcc43-mt-1_36 -lgruel -lfftw3f -lgsl -lgslcblas -lm -lgromnithread  
+GNURADIO_CORE_LIBS = -L/usr/local/lib -lgnuradio-core -lboost_thread-gcc43-mt-1_35 -lrt -lboost_date_time-gcc43-1_35 -lgruel -lfftw3f -lgsl -lgslcblas -lm -lgromnithread  
 GREP = /bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -147,7 +147,7 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/bin/ld
 LDFLAGS = 
 LIBOBJS = 
-LIBS =  -L/usr/local/lib -L/opt/boost_1_36_0/lib -lgnuradio-core -lboost_thread-gcc43-mt-1_36 -lrt -lboost_date_time-gcc43-mt-1_36 -lgruel -lfftw3f -lgsl -lgslcblas -lm -lgromnithread  
+LIBS =  -L/usr/local/lib -lgnuradio-core -lboost_thread-gcc43-mt-1_35 -lrt -lboost_date_time-gcc43-1_35 -lgruel -lfftw3f -lgsl -lgslcblas -lm -lgromnithread  
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
@@ -184,7 +184,7 @@ RM_PROG = /bin/rm
 SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
-STD_DEFINES_AND_INCLUDES = -pthread -DOMNITHREAD_POSIX=1 -I/opt/boost_1_36_0/include/boost-1_36 -I/usr/local/include/gnuradio -I/usr/local/include   -I/opt/boost_1_36_0/include/boost-1_36
+STD_DEFINES_AND_INCLUDES = -pthread -DOMNITHREAD_POSIX=1 -I/usr/local/include/gnuradio -I/usr/local/include   
 STRIP = strip
 SWIG = /usr/bin/swig -c++
 SWIG_PYTHON_CPPFLAGS = -I/usr/include/python2.5

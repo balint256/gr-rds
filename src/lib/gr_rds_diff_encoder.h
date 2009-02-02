@@ -20,22 +20,13 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/*	HSR - MOBKOM LABOR
- *	Semesterarbeit GnuRadio Contributions
- *	U. Schaufelberger and R. Gaensli
- *
- * 	Written by : WRITTEN_BY
- * 	Created: CREATED_DATE
- * 
- */
 
-
-#ifndef INCLUDED_gr_rds_diff_decoder_H
-#define INCLUDED_gr_rds_diff_decoder_H
+#ifndef INCLUDED_gr_rds_diff_encoder_H
+#define INCLUDED_gr_rds_diff_encoder_H
 
 #include <gr_sync_block.h>
 
-class gr_rds_diff_decoder;
+class gr_rds_diff_encoder;
 
 /*
  * We use boost::shared_ptr's instead of raw pointers for all access
@@ -49,33 +40,33 @@ class gr_rds_diff_decoder;
  *
  * As a convention, the _sptr suffix indicates a boost::shared_ptr
  */
-typedef boost::shared_ptr<gr_rds_diff_decoder> gr_rds_diff_decoder_sptr;
+typedef boost::shared_ptr<gr_rds_diff_encoder> gr_rds_diff_encoder_sptr;
 
 /*!
- * \brief Return a shared_ptr to a new instance of gr_rds_diff_decoder.
+ * \brief Return a shared_ptr to a new instance of gr_rds_diff_encoder.
  *
- * To avoid accidental use of raw pointers, gr_rds_diff_decoder's
- * constructor is private. gr_rds_make_diff_decoder is the public
+ * To avoid accidental use of raw pointers, gr_rds_diff_encoder's
+ * constructor is private. gr_rds_make_diff_encoder is the public
  * interface for creating new instances.
  *
  * \ingroup RDS
  */
-gr_rds_diff_decoder_sptr gr_rds_make_diff_decoder ();
+gr_rds_diff_encoder_sptr gr_rds_make_diff_encoder ();
 
-class gr_rds_diff_decoder : public gr_sync_block
+class gr_rds_diff_encoder : public gr_sync_block
 {
 private:
 	bool d_last;
-// The friend declaration allows gr_rds_make_diff_decoder to
+// The friend declaration allows gr_rds_make_diff_encoder to
 // access the private constructor.
-	friend gr_rds_diff_decoder_sptr gr_rds_make_diff_decoder ();
-	gr_rds_diff_decoder ();	// private constructor
+	friend gr_rds_diff_encoder_sptr gr_rds_make_diff_encoder ();
+	gr_rds_diff_encoder ();	// private constructor
 
 public:
-	~gr_rds_diff_decoder ();	// public destructor
+	~gr_rds_diff_encoder ();	// public destructor
 	int work (int noutput_items,
 			gr_vector_const_void_star &input_items,
 			gr_vector_void_star &output_items);
 };
 
-#endif /* INCLUDED_gr_rds_diff_decoder_H */
+#endif /* INCLUDED_gr_rds_diff_encoder_H */

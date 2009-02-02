@@ -8,6 +8,7 @@
 %{
 #include "gnuradio_swig_bug_workaround.h"	// mandatory bug fix
 #include "gr_rds_diff_decoder.h"
+#include "gr_rds_diff_encoder.h"
 #include "gr_rds_biphase_decoder.h"
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_freq_divider.h"
@@ -24,6 +25,18 @@ class gr_rds_diff_decoder : public gr_sync_block
 {
 private:
 	gr_rds_diff_decoder ();
+};
+
+// ----------------------------------------------------------------
+
+GR_SWIG_BLOCK_MAGIC ( gr_rds, diff_encoder);
+
+gr_rds_diff_encoder_sptr gr_rds_make_diff_encoder ();
+
+class gr_rds_diff_encoder : public gr_sync_block
+{
+private:
+	gr_rds_diff_encoder ();
 };
 
 // -----------------------------------------------------------------

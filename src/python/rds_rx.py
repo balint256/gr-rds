@@ -94,7 +94,7 @@ class rds_rx(gr.hier_block2):
 		self.rds_bb_filter = gr.fir_filter_fff (1, self.rds_bb_filter_coeffs)
 
 		# Biphase decoder
-		self.bpsk_demod = rds.biphase_decoder(audio_rate)
+		self.bpsk_demod = rds.bpsk_demod(audio_rate)
 
 		# Differential decoder
 		self.differential_decoder = rds.diff_decoder()

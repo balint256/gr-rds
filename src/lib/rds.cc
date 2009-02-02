@@ -2509,7 +2509,7 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_boost__shared_ptrT_gr_io_signature_t swig_types[8]
 #define SWIGTYPE_p_boost__shared_ptrT_gr_message_t swig_types[9]
 #define SWIGTYPE_p_boost__shared_ptrT_gr_msg_queue_t swig_types[10]
-#define SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t swig_types[11]
+#define SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t swig_types[11]
 #define SWIGTYPE_p_boost__shared_ptrT_gr_rds_data_decoder_t swig_types[12]
 #define SWIGTYPE_p_boost__shared_ptrT_gr_rds_diff_decoder_t swig_types[13]
 #define SWIGTYPE_p_boost__shared_ptrT_gr_rds_diff_encoder_t swig_types[14]
@@ -2521,7 +2521,7 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_gr_basic_block swig_types[20]
 #define SWIGTYPE_p_gr_block swig_types[21]
 #define SWIGTYPE_p_gr_hier_block2 swig_types[22]
-#define SWIGTYPE_p_gr_rds_biphase_decoder swig_types[23]
+#define SWIGTYPE_p_gr_rds_bpsk_demod swig_types[23]
 #define SWIGTYPE_p_gr_rds_data_decoder swig_types[24]
 #define SWIGTYPE_p_gr_rds_diff_decoder swig_types[25]
 #define SWIGTYPE_p_gr_rds_diff_encoder swig_types[26]
@@ -3621,7 +3621,7 @@ namespace swig
 #include "gnuradio_swig_bug_workaround.h"	// mandatory bug fix
 #include "gr_rds_diff_decoder.h"
 #include "gr_rds_diff_encoder.h"
-#include "gr_rds_biphase_decoder.h"
+#include "gr_rds_bpsk_demod.h"
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_freq_divider.h"
 #include <stdexcept>
@@ -3860,7 +3860,7 @@ SWIG_AsVal_int (PyObject * obj, int *val)
   }
 
 
-  gr_block_sptr gr_rds_biphase_decoder_block (gr_rds_biphase_decoder_sptr r)
+  gr_block_sptr gr_rds_bpsk_demod_block (gr_rds_bpsk_demod_sptr r)
   {
     return gr_block_sptr (r);
   }
@@ -4902,42 +4902,42 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_gr_rds_biphase_decoder_sptr__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_gr_rds_bpsk_demod_sptr__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *result = 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)":new_gr_rds_biphase_decoder_sptr")) SWIG_fail;
-  result = (boost::shared_ptr< gr_rds_biphase_decoder > *)new boost::shared_ptr< gr_rds_biphase_decoder >();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, SWIG_POINTER_NEW |  0 );
+  if (!PyArg_ParseTuple(args,(char *)":new_gr_rds_bpsk_demod_sptr")) SWIG_fail;
+  result = (boost::shared_ptr< gr_rds_bpsk_demod > *)new boost::shared_ptr< gr_rds_bpsk_demod >();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_new_gr_rds_biphase_decoder_sptr__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_gr_rds_bpsk_demod_sptr__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  gr_rds_biphase_decoder *arg1 = (gr_rds_biphase_decoder *) 0 ;
-  boost::shared_ptr< gr_rds_biphase_decoder > *result = 0 ;
+  gr_rds_bpsk_demod *arg1 = (gr_rds_bpsk_demod *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:new_gr_rds_biphase_decoder_sptr",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gr_rds_biphase_decoder, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:new_gr_rds_bpsk_demod_sptr",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_gr_rds_bpsk_demod, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_gr_rds_biphase_decoder_sptr" "', argument " "1"" of type '" "gr_rds_biphase_decoder *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_gr_rds_bpsk_demod_sptr" "', argument " "1"" of type '" "gr_rds_bpsk_demod *""'"); 
   }
-  arg1 = reinterpret_cast< gr_rds_biphase_decoder * >(argp1);
-  result = (boost::shared_ptr< gr_rds_biphase_decoder > *)new boost::shared_ptr< gr_rds_biphase_decoder >(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, SWIG_POINTER_NEW |  0 );
+  arg1 = reinterpret_cast< gr_rds_bpsk_demod * >(argp1);
+  result = (boost::shared_ptr< gr_rds_bpsk_demod > *)new boost::shared_ptr< gr_rds_bpsk_demod >(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_new_gr_rds_biphase_decoder_sptr(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_gr_rds_bpsk_demod_sptr(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[2];
   int ii;
@@ -4948,62 +4948,62 @@ SWIGINTERN PyObject *_wrap_new_gr_rds_biphase_decoder_sptr(PyObject *self, PyObj
     argv[ii] = PyTuple_GET_ITEM(args,ii);
   }
   if (argc == 0) {
-    return _wrap_new_gr_rds_biphase_decoder_sptr__SWIG_0(self, args);
+    return _wrap_new_gr_rds_bpsk_demod_sptr__SWIG_0(self, args);
   }
   if (argc == 1) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_gr_rds_biphase_decoder, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_gr_rds_bpsk_demod, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_new_gr_rds_biphase_decoder_sptr__SWIG_1(self, args);
+      return _wrap_new_gr_rds_bpsk_demod_sptr__SWIG_1(self, args);
     }
   }
   
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_gr_rds_biphase_decoder_sptr'.\n"
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number of arguments for overloaded function 'new_gr_rds_bpsk_demod_sptr'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    boost::shared_ptr< gr_rds_biphase_decoder >()\n"
-    "    boost::shared_ptr< gr_rds_biphase_decoder >(gr_rds_biphase_decoder *)\n");
+    "    boost::shared_ptr< gr_rds_bpsk_demod >()\n"
+    "    boost::shared_ptr< gr_rds_bpsk_demod >(gr_rds_bpsk_demod *)\n");
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr___deref__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr___deref__(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
-  gr_rds_biphase_decoder *result = 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
+  gr_rds_bpsk_demod *result = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr___deref__",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr___deref__",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr___deref__" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr___deref__" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
-  result = (gr_rds_biphase_decoder *)(arg1)->operator ->();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gr_rds_biphase_decoder, 0 |  0 );
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
+  result = (gr_rds_bpsk_demod *)(arg1)->operator ->();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gr_rds_bpsk_demod, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_gr_rds_biphase_decoder_sptr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_gr_rds_bpsk_demod_sptr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_gr_rds_biphase_decoder_sptr",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, SWIG_POINTER_DISOWN |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_gr_rds_bpsk_demod_sptr",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_gr_rds_biphase_decoder_sptr" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_gr_rds_bpsk_demod_sptr" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   delete arg1;
   
   resultobj = SWIG_Py_Void();
@@ -5013,19 +5013,19 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_reset(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_reset(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_reset",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_reset",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_reset" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_reset" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   (*arg1)->reset();
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -5034,20 +5034,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_history(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_history(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   unsigned int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_history",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_history",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_history" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_history" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (unsigned int)(*arg1)->history();
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
@@ -5056,20 +5056,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_output_multiple(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_output_multiple(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   int result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_output_multiple",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_output_multiple",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_output_multiple" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_output_multiple" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (int)(*arg1)->output_multiple();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -5078,20 +5078,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_relative_rate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_relative_rate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   double result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_relative_rate",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_relative_rate",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_relative_rate" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_relative_rate" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (double)(*arg1)->relative_rate();
   resultobj = SWIG_From_double(static_cast< double >(result));
   return resultobj;
@@ -5100,20 +5100,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_start(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_start(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   bool result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_start",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_start",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_start" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_start" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (bool)(*arg1)->start();
   resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
@@ -5122,20 +5122,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_stop(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_stop(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   bool result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_stop",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_stop",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_stop" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_stop" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (bool)(*arg1)->stop();
   resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
@@ -5144,20 +5144,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_detail(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_detail(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   gr_block_detail_sptr result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_detail",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_detail",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_detail" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_detail" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (*arg1)->detail();
   resultobj = SWIG_NewPointerObj((new gr_block_detail_sptr(static_cast< const gr_block_detail_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_block_detail_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
@@ -5166,9 +5166,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_set_detail(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_set_detail(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   gr_block_detail_sptr arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -5177,19 +5177,19 @@ SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_set_detail(PyObject *SWIG
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:gr_rds_biphase_decoder_sptr_set_detail",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"OO:gr_rds_bpsk_demod_sptr_set_detail",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_set_detail" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_set_detail" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   {
     res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_boost__shared_ptrT_gr_block_detail_t,  0  | 0);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gr_rds_biphase_decoder_sptr_set_detail" "', argument " "2"" of type '" "gr_block_detail_sptr""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "gr_rds_bpsk_demod_sptr_set_detail" "', argument " "2"" of type '" "gr_block_detail_sptr""'"); 
     }  
     if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "gr_rds_biphase_decoder_sptr_set_detail" "', argument " "2"" of type '" "gr_block_detail_sptr""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "gr_rds_bpsk_demod_sptr_set_detail" "', argument " "2"" of type '" "gr_block_detail_sptr""'");
     } else {
       gr_block_detail_sptr * temp = reinterpret_cast< gr_block_detail_sptr * >(argp2);
       arg2 = *temp;
@@ -5204,20 +5204,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_name(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_name(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   std::string result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_name",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_name",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_name" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_name" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (*arg1)->name();
   resultobj = SWIG_From_std_string(static_cast< std::string >(result));
   return resultobj;
@@ -5226,20 +5226,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_input_signature(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_input_signature(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   gr_io_signature_sptr result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_input_signature",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_input_signature",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_input_signature" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_input_signature" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (*arg1)->input_signature();
   resultobj = SWIG_NewPointerObj((new gr_io_signature_sptr(static_cast< const gr_io_signature_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_io_signature_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
@@ -5248,20 +5248,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_output_signature(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_output_signature(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   gr_io_signature_sptr result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_output_signature",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_output_signature",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_output_signature" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_output_signature" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (*arg1)->output_signature();
   resultobj = SWIG_NewPointerObj((new gr_io_signature_sptr(static_cast< const gr_io_signature_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_io_signature_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
@@ -5270,20 +5270,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_unique_id(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_unique_id(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   long result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_unique_id",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_unique_id",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_unique_id" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_unique_id" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > const *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (long)(*arg1)->unique_id();
   resultobj = SWIG_From_long(static_cast< long >(result));
   return resultobj;
@@ -5292,20 +5292,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_basic_block(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_basic_block(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   gr_basic_block_sptr result;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_sptr_basic_block",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_sptr_basic_block",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_basic_block" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_basic_block" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   result = (*arg1)->basic_block();
   resultobj = SWIG_NewPointerObj((new gr_basic_block_sptr(static_cast< const gr_basic_block_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_basic_block_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
@@ -5314,9 +5314,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_check_topology(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_sptr_check_topology(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  boost::shared_ptr< gr_rds_biphase_decoder > *arg1 = (boost::shared_ptr< gr_rds_biphase_decoder > *) 0 ;
+  boost::shared_ptr< gr_rds_bpsk_demod > *arg1 = (boost::shared_ptr< gr_rds_bpsk_demod > *) 0 ;
   int arg2 ;
   int arg3 ;
   bool result;
@@ -5330,20 +5330,20 @@ SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_sptr_check_topology(PyObject *
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:gr_rds_biphase_decoder_sptr_check_topology",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"OOO:gr_rds_bpsk_demod_sptr_check_topology",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_sptr_check_topology" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_biphase_decoder > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_sptr_check_topology" "', argument " "1"" of type '" "boost::shared_ptr< gr_rds_bpsk_demod > *""'"); 
   }
-  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_biphase_decoder > * >(argp1);
+  arg1 = reinterpret_cast< boost::shared_ptr< gr_rds_bpsk_demod > * >(argp1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gr_rds_biphase_decoder_sptr_check_topology" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "gr_rds_bpsk_demod_sptr_check_topology" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gr_rds_biphase_decoder_sptr_check_topology" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "gr_rds_bpsk_demod_sptr_check_topology" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   result = (bool)(*arg1)->check_topology(arg2,arg3);
@@ -5354,36 +5354,36 @@ fail:
 }
 
 
-SWIGINTERN PyObject *gr_rds_biphase_decoder_sptr_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *gr_rds_bpsk_demod_sptr_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, SWIG_NewClientData(obj));
+  SWIG_TypeNewClientData(SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_gr_rds_biphase_decoder_block(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_gr_rds_bpsk_demod_block(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  gr_rds_biphase_decoder_sptr arg1 ;
+  gr_rds_bpsk_demod_sptr arg1 ;
   gr_block_sptr result;
   void *argp1 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_biphase_decoder_block",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:gr_rds_bpsk_demod_block",&obj0)) SWIG_fail;
   {
-    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t,  0  | 0);
+    res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t,  0  | 0);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_biphase_decoder_block" "', argument " "1"" of type '" "gr_rds_biphase_decoder_sptr""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "gr_rds_bpsk_demod_block" "', argument " "1"" of type '" "gr_rds_bpsk_demod_sptr""'"); 
     }  
     if (!argp1) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "gr_rds_biphase_decoder_block" "', argument " "1"" of type '" "gr_rds_biphase_decoder_sptr""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "gr_rds_bpsk_demod_block" "', argument " "1"" of type '" "gr_rds_bpsk_demod_sptr""'");
     } else {
-      gr_rds_biphase_decoder_sptr * temp = reinterpret_cast< gr_rds_biphase_decoder_sptr * >(argp1);
+      gr_rds_bpsk_demod_sptr * temp = reinterpret_cast< gr_rds_bpsk_demod_sptr * >(argp1);
       arg1 = *temp;
       if (SWIG_IsNewObj(res1)) delete temp;
     }
   }
-  result = gr_rds_biphase_decoder_block(arg1);
+  result = gr_rds_bpsk_demod_block(arg1);
   resultobj = SWIG_NewPointerObj((new gr_block_sptr(static_cast< const gr_block_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_block_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -5391,22 +5391,22 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_biphase_decoder(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_bpsk_demod(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
-  gr_rds_biphase_decoder_sptr result;
+  gr_rds_bpsk_demod_sptr result;
   double val1 ;
   int ecode1 = 0 ;
   PyObject * obj0 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:biphase_decoder",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:bpsk_demod",&obj0)) SWIG_fail;
   ecode1 = SWIG_AsVal_double(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "biphase_decoder" "', argument " "1"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "bpsk_demod" "', argument " "1"" of type '" "double""'");
   } 
   arg1 = static_cast< double >(val1);
-  result = gr_rds_make_biphase_decoder(arg1);
-  resultobj = SWIG_NewPointerObj((new gr_rds_biphase_decoder_sptr(static_cast< const gr_rds_biphase_decoder_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_rds_biphase_decoder_t, SWIG_POINTER_OWN |  0 );
+  result = gr_rds_make_bpsk_demod(arg1);
+  resultobj = SWIG_NewPointerObj((new gr_rds_bpsk_demod_sptr(static_cast< const gr_rds_bpsk_demod_sptr& >(result))), SWIGTYPE_p_boost__shared_ptrT_gr_rds_bpsk_demod_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -6467,29 +6467,29 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"gr_rds_diff_encoder_sptr_swigregister", gr_rds_diff_encoder_sptr_swigregister, METH_VARARGS, NULL},
 	 { (char *)"gr_rds_diff_encoder_block", _wrap_gr_rds_diff_encoder_block, METH_VARARGS, (char *)"gr_rds_diff_encoder_block(gr_rds_diff_encoder_sptr r) -> gr_block_sptr"},
 	 { (char *)"diff_encoder", _wrap_diff_encoder, METH_VARARGS, (char *)"diff_encoder() -> gr_rds_diff_encoder_sptr"},
-	 { (char *)"new_gr_rds_biphase_decoder_sptr", _wrap_new_gr_rds_biphase_decoder_sptr, METH_VARARGS, (char *)"\n"
-		"gr_rds_biphase_decoder_sptr()\n"
-		"new_gr_rds_biphase_decoder_sptr( p) -> gr_rds_biphase_decoder_sptr\n"
+	 { (char *)"new_gr_rds_bpsk_demod_sptr", _wrap_new_gr_rds_bpsk_demod_sptr, METH_VARARGS, (char *)"\n"
+		"gr_rds_bpsk_demod_sptr()\n"
+		"new_gr_rds_bpsk_demod_sptr( p) -> gr_rds_bpsk_demod_sptr\n"
 		""},
-	 { (char *)"gr_rds_biphase_decoder_sptr___deref__", _wrap_gr_rds_biphase_decoder_sptr___deref__, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr___deref__(gr_rds_biphase_decoder_sptr self)"},
-	 { (char *)"delete_gr_rds_biphase_decoder_sptr", _wrap_delete_gr_rds_biphase_decoder_sptr, METH_VARARGS, (char *)"delete_gr_rds_biphase_decoder_sptr(gr_rds_biphase_decoder_sptr self)"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_reset", _wrap_gr_rds_biphase_decoder_sptr_reset, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_reset(gr_rds_biphase_decoder_sptr self)"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_history", _wrap_gr_rds_biphase_decoder_sptr_history, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_history(gr_rds_biphase_decoder_sptr self) -> unsigned int"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_output_multiple", _wrap_gr_rds_biphase_decoder_sptr_output_multiple, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_output_multiple(gr_rds_biphase_decoder_sptr self) -> int"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_relative_rate", _wrap_gr_rds_biphase_decoder_sptr_relative_rate, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_relative_rate(gr_rds_biphase_decoder_sptr self) -> double"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_start", _wrap_gr_rds_biphase_decoder_sptr_start, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_start(gr_rds_biphase_decoder_sptr self) -> bool"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_stop", _wrap_gr_rds_biphase_decoder_sptr_stop, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_stop(gr_rds_biphase_decoder_sptr self) -> bool"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_detail", _wrap_gr_rds_biphase_decoder_sptr_detail, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_detail(gr_rds_biphase_decoder_sptr self) -> gr_block_detail_sptr"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_set_detail", _wrap_gr_rds_biphase_decoder_sptr_set_detail, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_set_detail(gr_rds_biphase_decoder_sptr self, gr_block_detail_sptr detail)"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_name", _wrap_gr_rds_biphase_decoder_sptr_name, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_name(gr_rds_biphase_decoder_sptr self) -> string"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_input_signature", _wrap_gr_rds_biphase_decoder_sptr_input_signature, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_input_signature(gr_rds_biphase_decoder_sptr self) -> gr_io_signature_sptr"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_output_signature", _wrap_gr_rds_biphase_decoder_sptr_output_signature, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_output_signature(gr_rds_biphase_decoder_sptr self) -> gr_io_signature_sptr"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_unique_id", _wrap_gr_rds_biphase_decoder_sptr_unique_id, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_unique_id(gr_rds_biphase_decoder_sptr self) -> long"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_basic_block", _wrap_gr_rds_biphase_decoder_sptr_basic_block, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_basic_block(gr_rds_biphase_decoder_sptr self) -> gr_basic_block_sptr"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_check_topology", _wrap_gr_rds_biphase_decoder_sptr_check_topology, METH_VARARGS, (char *)"gr_rds_biphase_decoder_sptr_check_topology(gr_rds_biphase_decoder_sptr self, int ninputs, int noutputs) -> bool"},
-	 { (char *)"gr_rds_biphase_decoder_sptr_swigregister", gr_rds_biphase_decoder_sptr_swigregister, METH_VARARGS, NULL},
-	 { (char *)"gr_rds_biphase_decoder_block", _wrap_gr_rds_biphase_decoder_block, METH_VARARGS, (char *)"gr_rds_biphase_decoder_block(gr_rds_biphase_decoder_sptr r) -> gr_block_sptr"},
-	 { (char *)"biphase_decoder", _wrap_biphase_decoder, METH_VARARGS, (char *)"biphase_decoder(double input_sample_rate) -> gr_rds_biphase_decoder_sptr"},
+	 { (char *)"gr_rds_bpsk_demod_sptr___deref__", _wrap_gr_rds_bpsk_demod_sptr___deref__, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr___deref__(gr_rds_bpsk_demod_sptr self)"},
+	 { (char *)"delete_gr_rds_bpsk_demod_sptr", _wrap_delete_gr_rds_bpsk_demod_sptr, METH_VARARGS, (char *)"delete_gr_rds_bpsk_demod_sptr(gr_rds_bpsk_demod_sptr self)"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_reset", _wrap_gr_rds_bpsk_demod_sptr_reset, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_reset(gr_rds_bpsk_demod_sptr self)"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_history", _wrap_gr_rds_bpsk_demod_sptr_history, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_history(gr_rds_bpsk_demod_sptr self) -> unsigned int"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_output_multiple", _wrap_gr_rds_bpsk_demod_sptr_output_multiple, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_output_multiple(gr_rds_bpsk_demod_sptr self) -> int"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_relative_rate", _wrap_gr_rds_bpsk_demod_sptr_relative_rate, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_relative_rate(gr_rds_bpsk_demod_sptr self) -> double"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_start", _wrap_gr_rds_bpsk_demod_sptr_start, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_start(gr_rds_bpsk_demod_sptr self) -> bool"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_stop", _wrap_gr_rds_bpsk_demod_sptr_stop, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_stop(gr_rds_bpsk_demod_sptr self) -> bool"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_detail", _wrap_gr_rds_bpsk_demod_sptr_detail, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_detail(gr_rds_bpsk_demod_sptr self) -> gr_block_detail_sptr"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_set_detail", _wrap_gr_rds_bpsk_demod_sptr_set_detail, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_set_detail(gr_rds_bpsk_demod_sptr self, gr_block_detail_sptr detail)"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_name", _wrap_gr_rds_bpsk_demod_sptr_name, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_name(gr_rds_bpsk_demod_sptr self) -> string"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_input_signature", _wrap_gr_rds_bpsk_demod_sptr_input_signature, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_input_signature(gr_rds_bpsk_demod_sptr self) -> gr_io_signature_sptr"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_output_signature", _wrap_gr_rds_bpsk_demod_sptr_output_signature, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_output_signature(gr_rds_bpsk_demod_sptr self) -> gr_io_signature_sptr"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_unique_id", _wrap_gr_rds_bpsk_demod_sptr_unique_id, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_unique_id(gr_rds_bpsk_demod_sptr self) -> long"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_basic_block", _wrap_gr_rds_bpsk_demod_sptr_basic_block, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_basic_block(gr_rds_bpsk_demod_sptr self) -> gr_basic_block_sptr"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_check_topology", _wrap_gr_rds_bpsk_demod_sptr_check_topology, METH_VARARGS, (char *)"gr_rds_bpsk_demod_sptr_check_topology(gr_rds_bpsk_demod_sptr self, int ninputs, int noutputs) -> bool"},
+	 { (char *)"gr_rds_bpsk_demod_sptr_swigregister", gr_rds_bpsk_demod_sptr_swigregister, METH_VARARGS, NULL},
+	 { (char *)"gr_rds_bpsk_demod_block", _wrap_gr_rds_bpsk_demod_block, METH_VARARGS, (char *)"gr_rds_bpsk_demod_block(gr_rds_bpsk_demod_sptr r) -> gr_block_sptr"},
+	 { (char *)"bpsk_demod", _wrap_bpsk_demod, METH_VARARGS, (char *)"bpsk_demod(double input_sample_rate) -> gr_rds_bpsk_demod_sptr"},
 	 { (char *)"new_gr_rds_data_decoder_sptr", _wrap_new_gr_rds_data_decoder_sptr, METH_VARARGS, (char *)"\n"
 		"gr_rds_data_decoder_sptr()\n"
 		"new_gr_rds_data_decoder_sptr( p) -> gr_rds_data_decoder_sptr\n"
@@ -6544,14 +6544,14 @@ static PyMethodDef SwigMethods[] = {
 static void *_p_gr_rds_diff_encoderTo_p_gr_basic_block(void *x, int *newmemory) {
     return (void *)((gr_basic_block *) (gr_block *)(gr_sync_block *) ((gr_rds_diff_encoder *) x));
 }
+static void *_p_gr_rds_bpsk_demodTo_p_gr_basic_block(void *x, int *newmemory) {
+    return (void *)((gr_basic_block *) (gr_block *) ((gr_rds_bpsk_demod *) x));
+}
 static void *_p_gr_sync_decimatorTo_p_gr_basic_block(void *x, int *newmemory) {
     return (void *)((gr_basic_block *) (gr_block *)(gr_sync_block *) ((gr_sync_decimator *) x));
 }
 static void *_p_gr_rds_diff_decoderTo_p_gr_basic_block(void *x, int *newmemory) {
     return (void *)((gr_basic_block *) (gr_block *)(gr_sync_block *) ((gr_rds_diff_decoder *) x));
-}
-static void *_p_gr_rds_biphase_decoderTo_p_gr_basic_block(void *x, int *newmemory) {
-    return (void *)((gr_basic_block *) (gr_block *) ((gr_rds_biphase_decoder *) x));
 }
 static void *_p_gr_rds_data_decoderTo_p_gr_basic_block(void *x, int *newmemory) {
     return (void *)((gr_basic_block *) (gr_block *)(gr_sync_block *) ((gr_rds_data_decoder *) x));
@@ -6595,14 +6595,14 @@ static void *_p_gr_sync_interpolatorTo_p_gr_sync_block(void *x, int *newmemory) 
 static void *_p_gr_rds_diff_encoderTo_p_gr_block(void *x, int *newmemory) {
     return (void *)((gr_block *) (gr_sync_block *) ((gr_rds_diff_encoder *) x));
 }
+static void *_p_gr_rds_bpsk_demodTo_p_gr_block(void *x, int *newmemory) {
+    return (void *)((gr_block *)  ((gr_rds_bpsk_demod *) x));
+}
 static void *_p_gr_sync_decimatorTo_p_gr_block(void *x, int *newmemory) {
     return (void *)((gr_block *) (gr_sync_block *) ((gr_sync_decimator *) x));
 }
 static void *_p_gr_rds_diff_decoderTo_p_gr_block(void *x, int *newmemory) {
     return (void *)((gr_block *) (gr_sync_block *) ((gr_rds_diff_decoder *) x));
-}
-static void *_p_gr_rds_biphase_decoderTo_p_gr_block(void *x, int *newmemory) {
-    return (void *)((gr_block *)  ((gr_rds_biphase_decoder *) x));
 }
 static void *_p_gr_rds_data_decoderTo_p_gr_block(void *x, int *newmemory) {
     return (void *)((gr_block *) (gr_sync_block *) ((gr_rds_data_decoder *) x));
@@ -6627,7 +6627,7 @@ static swig_type_info _swigt__p_boost__shared_ptrT_gr_hier_block2_t = {"_p_boost
 static swig_type_info _swigt__p_boost__shared_ptrT_gr_io_signature_t = {"_p_boost__shared_ptrT_gr_io_signature_t", "boost::shared_ptr< gr_io_signature > *|gr_io_signature_sptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_gr_message_t = {"_p_boost__shared_ptrT_gr_message_t", "boost::shared_ptr< gr_message > *|gr_message_sptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_gr_msg_queue_t = {"_p_boost__shared_ptrT_gr_msg_queue_t", "boost::shared_ptr< gr_msg_queue > *|gr_msg_queue_sptr *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_boost__shared_ptrT_gr_rds_biphase_decoder_t = {"_p_boost__shared_ptrT_gr_rds_biphase_decoder_t", "boost::shared_ptr< gr_rds_biphase_decoder > *|gr_rds_biphase_decoder_sptr *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_boost__shared_ptrT_gr_rds_bpsk_demod_t = {"_p_boost__shared_ptrT_gr_rds_bpsk_demod_t", "boost::shared_ptr< gr_rds_bpsk_demod > *|gr_rds_bpsk_demod_sptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_gr_rds_data_decoder_t = {"_p_boost__shared_ptrT_gr_rds_data_decoder_t", "boost::shared_ptr< gr_rds_data_decoder > *|gr_rds_data_decoder_sptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_gr_rds_diff_decoder_t = {"_p_boost__shared_ptrT_gr_rds_diff_decoder_t", "boost::shared_ptr< gr_rds_diff_decoder > *|gr_rds_diff_decoder_sptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_gr_rds_diff_encoder_t = {"_p_boost__shared_ptrT_gr_rds_diff_encoder_t", "boost::shared_ptr< gr_rds_diff_encoder > *|gr_rds_diff_encoder_sptr *", 0, 0, (void*)0, 0};
@@ -6642,7 +6642,7 @@ static swig_type_info _swigt__p_gr_hier_block2 = {"_p_gr_hier_block2", 0, 0, 0, 
 static swig_type_info _swigt__p_gr_sync_interpolator = {"_p_gr_sync_interpolator", 0, 0, 0, 0, 0};
 static swig_type_info _swigt__p_gr_top_block = {"_p_gr_top_block", 0, 0, 0, 0, 0};
 static swig_type_info _swigt__p_gr_block = {"_p_gr_block", "gr_block *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_gr_rds_biphase_decoder = {"_p_gr_rds_biphase_decoder", "gr_rds_biphase_decoder *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_gr_rds_bpsk_demod = {"_p_gr_rds_bpsk_demod", "gr_rds_bpsk_demod *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gr_rds_data_decoder = {"_p_gr_rds_data_decoder", "gr_rds_data_decoder *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gr_rds_diff_decoder = {"_p_gr_rds_diff_decoder", "gr_rds_diff_decoder *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gr_rds_diff_encoder = {"_p_gr_rds_diff_encoder", "gr_rds_diff_encoder *", 0, 0, (void*)0, 0};
@@ -6666,7 +6666,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_boost__shared_ptrT_gr_io_signature_t,
   &_swigt__p_boost__shared_ptrT_gr_message_t,
   &_swigt__p_boost__shared_ptrT_gr_msg_queue_t,
-  &_swigt__p_boost__shared_ptrT_gr_rds_biphase_decoder_t,
+  &_swigt__p_boost__shared_ptrT_gr_rds_bpsk_demod_t,
   &_swigt__p_boost__shared_ptrT_gr_rds_data_decoder_t,
   &_swigt__p_boost__shared_ptrT_gr_rds_diff_decoder_t,
   &_swigt__p_boost__shared_ptrT_gr_rds_diff_encoder_t,
@@ -6678,7 +6678,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_gr_basic_block,
   &_swigt__p_gr_block,
   &_swigt__p_gr_hier_block2,
-  &_swigt__p_gr_rds_biphase_decoder,
+  &_swigt__p_gr_rds_bpsk_demod,
   &_swigt__p_gr_rds_data_decoder,
   &_swigt__p_gr_rds_diff_decoder,
   &_swigt__p_gr_rds_diff_encoder,
@@ -6705,7 +6705,7 @@ static swig_cast_info _swigc__p_boost__shared_ptrT_gr_hier_block2_t[] = {  {&_sw
 static swig_cast_info _swigc__p_boost__shared_ptrT_gr_io_signature_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_io_signature_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_gr_message_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_message_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_gr_msg_queue_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_msg_queue_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_boost__shared_ptrT_gr_rds_biphase_decoder_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_rds_biphase_decoder_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_boost__shared_ptrT_gr_rds_bpsk_demod_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_rds_bpsk_demod_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_gr_rds_data_decoder_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_rds_data_decoder_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_gr_rds_diff_decoder_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_rds_diff_decoder_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_gr_rds_diff_encoder_t[] = {  {&_swigt__p_boost__shared_ptrT_gr_rds_diff_encoder_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -6718,9 +6718,9 @@ static swig_cast_info _swigc__p_gr_sync_decimator[] = {{&_swigt__p_gr_sync_decim
 static swig_cast_info _swigc__p_gr_hier_block2[] = {{&_swigt__p_gr_hier_block2, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gr_sync_interpolator[] = {{&_swigt__p_gr_sync_interpolator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gr_top_block[] = {{&_swigt__p_gr_top_block, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_gr_basic_block[] = {  {&_swigt__p_gr_rds_diff_encoder, _p_gr_rds_diff_encoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_sync_decimator, _p_gr_sync_decimatorTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_diff_decoder, _p_gr_rds_diff_decoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_biphase_decoder, _p_gr_rds_biphase_decoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_data_decoder, _p_gr_rds_data_decoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_basic_block, 0, 0, 0},  {&_swigt__p_gr_hier_block2, _p_gr_hier_block2To_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_sync_block, _p_gr_sync_blockTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_freq_divider, _p_gr_rds_freq_dividerTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_sync_interpolator, _p_gr_sync_interpolatorTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_block, _p_gr_blockTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_top_block, _p_gr_top_blockTo_p_gr_basic_block, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_gr_block[] = {  {&_swigt__p_gr_rds_diff_encoder, _p_gr_rds_diff_encoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_sync_decimator, _p_gr_sync_decimatorTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_diff_decoder, _p_gr_rds_diff_decoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_biphase_decoder, _p_gr_rds_biphase_decoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_data_decoder, _p_gr_rds_data_decoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_sync_block, _p_gr_sync_blockTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_freq_divider, _p_gr_rds_freq_dividerTo_p_gr_block, 0, 0},  {&_swigt__p_gr_block, 0, 0, 0},  {&_swigt__p_gr_sync_interpolator, _p_gr_sync_interpolatorTo_p_gr_block, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_gr_rds_biphase_decoder[] = {  {&_swigt__p_gr_rds_biphase_decoder, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_gr_basic_block[] = {  {&_swigt__p_gr_rds_diff_encoder, _p_gr_rds_diff_encoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_bpsk_demod, _p_gr_rds_bpsk_demodTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_sync_decimator, _p_gr_sync_decimatorTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_diff_decoder, _p_gr_rds_diff_decoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_data_decoder, _p_gr_rds_data_decoderTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_basic_block, 0, 0, 0},  {&_swigt__p_gr_hier_block2, _p_gr_hier_block2To_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_sync_block, _p_gr_sync_blockTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_rds_freq_divider, _p_gr_rds_freq_dividerTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_sync_interpolator, _p_gr_sync_interpolatorTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_block, _p_gr_blockTo_p_gr_basic_block, 0, 0},  {&_swigt__p_gr_top_block, _p_gr_top_blockTo_p_gr_basic_block, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_gr_block[] = {  {&_swigt__p_gr_rds_diff_encoder, _p_gr_rds_diff_encoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_bpsk_demod, _p_gr_rds_bpsk_demodTo_p_gr_block, 0, 0},  {&_swigt__p_gr_sync_decimator, _p_gr_sync_decimatorTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_diff_decoder, _p_gr_rds_diff_decoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_data_decoder, _p_gr_rds_data_decoderTo_p_gr_block, 0, 0},  {&_swigt__p_gr_sync_block, _p_gr_sync_blockTo_p_gr_block, 0, 0},  {&_swigt__p_gr_rds_freq_divider, _p_gr_rds_freq_dividerTo_p_gr_block, 0, 0},  {&_swigt__p_gr_block, 0, 0, 0},  {&_swigt__p_gr_sync_interpolator, _p_gr_sync_interpolatorTo_p_gr_block, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_gr_rds_bpsk_demod[] = {  {&_swigt__p_gr_rds_bpsk_demod, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gr_rds_data_decoder[] = {  {&_swigt__p_gr_rds_data_decoder, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gr_rds_diff_decoder[] = {  {&_swigt__p_gr_rds_diff_decoder, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gr_rds_diff_encoder[] = {  {&_swigt__p_gr_rds_diff_encoder, 0, 0, 0},{0, 0, 0, 0}};
@@ -6744,7 +6744,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_boost__shared_ptrT_gr_io_signature_t,
   _swigc__p_boost__shared_ptrT_gr_message_t,
   _swigc__p_boost__shared_ptrT_gr_msg_queue_t,
-  _swigc__p_boost__shared_ptrT_gr_rds_biphase_decoder_t,
+  _swigc__p_boost__shared_ptrT_gr_rds_bpsk_demod_t,
   _swigc__p_boost__shared_ptrT_gr_rds_data_decoder_t,
   _swigc__p_boost__shared_ptrT_gr_rds_diff_decoder_t,
   _swigc__p_boost__shared_ptrT_gr_rds_diff_encoder_t,
@@ -6756,7 +6756,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_gr_basic_block,
   _swigc__p_gr_block,
   _swigc__p_gr_hier_block2,
-  _swigc__p_gr_rds_biphase_decoder,
+  _swigc__p_gr_rds_bpsk_demod,
   _swigc__p_gr_rds_data_decoder,
   _swigc__p_gr_rds_diff_decoder,
   _swigc__p_gr_rds_diff_encoder,

@@ -53,7 +53,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.freq = 0
 
 		# build graph
-		
 		self.u = usrp.source_c()
 
 		adc_rate = self.u.adc_rate()				# 64 MS/s
@@ -64,7 +63,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		demod_rate = usrp_rate / chanfilt_decim		# 256 kS/s
 		audio_decim = 8
 		audio_rate = demod_rate / audio_decim		# 32 kHz
-		#demod_rate = demod_rate * 19 / 16
 
 		if options.rx_subdev_spec is None:
 			options.rx_subdev_spec = pick_subdevice(self.u)
@@ -94,58 +92,12 @@ class rds_rx_graph (stdgui2.std_top_block):
 										gr.firdes.WIN_HAMMING)
 		self.fm_filter = gr.fir_filter_fff (1, coeffs)
 
-#		pilot_filter_coeffs = gr.firdes_band_pass(1, 
-#													demod_rate,
-#													18e3,
-#													20e3,
-#													3e3,
-#													gr.firdes.WIN_HAMMING)
-#		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
-
-## Data rate = (3 * 19e3) / 48 = 19e3 / 16
-#		self.rds_data_clock = rds.freq_divider(16)
-
-#		rds_filter_coeffs = gr.firdes.band_pass (1,
-#													demod_rate,
-#													54e3,
-#													60e3,
-#													3e3,
-#													gr.firdes.WIN_HAMMING)
-#		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
-
-#		self.mixer = gr.multiply_ff()
-
-#		rds_bb_filter_coeffs = gr.firdes.low_pass (1,
-#													demod_rate,
-#													1500,
-#													2e3,
-#													gr.firdes.WIN_HAMMING)
-#		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
-
-#		self.data_clock = rds.freq_divider(16)
-#		self.bpsk_demod = rds.biphase_decoder(demod_rate)
-#		self.differential_decoder = rds.diff_decoder()
 		self.msgq = gr.msg_queue()
-#		self.rds_decoder = rds.data_decoder(self.msgq)
-
 		self.rds_receiver = rds_rx.rds_rx(self, demod_rate, self.msgq)
 
 		self.connect(self.u, self.chan_filt, self.guts)
 		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
 		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
-#		self.connect(self.guts.fm_demod, self.fm_filter)
-#		self.connect(self.fm_filter, self.pilot_filter)
-#		self.connect(self.fm_filter, self.rds_filter)
-#		self.connect(self.pilot_filter, (self.mixer, 0))
-#		self.connect(self.pilot_filter, (self.mixer, 1))
-#		self.connect(self.pilot_filter, (self.mixer, 2))
-#		self.connect(self.rds_filter, (self.mixer, 3))
-#		self.connect(self.pilot_filter, self.data_clock)
-#		self.connect(self.mixer, self.rds_bb_filter)
-#		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
-#		self.connect(self.data_clock, (self.bpsk_demod, 1))
-#		self.connect(self.bpsk_demod, self.differential_decoder)
-#		self.connect(self.differential_decoder, self.rds_decoder)
 		self.connect(self.guts.fm_demod, self.fm_filter, self.rds_receiver)
 
 		self._build_gui(vbox, usrp_rate, demod_rate, audio_rate)

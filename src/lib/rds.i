@@ -9,7 +9,7 @@
 #include "gnuradio_swig_bug_workaround.h"	// mandatory bug fix
 #include "gr_rds_diff_decoder.h"
 #include "gr_rds_diff_encoder.h"
-#include "gr_rds_biphase_decoder.h"
+#include "gr_rds_bpsk_demod.h"
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_freq_divider.h"
 #include <stdexcept>
@@ -41,14 +41,14 @@ private:
 
 // -----------------------------------------------------------------
 
-GR_SWIG_BLOCK_MAGIC (gr_rds, biphase_decoder);
+GR_SWIG_BLOCK_MAGIC (gr_rds, bpsk_demod);
 
-gr_rds_biphase_decoder_sptr gr_rds_make_biphase_decoder (double input_sample_rate);
+gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);
 
-class gr_rds_biphase_decoder: public gr_block
+class gr_rds_bpsk_demod: public gr_block
 {
 private:
-	gr_rds_biphase_decoder (double input_sample_rate);
+	gr_rds_bpsk_demod (double input_sample_rate);
 public:
 	void reset(void);
 };

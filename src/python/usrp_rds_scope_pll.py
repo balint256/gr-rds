@@ -113,7 +113,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
 
 		self.data_clock = rds.freq_divider(16)
-		self.bpsk_demod = rds.biphase_decoder(demod_rate)
+		self.bpsk_demod = rds.bpsk_demod(demod_rate)
 		self.differential_decoder = rds.diff_decoder()
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)

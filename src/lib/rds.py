@@ -222,97 +222,97 @@ gr_rds_diff_encoder_sptr.__repr__ = lambda self: "<gr_block %s (%d)>" % (self.na
 def diff_encoder(*args):
   """diff_encoder() -> gr_rds_diff_encoder_sptr"""
   return _rds.diff_encoder(*args)
-class gr_rds_biphase_decoder_sptr(_object):
-    """Proxy of C++ gr_rds_biphase_decoder_sptr class"""
+class gr_rds_bpsk_demod_sptr(_object):
+    """Proxy of C++ gr_rds_bpsk_demod_sptr class"""
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, gr_rds_biphase_decoder_sptr, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, gr_rds_bpsk_demod_sptr, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, gr_rds_biphase_decoder_sptr, name)
+    __getattr__ = lambda self, name: _swig_getattr(self, gr_rds_bpsk_demod_sptr, name)
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
-        __init__(self) -> gr_rds_biphase_decoder_sptr
-        __init__(self,  p) -> gr_rds_biphase_decoder_sptr
+        __init__(self) -> gr_rds_bpsk_demod_sptr
+        __init__(self,  p) -> gr_rds_bpsk_demod_sptr
         """
-        this = _rds.new_gr_rds_biphase_decoder_sptr(*args)
+        this = _rds.new_gr_rds_bpsk_demod_sptr(*args)
         try: self.this.append(this)
         except: self.this = this
     def __deref__(*args):
         """__deref__(self)"""
-        return _rds.gr_rds_biphase_decoder_sptr___deref__(*args)
+        return _rds.gr_rds_bpsk_demod_sptr___deref__(*args)
 
-    __swig_destroy__ = _rds.delete_gr_rds_biphase_decoder_sptr
+    __swig_destroy__ = _rds.delete_gr_rds_bpsk_demod_sptr
     __del__ = lambda self : None;
     def reset(*args):
         """reset(self)"""
-        return _rds.gr_rds_biphase_decoder_sptr_reset(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_reset(*args)
 
     def history(*args):
         """history(self) -> unsigned int"""
-        return _rds.gr_rds_biphase_decoder_sptr_history(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_history(*args)
 
     def output_multiple(*args):
         """output_multiple(self) -> int"""
-        return _rds.gr_rds_biphase_decoder_sptr_output_multiple(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_output_multiple(*args)
 
     def relative_rate(*args):
         """relative_rate(self) -> double"""
-        return _rds.gr_rds_biphase_decoder_sptr_relative_rate(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_relative_rate(*args)
 
     def start(*args):
         """start(self) -> bool"""
-        return _rds.gr_rds_biphase_decoder_sptr_start(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_start(*args)
 
     def stop(*args):
         """stop(self) -> bool"""
-        return _rds.gr_rds_biphase_decoder_sptr_stop(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_stop(*args)
 
     def detail(*args):
         """detail(self) -> gr_block_detail_sptr"""
-        return _rds.gr_rds_biphase_decoder_sptr_detail(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_detail(*args)
 
     def set_detail(*args):
         """set_detail(self, gr_block_detail_sptr detail)"""
-        return _rds.gr_rds_biphase_decoder_sptr_set_detail(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_set_detail(*args)
 
     def name(*args):
         """name(self) -> string"""
-        return _rds.gr_rds_biphase_decoder_sptr_name(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_name(*args)
 
     def input_signature(*args):
         """input_signature(self) -> gr_io_signature_sptr"""
-        return _rds.gr_rds_biphase_decoder_sptr_input_signature(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_input_signature(*args)
 
     def output_signature(*args):
         """output_signature(self) -> gr_io_signature_sptr"""
-        return _rds.gr_rds_biphase_decoder_sptr_output_signature(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_output_signature(*args)
 
     def unique_id(*args):
         """unique_id(self) -> long"""
-        return _rds.gr_rds_biphase_decoder_sptr_unique_id(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_unique_id(*args)
 
     def basic_block(*args):
         """basic_block(self) -> gr_basic_block_sptr"""
-        return _rds.gr_rds_biphase_decoder_sptr_basic_block(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_basic_block(*args)
 
     def check_topology(*args):
         """check_topology(self, int ninputs, int noutputs) -> bool"""
-        return _rds.gr_rds_biphase_decoder_sptr_check_topology(*args)
+        return _rds.gr_rds_bpsk_demod_sptr_check_topology(*args)
 
-gr_rds_biphase_decoder_sptr_swigregister = _rds.gr_rds_biphase_decoder_sptr_swigregister
-gr_rds_biphase_decoder_sptr_swigregister(gr_rds_biphase_decoder_sptr)
-
-
-def gr_rds_biphase_decoder_block(*args):
-  """gr_rds_biphase_decoder_block(gr_rds_biphase_decoder_sptr r) -> gr_block_sptr"""
-  return _rds.gr_rds_biphase_decoder_block(*args)
-gr_rds_biphase_decoder_sptr.block = lambda self: gr_rds_biphase_decoder_block (self)
-gr_rds_biphase_decoder_sptr.__repr__ = lambda self: "<gr_block %s (%d)>" % (self.name(), self.unique_id ())
+gr_rds_bpsk_demod_sptr_swigregister = _rds.gr_rds_bpsk_demod_sptr_swigregister
+gr_rds_bpsk_demod_sptr_swigregister(gr_rds_bpsk_demod_sptr)
 
 
-def biphase_decoder(*args):
-  """biphase_decoder(double input_sample_rate) -> gr_rds_biphase_decoder_sptr"""
-  return _rds.biphase_decoder(*args)
+def gr_rds_bpsk_demod_block(*args):
+  """gr_rds_bpsk_demod_block(gr_rds_bpsk_demod_sptr r) -> gr_block_sptr"""
+  return _rds.gr_rds_bpsk_demod_block(*args)
+gr_rds_bpsk_demod_sptr.block = lambda self: gr_rds_bpsk_demod_block (self)
+gr_rds_bpsk_demod_sptr.__repr__ = lambda self: "<gr_block %s (%d)>" % (self.name(), self.unique_id ())
+
+
+def bpsk_demod(*args):
+  """bpsk_demod(double input_sample_rate) -> gr_rds_bpsk_demod_sptr"""
+  return _rds.bpsk_demod(*args)
 class gr_rds_data_decoder_sptr(_object):
     """Proxy of C++ gr_rds_data_decoder_sptr class"""
     __swig_setmethods__ = {}

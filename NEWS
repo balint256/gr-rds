@@ -1,3 +1,8 @@
+02.02.2009
+- Fixed the existing QA code (freq_divider, diff_decoder)
+- Added diff_encoder (with QA)
+- Renamed biphase_decoder to bpsk_demod
+
 19.12.2008
 New features:
 - Added mono and stereo FM broadcast python code. Next step: add RDS.

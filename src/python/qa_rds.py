@@ -31,32 +31,27 @@ class qa_rds (gr_unittest.TestCase):
 	def tearDown (self):
 		self.fg = None
 
-#  this test is broken diff_decoder outputs bools and there
-#   is no vector_source_bool
-#
-#    def test_002_diff_decoder (self):
-#	src_data = 	  (0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0)
-#	expected_result = (0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1)
-#	src = gr.vector_source_s (src_data)
-#	dut = rds.diff_decoder ()
-#	dst = gr.vector_sink_s ()
-#
-#	self.fg.connect (src, dut)
-#	self.fg.connect (dut, dst)
-#	self.fg.run ()
-#	result_data = dst.data()
-#	self.assertEqual (expected_result, result_data)
+	def test_002_diff_decoder (self):
+		src_data = 			(0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0)
+		expected_result = 	(0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1)
+		src = gr.vector_source_b (src_data)
+		dut = rds.diff_decoder ()
+		dst = gr.vector_sink_b ()
+		self.fg.connect (src, dut, dst)
+		self.fg.run ()
+		result_data = dst.data()
+		self.assertEqual (expected_result, result_data)
 
 	def test_003_freq_divider (self):
-		src_data = 		(-1, 1, -1,  1, -1, 1, -1,  1, -1, 1, -1,  1, -1, 1)
-		expected_data =	(1,  1, -1, -1,  1, 1, -1, -1,  1, 1, -1, -1,  1, 1)
+		src_data = 			(-1, 1, -1,  1, -1, 1, -1,  1, -1, 1, -1,  1, -1, 1)
+		expected_result = 	(1,  1, -1, -1,  1, 1, -1, -1,  1, 1, -1, -1,  1, 1)
 		src = gr.vector_source_f (src_data)
-		dut = rds.freq_divider(3)
+		dut = rds.freq_divider(2)
 		dst = gr.vector_sink_f ()
 		self.fg.connect(src, dut, dst)
 		self.fg.run()
 		result_data = dst.data()
-		print "Resulted data: ", result_data, "\n"
+		self.assertEqual (expected_result, result_data)
 
 		
 if __name__ == '__main__':

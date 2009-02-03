@@ -37,22 +37,19 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.frame = frame
 		self.panel = panel
 		
-		self.vol = 0
+		self.vol = .5
 		self.state = "FREQ"
 		self.freq = 0
 
 		# build graph
 
-		self.u = usrp.source_c()					# usrp is data source
+		usrp_decim = 250
+		self.u = usrp.source_c(0, usrp_decim)
 		print "USRP Serial: ", self.u.serial_number()
 		adc_rate = self.u.adc_rate()				# 64 MS/s
-		usrp_decim = 250
-		self.u.set_decim_rate(usrp_decim)
-		usrp_rate = adc_rate / usrp_decim			# 256 kS/s
-		chanfilt_decim = 1
-		demod_rate = usrp_rate / chanfilt_decim		# 256 kS/s
+		demod_rate = adc_rate / usrp_decim			# 256 kS/s
 		audio_decim = 8
-		audio_rate = demod_rate / audio_decim		# 32 kHz
+		audio_rate = demod_rate / audio_decim		# 32 kS/s
 
 		if options.rx_subdev_spec is None:
 			options.rx_subdev_spec = usrp.pick_subdev(self.u, 
@@ -135,7 +132,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
-		self._build_gui(vbox, usrp_rate, demod_rate, audio_rate)
+		self._build_gui(vbox, demod_rate, audio_rate)
 
 		# if no gain was specified, use the mid-point in dB
 		if options.gain is None:
@@ -165,14 +162,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 	def _set_status_msg(self, msg, which=0):
 		self.frame.GetStatusBar().SetStatusText(msg, which)
 
-	def _build_gui(self, vbox, usrp_rate, demod_rate, audio_rate):
+	def _build_gui(self, vbox, demod_rate, audio_rate):
 
 		def _form_set_freq(kv):
 			return self.set_freq(kv['freq'])
 
 		if 0:
 			self.src_fft = fftsink2.fft_sink_c (self.panel, title="Data from USRP",
-											fft_size=512, sample_rate=usrp_rate)
+											fft_size=512, sample_rate=demod_rate)
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 

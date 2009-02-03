@@ -70,13 +70,14 @@ class gr_rds_bpsk_demod : public gr_block
 {
 private:
 	enum state_t { ST_LOOKING, ST_LOCKED };
-	int SYMBOL_LENGTH;
 	state_t d_state;
+	int SYMBOL_LENGTH;
 	int d_zc;				// Zero crosses in clk
 	int d_last_zc;
 	int d_sign_last;
 	float d_symbol_integrator;
 	unsigned int synccounter;
+
 // The friend declaration allows gr_rds_make_bpsk_demod to
 // access the private constructor.
 	friend gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);

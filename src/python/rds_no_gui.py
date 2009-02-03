@@ -11,7 +11,7 @@ class rds_rx_graph (gr.top_block):
 ####################
 		vol = .5
 		freq = 89.8e6
-		usrp_decim = 256
+		usrp_decim = 250
 		audio_decim = 8
 ####################
 
@@ -19,7 +19,7 @@ class rds_rx_graph (gr.top_block):
 		print "USRP Serial: ", self.u.serial_number()
 		adc_rate = self.u.adc_rate()				# 64 MS/s
 		demod_rate = adc_rate / usrp_decim			# 256 kS/s
-		audio_rate = demod_rate / audio_decim		# 32 kHz
+		audio_rate = demod_rate / audio_decim		# 32 kS/s
 
 		rx_subdev_spec = usrp.pick_subdev(self.u, [usrp_dbid.BASIC_RX])
 		self.u.set_mux(usrp.determine_rx_mux_value(self.u, rx_subdev_spec))

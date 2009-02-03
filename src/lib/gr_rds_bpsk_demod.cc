@@ -73,9 +73,13 @@ gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
 			gr_make_io_signature (MIN_IN, MAX_IN, sizeof (float)),
 			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool)))
 {
-	SYMBOL_LENGTH = (int)(input_sampling_rate/57000*48.0);
+	SYMBOL_LENGTH = (int)(input_sampling_rate/1187.5);
 	printf("SYMBOL_LENGTH= %d\n", SYMBOL_LENGTH);
-	set_relative_rate((input_sampling_rate/57e3/48));
+
+/* set approximate output-per-input relative rate
+   for the buffer allocator and the scheduler */
+	set_relative_rate(input_sampling_rate/57e3/48);
+/* shouldn't the relative_rate be (1/SYMBOL_LENGTH) ? */
 	reset();
 }
 
@@ -114,13 +118,13 @@ int gr_rds_bpsk_demod::general_work (int noutput_items,
 					gr_vector_void_star &output_items)
 {
 	const float *in = (const float *) input_items[0];
-	const float *clk  =  (const float *) input_items [1];
+	const float *clk = (const float *) input_items[1];
 	bool *out = (bool *) output_items[0];
 	int n_in = ninput_items[0];
 	int n_clk_in = ninput_items[1];
 	int i = 0;
-	int n = 0;			// number of output items created
-	int cons;
+	int nout = 0;
+	int cons=0;
 	int sign_current = 0;
 
 	switch (d_state){
@@ -131,33 +135,36 @@ int gr_rds_bpsk_demod::general_work (int noutput_items,
 				if(sign_current != d_sign_last) d_zc++; // a zero cross in clk
 				d_sign_last = sign_current;
 				d_symbol_integrator += (in[i]*clk[i]);
-				if(d_zc >= 2) { // Two zero crossings in clock - that's a symbol
-					out[n] = (d_symbol_integrator>0?1:0);
-					n++;
+				if(d_zc >= 2) {
+// Two zero crossings in clock - that's a symbol
+					out[nout] = (d_symbol_integrator>0?1:0);
+					nout++;
 					d_symbol_integrator = 0;
 					d_zc = 0;
 				}
 			}
-			fflush(stdout);
 			consume_each (i);
-			return n; 
+			return nout; 
 		case ST_LOOKING:
 // adjust clock and signal; if fine: go locked 
 			if(d_sign_last == 0) d_sign_last = (in[0]>0?1:-1);
 			for(i=0; i<n_in; i++) {
 				sign_current = (in[i]>0?1:-1);
 				if(sign_current != d_sign_last) {
-// Remember the zero crossing and check next time if it was a half or a whole symbol
+// Remember the zero crossing and check next time
+// if it was a half or a whole symbol
 					if(d_last_zc!=0) {
 						int delta = i-d_last_zc;
 						if(abs(delta-SYMBOL_LENGTH)<10) {
-// That was a 1, 0 or 0, 1 in signal; i is now pointing at the middle of a symbol
+// That was a 1, 0 or 0, 1 in signal
+// i is now pointing at the middle of a symbol
 							consume(0, i-(delta/2));
 							i=i-(delta/2);
 							d_sign_last = (clk[i]>0?1:-1);
 							for (; i<n_clk_in; i++) {
 								sign_current = (clk[i]>0?1:-1);
-								if(sign_current!=d_sign_last) { // zero crossing in clock
+								if(sign_current!=d_sign_last) {
+// zero crossing in clock
 									consume(1,i);
 									break;
 								}
@@ -174,12 +181,10 @@ int gr_rds_bpsk_demod::general_work (int noutput_items,
 			}
 			d_last_zc = d_last_zc-n_in;
 			cons = (n_in>n_clk_in?n_clk_in:n_in);
-			consume(0, cons);
-			consume(1, cons);
+			consume_each(cons);
 			return 0;
 		default:
 			enter_looking();
-			consume_each(0);
 			return 0;
 		break;
 	}

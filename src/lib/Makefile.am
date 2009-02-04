@@ -61,9 +61,10 @@ ourlib_LTLIBRARIES = _rds.la
 # These are the source files that go into the shared library
 _rds_la_SOURCES = 				\
 	rds.cc						\
-	gr_rds_diff_decoder.cc 		\
-	gr_rds_diff_encoder.cc 		\
+	gr_rds_diff_decoder.cc		\
+	gr_rds_diff_encoder.cc		\
 	gr_rds_bpsk_demod.cc		\
+	gr_rds_bpsk_mod.cc			\
 	gr_rds_data_decoder.cc		\
 	gr_rds_freq_divider.cc
 
@@ -84,7 +85,8 @@ rds.cc rds.py: rds.i $(ALL_IFILES)
 grinclude_HEADERS =				\
 	gr_rds_diff_decoder.h		\
 	gr_rds_diff_encoder.h		\
-	gr_rds_bpsk_demod.h 		\
+	gr_rds_bpsk_demod.h			\
+	gr_rds_bpsk_mod.h			\
 	gr_rds_data_decoder.h		\
 	gr_rds_freq_divider.h
 

@@ -10,6 +10,7 @@
 #include "gr_rds_diff_decoder.h"
 #include "gr_rds_diff_encoder.h"
 #include "gr_rds_bpsk_demod.h"
+#include "gr_rds_bpsk_mod.h"
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_freq_divider.h"
 #include <stdexcept>
@@ -49,6 +50,20 @@ class gr_rds_bpsk_demod: public gr_block
 {
 private:
 	gr_rds_bpsk_demod (double input_sample_rate);
+public:
+	void reset(void);
+};
+
+// -----------------------------------------------------------------
+
+GR_SWIG_BLOCK_MAGIC (gr_rds, bpsk_mod);
+
+gr_rds_bpsk_mod_sptr gr_rds_make_bpsk_mod (double input_sample_rate);
+
+class gr_rds_bpsk_mod: public gr_block
+{
+private:
+	gr_rds_bpsk_mod (double input_sample_rate);
 public:
 	void reset(void);
 };

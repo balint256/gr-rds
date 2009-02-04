@@ -70,9 +70,17 @@ static const int MAX_OUT = 8;	// maximum number of output streams
  */
 gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
 	: gr_block("gr_rds_bpsk_demod",
-			gr_make_io_signature (MIN_IN, MAX_IN, sizeof (bool)),
-			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (float)))
+			gr_make_io_signature (MIN_IN, MAX_IN, sizeof(float)),
+			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof(bool)))
 {
+	SYMBOL_LENGTH = (int)(input_sampling_rate/1187.5);
+	printf("SYMBOL_LENGTH= %d\n", SYMBOL_LENGTH);
+
+/* set approximate output-per-input relative rate
+   for the buffer allocator and the scheduler */
+	set_relative_rate(input_sampling_rate/57e3/48);
+/* shouldn't the relative_rate be (1/SYMBOL_LENGTH) ? */
+	reset();
 }
 
 /*
@@ -81,6 +89,25 @@ gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
 gr_rds_bpsk_demod::~gr_rds_bpsk_demod (){
 }
 
+void gr_rds_bpsk_demod::reset() {
+	d_zc = 0;
+	d_last_zc=0;
+	d_sign_last = 0;
+	synccounter=0;
+	enter_looking();
+}
+
+void gr_rds_bpsk_demod::enter_looking () {
+	printf (">>> bpsk demodulator enter_looking\n");
+	d_state = ST_LOOKING;
+}
+
+void  gr_rds_bpsk_demod::enter_locked () {
+	printf(">>> bpsk demodulator enter_locked\n");
+	d_state = ST_LOCKED;
+	d_symbol_integrator = 0;
+	d_sign_last = 0;
+}
 
 
 ////////////////////////////////////////////////////////////////

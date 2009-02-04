@@ -64,8 +64,6 @@ class gr_rds_bpsk_mod: public gr_block
 {
 private:
 	gr_rds_bpsk_mod (double input_sample_rate);
-public:
-	void reset(void);
 };
 
 //------------------------------------------------------------------

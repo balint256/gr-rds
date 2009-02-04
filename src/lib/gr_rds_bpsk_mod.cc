@@ -64,8 +64,8 @@ static const int MAX_OUT = 8;	// maximum number of output streams
  */
 gr_rds_bpsk_mod::gr_rds_bpsk_mod (double input_sampling_rate)
 	: gr_block("gr_rds_bpsk_mod",
-			gr_make_io_signature (MIN_IN, MAX_IN, sizeof (bool)),
-			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (float)))
+			gr_make_io_signature2 (MIN_IN, MAX_IN, sizeof(bool), sizeof(float)),
+			gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof(float)))
 {
 }
 
@@ -84,7 +84,11 @@ int gr_rds_bpsk_mod::general_work (int noutput_items,
 					gr_vector_void_star &output_items)
 {
 	const bool *in = (const bool *) input_items[0];
-	const bool *clk = (const bool *) input_items[1];
+	const float *clk = (const float *) input_items[1];
 	float *out = (float *) output_items[0];
 
+	for (int i = 0; i < noutput_items; i++)
+		out[i] = in[i]?clk[i]:(-1*clk[i]);
+
+	return noutput_items;
 }

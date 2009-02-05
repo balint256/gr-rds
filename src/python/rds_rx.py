@@ -97,7 +97,8 @@ class rds_rx(gr.hier_block2):
 		self.bpsk_demod = rds.bpsk_demod(audio_rate)
 
 		# Differential decoder
-		self.differential_decoder = rds.diff_decoder()
+#		self.differential_decoder = rds.diff_decoder()
+		self.differential_decoder = gr.diff_decoder_bb(2)
 
 		# RDS data decoder
 		self.rds_decoder = rds.data_decoder(msgq)

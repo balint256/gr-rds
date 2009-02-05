@@ -96,7 +96,8 @@ class rds_rx_graph (gr.top_block):
 
 		self.data_clock = rds.freq_divider(16)
 		self.bpsk_demod = rds.bpsk_demod(demod_rate)
-		self.differential_decoder = rds.diff_decoder()
+#		self.differential_decoder = rds.diff_decoder()
+		self.differential_decoder = gr.diff_decoder_bb(2)
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)
 

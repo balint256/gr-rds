@@ -29,7 +29,7 @@ class rds_rx_graph (gr.top_block):
 		g = self.subdev.gain_range()
 		gain = float(g[0]+g[1])/2
 		self.subdev.set_gain(gain)
-		if self.u.tune(0, self.subdev, freq):
+		if self.u.tune(self.subdev.which(), self.subdev, freq):
 			print "Tuned to", freq/1e6, "MHz"
 		else:
 			sys.exit(1)

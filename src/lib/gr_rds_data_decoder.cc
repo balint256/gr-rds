@@ -43,13 +43,10 @@ gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq) {
   return gr_rds_data_decoder_sptr (new gr_rds_data_decoder (msgq));
 }
 
-static const int MIN_IN = 1;	// mininum number of input streams
-static const int MAX_IN = 1;	// maximum number of input streams
-
 gr_rds_data_decoder::gr_rds_data_decoder (gr_msg_queue_sptr msgq)
   : gr_sync_block ("gr_rds_data_decoder",
-  gr_make_io_signature (MIN_IN, MAX_IN, sizeof (bool)),
-  gr_make_io_signature (0, 0, 0))
+			gr_make_io_signature (1, 1, sizeof (bool)),
+			gr_make_io_signature (0, 0, 0))
 {
 	d_msgq=msgq;
 	set_output_multiple(104);	// 1 RDS datagroup contains 104 bits

@@ -36,34 +36,18 @@
  * Create a new instance of gr_rds_diff_decoder and return
  * a boost shared_ptr.  This is effectively the public constructor.
  */
-gr_rds_diff_decoder_sptr 
-gr_rds_make_diff_decoder ()
-	
+gr_rds_diff_decoder_sptr gr_rds_make_diff_decoder ()
 {
-  return gr_rds_diff_decoder_sptr (new gr_rds_diff_decoder ());
+	return gr_rds_diff_decoder_sptr (new gr_rds_diff_decoder ());
 }
-
-/*
- * Specify constraints on number of input and output streams.
- * This info is used to construct the input and output signatures
- * (2nd & 3rd args to gr_block's constructor).  The input and
- * output signatures are used by the runtime system to
- * check that a valid number and type of inputs and outputs
- * are connected to this block.  In this case, we accept
- * only 1 input and 1 output.
- */
-static const int MIN_IN = 1;	// mininum number of input streams
-static const int MAX_IN = 1;	// maximum number of input streams
-static const int MIN_OUT = 1;	// minimum number of output streams
-static const int MAX_OUT = 1;	// maximum number of output streams
 
 /*
  * The private constructor
  */
 gr_rds_diff_decoder::gr_rds_diff_decoder ()
 	: gr_sync_block ("gr_rds_diff_decoder",
-		gr_make_io_signature (MIN_IN, MAX_IN, sizeof (bool)),
-		gr_make_io_signature (MIN_OUT, MAX_OUT, sizeof (bool)))
+		gr_make_io_signature (1, 1, sizeof (bool)),
+		gr_make_io_signature (1, 1, sizeof (bool)))
 {
 	d_last = 0;
 }

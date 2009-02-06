@@ -57,11 +57,23 @@ gr_rds_data_encoder::~gr_rds_data_encoder () {
 static void print_element_names(xmlNode * a_node)
 {
 	xmlNode *cur_node = NULL;
+	char *node_name='\0', *attribute='\0', *value='\0';
 
 	for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
-		if (cur_node->type == XML_ELEMENT_NODE)
-			printf("node type: Element, name: %s\n", cur_node->name);
-
+		if (cur_node->type == XML_ELEMENT_NODE){
+			node_name=(char*)cur_node->name;
+			if(!strcmp(node_name, "rds")) ;		//move on
+			else if(!strcmp(node_name, "group")){
+				attribute=(char*)xmlGetProp(cur_node, (const xmlChar *)"type");
+				printf("group type: %s\n", attribute);
+			}
+			else if(!strcmp(node_name, "field")){
+				attribute=(char*)xmlGetProp(cur_node, (const xmlChar *)"name");
+				value=(char*)xmlNodeGetContent(cur_node);
+				printf("\t%s: %s\n", attribute, value);
+			}
+			else printf("invalid node name: %s\n", node_name);
+		}
 		print_element_names(cur_node->children);
 	}
 }
@@ -71,12 +83,17 @@ int gr_rds_data_encoder::read_xml (const char *xmlfile){
 	xmlDoc *doc;
 	xmlNode *root_element = NULL;
 
-	doc = xmlReadFile(xmlfile, NULL, 0);
+	doc = xmlParseFile(xmlfile);
 	if (doc == NULL) {
 		fprintf(stderr, "Failed to parse %s\n", xmlfile);
 		return 1;
 	}
 	root_element = xmlDocGetRootElement(doc);
+// The root element MUST be "rds"
+	if(strcmp((char*)root_element->name, "rds")){
+		fprintf(stderr, "invalid XML root element!\n");
+		return 1;
+	}
 	print_element_names(root_element);
 
 	xmlFreeDoc(doc);

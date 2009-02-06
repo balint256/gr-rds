@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <rds>
 	<group type="0A">
-		<TP type="bool">true</TP>
-		<TA type="bool">false</TA>
-		<MuSp type="bool">true</MuSp>
-		<PI type="string">AZI0</PI>
+		<field name="TP" type="bool">true</field>
+		<field name="TA" type="bool">false</field>
+		<field name="MuSp" type="bool">true</field>
+		<field name="PI" type="string">AZI0</field>
 	</group>
 	<group type="2A">
-		<RadioText type="string">JRCRadio</RadioText>
+		<field name="RadioText" type="string">JRCRadio</field>
 	</group>
 </rds>

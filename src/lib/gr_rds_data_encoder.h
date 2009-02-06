@@ -31,6 +31,7 @@
 /* adds dependency: libxml2-dev */
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xmlmemory.h>
 
 class gr_rds_data_encoder;
 

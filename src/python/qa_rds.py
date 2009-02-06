@@ -20,8 +20,7 @@
 # Boston, MA 02111-1307, USA.
 # 
 
-from gnuradio import gr, gr_unittest
-from gnuradio import rds
+from gnuradio import gr, gr_unittest, rds
 
 class qa_rds (gr_unittest.TestCase):
 

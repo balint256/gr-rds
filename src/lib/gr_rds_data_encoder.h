@@ -28,6 +28,9 @@
 #include <string.h>
 #include <vector>
 #include <iostream>
+/* adds dependency: libxml2-dev */
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 class gr_rds_data_encoder;
 

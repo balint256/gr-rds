@@ -32,9 +32,6 @@
 #include <gr_rds_data_encoder.h>
 #include <gr_io_signature.h>
 #include <math.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-/* adds dependency: libxml2-dev */
 
 gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 	return gr_rds_data_encoder_sptr (new gr_rds_data_encoder (xmlfile));

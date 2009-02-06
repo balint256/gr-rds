@@ -77,6 +77,7 @@ _rds_la_LDFLAGS = -module -avoid-version
 _rds_la_LIBADD = 				\
 	$(GNURADIO_CORE_LIBS)		\
 	$(PYTHON_LDFLAGS)			\
+	-lxml2						\
 	-lstdc++
 
 rds.cc rds.py: rds.i $(ALL_IFILES)

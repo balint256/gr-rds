@@ -12,6 +12,7 @@
 #include "gr_rds_bpsk_demod.h"
 #include "gr_rds_bpsk_mod.h"
 #include "gr_rds_data_decoder.h"
+#include "gr_rds_data_encoder.h"
 #include "gr_rds_freq_divider.h"
 #include <stdexcept>
 %}
@@ -79,6 +80,19 @@ private:
 public:
 	void reset(void);
 };
+
+//------------------------------------------------------------------
+
+GR_SWIG_BLOCK_MAGIC (gr_rds, data_encoder);
+
+gr_rds_data_encoder_sptr gr_rds_make_data_encoder(const char *xmlfile);
+
+class gr_rds_data_encoder: public gr_sync_block
+{
+private:
+	gr_rds_data_encoder(const char *xmlfile);
+};
+
 
 // ------------------------------------------------------------------
 

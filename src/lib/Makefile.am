@@ -66,6 +66,7 @@ _rds_la_SOURCES = 				\
 	gr_rds_bpsk_demod.cc		\
 	gr_rds_bpsk_mod.cc			\
 	gr_rds_data_decoder.cc		\
+	gr_rds_data_encoder.cc		\
 	gr_rds_freq_divider.cc
 
 # magic flags
@@ -88,6 +89,7 @@ grinclude_HEADERS =				\
 	gr_rds_bpsk_demod.h			\
 	gr_rds_bpsk_mod.h			\
 	gr_rds_data_decoder.h		\
+	gr_rds_data_encoder.h		\
 	gr_rds_freq_divider.h
 
 # These swig headers get installed in ${prefix}/include/gnuradio/swig

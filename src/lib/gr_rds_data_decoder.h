@@ -252,9 +252,9 @@ private:
 // Functions
 	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);
 	gr_rds_data_decoder (gr_msg_queue_sptr msgq);		// private constructor
-	void	enter_no_sync();
-	void  enter_sync(unsigned int sync_block_number);
-	void  reset_rds_data();
+	void enter_no_sync();
+	void enter_sync(unsigned int sync_block_number);
+	void reset_rds_data();
 	unsigned long calc_syndrome(unsigned long message, unsigned char mlen,
 			unsigned long poly, unsigned char plen);
 	void printbin(unsigned long number,unsigned char bits);

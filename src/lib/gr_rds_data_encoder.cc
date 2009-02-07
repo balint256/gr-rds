@@ -54,8 +54,25 @@ gr_rds_data_encoder::~gr_rds_data_encoder () {
 
 ///////////////////////////////////////////////////
 
-static void print_element_names(xmlNode * a_node)
-{
+void gr_rds_data_encoder::reset_rds_data(){
+	for(int i=0; i<4; i++) group[i]=0;
+	PI=0;
+	TP=false;
+	PTY=0;
+	TA=false;
+	MuSp=false;
+	MS=false;
+	AH=false;
+	compressed=false;
+	static_pty=false;
+	memset(PS,' ',sizeof(PS));
+	PS[8]='\0';
+	memset(radiotext,' ',sizeof(radiotext));
+	radiotext[64] = '\0';
+	radiotext_AB_flag=0;
+}
+
+void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
 	xmlNode *cur_node = NULL;
 	char *node_name='\0', *attribute='\0', *value='\0';
 
@@ -78,7 +95,6 @@ static void print_element_names(xmlNode * a_node)
 	}
 }
 
-
 int gr_rds_data_encoder::read_xml (const char *xmlfile){
 	xmlDoc *doc;
 	xmlNode *root_element = NULL;
@@ -100,7 +116,8 @@ int gr_rds_data_encoder::read_xml (const char *xmlfile){
 	return 0;
 }
 
-
+/* the plan for now is to do group0 (basic), group2 (radiotext),
+ * group4a (clocktime), and group8a (tmc)... */
 int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)

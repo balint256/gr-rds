@@ -44,6 +44,7 @@ gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
+	reset_rds_data();
 	read_xml(xmlfile);
 }
 
@@ -72,9 +73,56 @@ void gr_rds_data_encoder::reset_rds_data(){
 	radiotext_AB_flag=0;
 }
 
+/* assinging the values from the xml file to our variables
+ * i could do some more checking for invalid inputs,
+ * but leaving as is for now */
+void gr_rds_data_encoder::assign_from_xml
+(const char *field, const char *value, const int length){
+	if(!strcmp(field, "PI")){
+		if(length!=4) printf("invalid PI string length: %i\n", length);
+		else PI=strtol(value, NULL, 16);
+	}
+	else if(!strcmp(field, "TP")){
+		if(!strcmp(value, "true")) TP=true;
+		else if(!strcmp(value, "false")) TP=false;
+		else printf("unrecognized TP value: %s\n", value);
+	}
+	else if(!strcmp(field, "PTY")){
+		if((length!=1)&&(length!=2))
+			printf("invalid TPY string length: %i\n", length);
+		else PTY=atol(value);
+	}
+	else if(!strcmp(field, "TA")){
+		if(!strcmp(value, "true")) TA=true;
+		else if(!strcmp(value, "false")) TA=false;
+		else printf("unrecognized TA value: %s\n", value);
+	}
+	else if(!strcmp(field, "MuSp")){
+		if(!strcmp(value, "true")) MuSp=true;
+		else if(!strcmp(value, "false")) MuSp=false;
+		else printf("unrecognized MuSp value: %s\n", value);
+	}
+	else if(!strcmp(field, "AF1")) AF1=atof(value);
+	else if(!strcmp(field, "AF2")) AF2=atof(value);
+/* need to copy a char arrays here */
+	else if(!strcmp(field, "PS")){
+		if(length!=8) printf("invalid PS string length: %i\n", length);
+		else for(int i=0; i<length; i++)
+			PS[i]=value[i];
+	}
+	else if(!strcmp(field, "RadioText")){
+		if(length>64) printf("invalid RadioText string length: %i\n", length);
+		else for(int i=0; i<length; i++)
+			radiotext[i]=value[i];
+	}
+	else printf("unrecognized field type: %s\n", field);
+}
+
+/* recursively print the xml nodes */
 void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
 	xmlNode *cur_node = NULL;
 	char *node_name='\0', *attribute='\0', *value='\0';
+	int length=0;
 
 	for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
 		if (cur_node->type == XML_ELEMENT_NODE){
@@ -87,7 +135,9 @@ void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
 			else if(!strcmp(node_name, "field")){
 				attribute=(char*)xmlGetProp(cur_node, (const xmlChar *)"name");
 				value=(char*)xmlNodeGetContent(cur_node);
-				printf("\t%s: %s\n", attribute, value);
+				length=xmlUTF8Strlen(xmlNodeGetContent(cur_node));
+				printf("\t%s: %s (length: %i)\n", attribute, value, length);
+				assign_from_xml(attribute, value, length);
 			}
 			else printf("invalid node name: %s\n", node_name);
 		}
@@ -95,6 +145,11 @@ void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
 	}
 }
 
+/* open the xml file, confirm that the root element is "rds",
+ * then recursively print it and assign values to the variables.
+ * for now, this runs once at startup. in the future, i might want
+ * to read periodically (say, each 5 sec?) so as to change values
+ * in the xml file and see the results in the "air"... */
 int gr_rds_data_encoder::read_xml (const char *xmlfile){
 	xmlDoc *doc;
 	xmlNode *root_element = NULL;

@@ -64,6 +64,8 @@ private:
 	bool AH;
 	bool compressed;
 	bool static_pty;
+	float AF1;
+	float AF2;
 	char PS[9];
 	char radiotext[65];
 	bool radiotext_AB_flag;
@@ -73,6 +75,7 @@ private:
 	gr_rds_data_encoder (const char *xmlfile);		// private constructor
 	int read_xml(const char *xmlfile);
 	void print_element_names(xmlNode * a_node);
+	void assign_from_xml(const char *field, const char *value, const int length);
 	void reset_rds_data();
 
 public:

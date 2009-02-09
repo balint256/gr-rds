@@ -109,7 +109,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 													gr.firdes.WIN_HAMMING)
 		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
 
-		self.data_clock = rds.freq_divider(16)
 		self.bpsk_demod = rds.bpsk_demod(demod_rate)
 #		self.differential_decoder = rds.diff_decoder()
 		self.differential_decoder = gr.diff_decoder_bb(2)
@@ -126,10 +125,10 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.pilot_filter, (self.mixer, 1))
 		self.connect(self.pilot_filter, (self.mixer, 2))
 		self.connect(self.rds_filter, (self.mixer, 3))
-		self.connect(self.pilot_filter, self.data_clock)
+		self.connect(self.pilot_filter, self.rds_data_clock)
 		self.connect(self.mixer, self.rds_bb_filter)
 		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
-		self.connect(self.data_clock, (self.bpsk_demod, 1))
+		self.connect(self.rds_data_clock, (self.bpsk_demod, 1))
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 

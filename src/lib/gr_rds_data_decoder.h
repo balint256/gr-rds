@@ -221,10 +221,10 @@ static const char * const language_codes[44]={"Unkown/not applicable",
 class gr_rds_data_decoder : public gr_sync_block
 {
 private:
-	unsigned long bit_counter,lastseen_offset_counter,reg;
-	unsigned char lastseen_offset,block_number;
-	unsigned int block_bit_counter,wrong_blocks_counter,blocks_counter,group_good_blocks_counter;
-	bool presync,good_block,group_assembly_started;
+	unsigned long bit_counter, lastseen_offset_counter, reg;
+	unsigned char lastseen_offset, block_number;
+	unsigned int block_bit_counter, wrong_blocks_counter, blocks_counter, group_good_blocks_counter;
+	bool presync,good_block, group_assembly_started;
 	unsigned int group[4];
 	enum state_t { ST_NO_SYNC, ST_SYNC };
 	state_t d_state;
@@ -255,7 +255,7 @@ private:
 	void enter_no_sync();
 	void enter_sync(unsigned int sync_block_number);
 	void reset_rds_data();
-	unsigned long calc_syndrome(unsigned long message, unsigned char mlen,
+	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,
 			unsigned long poly, unsigned char plen);
 	void printbin(unsigned long number,unsigned char bits);
 	unsigned long bin2dec(char *string);

@@ -109,6 +109,7 @@ void gr_rds_data_decoder::printbin(unsigned long number,unsigned char bits) {
 	putchar('\n');
 }
 
+/* this doesn't seem to be used anywhere... (???) */
 unsigned long gr_rds_data_decoder::bin2dec(char *string) {
 	unsigned int i;
 	unsigned long reg=0;
@@ -136,7 +137,7 @@ void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext) {
 }
 
 /* see Annex B, page 64 of the standard */
-unsigned long gr_rds_data_decoder::calc_syndrome(unsigned long message, 
+unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message, 
 			unsigned char mlen, unsigned long poly, unsigned char plen) {
 	unsigned long reg=0;
 	unsigned int i;
@@ -591,21 +592,23 @@ int gr_rds_data_decoder::work (int noutput_items,
 	DBG(printf("RDS data decoder at work: input_items = %d, /104 = %d\n", 
 					noutput_items, noutput_items/104);)
 	int i=0,j;
-	unsigned long bit_distance,block_distance;
-	unsigned int block_calculated_crc,block_received_crc,checkword,dataword;
+	unsigned long bit_distance, block_distance;
+	unsigned int block_calculated_crc, block_received_crc, checkword,dataword;
+	unsigned int reg_syndrome;
 	
 	while (i<noutput_items) {
 		reg=(reg<<1)|in[i];
 		switch (d_state) {
 			case ST_NO_SYNC:
+				reg_syndrome = calc_syndrome(reg,26,0x5b9,10);
 				for (j=0;j<5;j++) {
-					if (calc_syndrome(reg,26,0x5b9,10)==syndrome[j]) {
-						DBG(printf("Offset %s syndrome found @ bit %lu\n",offset_name[j],bit_counter);)
+					if (reg_syndrome==syndrome[j]) {
+						DBG(printf("Offset %s syndrome found @ bit %lu\n", offset_name[j], bit_counter);)
 						if (!presync) {
 							lastseen_offset=j;
 							lastseen_offset_counter=bit_counter;
 							DBG(printf("out of presync %d %d %d\n",
-								lastseen_offset,lastseen_offset_counter,bit_counter);)
+								lastseen_offset, lastseen_offset_counter, bit_counter);)
 							presync=true;
 						}
 						else {

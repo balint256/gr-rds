@@ -27,7 +27,7 @@ class rds_rx_graph (gr.top_block):
 		print "Using d'board", self.subdev.side_and_name()
 
 		g = self.subdev.gain_range()
-		gain = float(g[0]+g[1])/2
+		gain = g[1] #float(g[0]+g[1])/2
 		self.subdev.set_gain(gain)
 		if usrp.tune(self.u, 0, self.subdev, freq):
 			print "Tuned to", freq/1e6, "MHz"

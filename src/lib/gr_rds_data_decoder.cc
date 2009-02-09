@@ -58,9 +58,8 @@ gr_rds_data_decoder::~gr_rds_data_decoder () {
 
 
 
-
-
 ////////////////////////// HELPER FUNTIONS /////////////////////////
+
 void gr_rds_data_decoder::reset() {
 	bit_counter=0;
 	reg=0;
@@ -99,7 +98,6 @@ void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number) {
 	block_bit_counter=0;
 	block_number=(sync_block_number+1) % 4;
 	group_assembly_started=false;
-	DBG(printf("Starting Block Decode @ block %u\n",block_number);)
 	d_state = ST_SYNC;
 }
 
@@ -153,12 +151,6 @@ unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message,
 	return (reg & ((1<<plen)-1));
 }
 
-
-
-
-
-/////////////////////  DATA TRANSFORMATION ROUTINES  //////////////////////////
-
 char gr_rds_data_decoder::transform_char(char z) {
 	int row, col;
 	row = (z & 0x0F);
@@ -168,6 +160,11 @@ char gr_rds_data_decoder::transform_char(char z) {
 	else
 		return '_';
 }
+
+
+
+/////////////////////  RDS LAYERS 5 AND 6  //////////////////////////
+
 
 /* BASIC TUNING: see page 21 of the standard */
 void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
@@ -509,8 +506,7 @@ void gr_rds_data_decoder::decode_type15b(unsigned int *group){
 void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	unsigned char group_type_code=(group[1]>>12)&0x0f;
 	bool version_code=(group[1]>>11) & 0x01;
-/*	printf("g1:%x%x g2:%x%x g3:%x%x\n", (group[1]>>8)&0xff, group[1]&0xff,
-		(group[2]>>8)&0xff, group[2]&0xff, (group[3]>>8)&0xff, group[3]&0xff);*/
+//	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
 	printf("%i%c", (int)group_type_code, (version_code?'B':'A'));
 
 	program_identification=group[0];			// "PI"
@@ -534,7 +530,6 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	std::cout << " - area:" << coverage_area_codes[pi_area_coverage];
 	std::cout << " - program:" << (int)pi_program_reference_number << std::endl;
 
-//	std::string message("");
 	switch (group_type_code) {
 		case 0:
 			decode_type0(group, version_code);
@@ -581,8 +576,6 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	}
 }
 
-
-///////////////////////////////////////////////////
 int gr_rds_data_decoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
@@ -595,7 +588,8 @@ int gr_rds_data_decoder::work (int noutput_items,
 	unsigned long bit_distance, block_distance;
 	unsigned int block_calculated_crc, block_received_crc, checkword,dataword;
 	unsigned int reg_syndrome;
-	
+
+/* the synchronization process is described in Annex C, page 66 of the standard */
 	while (i<noutput_items) {
 		reg=(reg<<1)|in[i];
 		switch (d_state) {
@@ -603,12 +597,9 @@ int gr_rds_data_decoder::work (int noutput_items,
 				reg_syndrome = calc_syndrome(reg,26,0x5b9,10);
 				for (j=0;j<5;j++) {
 					if (reg_syndrome==syndrome[j]) {
-						DBG(printf("Offset %s syndrome found @ bit %lu\n", offset_name[j], bit_counter);)
 						if (!presync) {
 							lastseen_offset=j;
 							lastseen_offset_counter=bit_counter;
-							DBG(printf("out of presync %d %d %d\n",
-								lastseen_offset, lastseen_offset_counter, bit_counter);)
 							presync=true;
 						}
 						else {
@@ -617,101 +608,74 @@ int gr_rds_data_decoder::work (int noutput_items,
 								block_distance=offset_pos[j]+4-offset_pos[lastseen_offset];
 							else
 								block_distance=offset_pos[j]-offset_pos[lastseen_offset];
-							DBG(printf("%lu,%lu\n",block_distance,bit_distance);)
 							if ((block_distance*26)!=bit_distance) presync=false;
 							else {
 								printf("@@@@@ Sync State Detected\n");
 								enter_sync(j);
-							}	
+							}
 						}
 					j=5; //syndrome found, no more cycles
 					}
 				}
 			break;
 			case ST_SYNC:
-				if (block_bit_counter<25) {
-					block_bit_counter++;
-				}
+/* wait until 26 bits enter the buffer */
+				if (block_bit_counter<25) block_bit_counter++;
 				else {
 					good_block=false;
-					DBG(printf("block_number:%u\n",block_number);)
-					DBG(printf("reg:\t\t\t");printbin(reg,32);)
-					//we got a complete block, let's see if CRC is correct
 					dataword=(reg>>10) & 0xffff;
-					DBG(printf("dataword:\t\t\t");printbin(dataword,16);)
-					//calc CRC of the payload
 					block_calculated_crc=calc_syndrome(dataword,16,0x5b9,10);
-					DBG(printf("block_calculated_crc:\t\t");printbin(block_calculated_crc,10);)
 					checkword=reg & 0x3ff;
-					DBG(printf("checkword:\t\t\t");printbin(checkword,10);)
-					if (block_number==2) {	//manage special case of C or C' offset word
-						DBG(printf("offset_word:\t\t\t");printbin(offset_word[block_number],10);)
+/* manage special case of C or C' offset word */
+					if (block_number==2) {
 						block_received_crc=checkword^offset_word[block_number];
-						DBG(printf("block_received_crc:\t\t");printbin(block_received_crc,10);)
-						if (block_received_crc==block_calculated_crc) {
-							DBG(printf("BLOCK RECEIVED OK\n");)
+						if (block_received_crc==block_calculated_crc)
 							good_block=true;
-						}
 						else {
-							DBG(printf("C_ OFFSET WORD TEST\n");)
-							DBG(printf("offset_word:\t\t\t");printbin(offset_word[4],10);)
 							block_received_crc=checkword^offset_word[4];
-							DBG(printf("block_received_crc:\t\t");printbin(block_received_crc,10);)
-							if (block_received_crc==block_calculated_crc) {
-								DBG(printf("BLOCK RECEIVED OK\n");)
+							if (block_received_crc==block_calculated_crc)
 								good_block=true;
-							}
-							else {			
-								DBG(printf("BLOCK RECEIVED KO\n");)
+							else {
 								wrong_blocks_counter++;
 								good_block=false;
 							}
 						}
 					}
 					else {
-						DBG(printf("offset_word:\t\t\t");printbin(offset_word[block_number],10);)
 						block_received_crc=checkword^offset_word[block_number];
-						DBG(printf("block_received_crc:\t\t");printbin(block_received_crc,10);)
-						if (block_received_crc==block_calculated_crc) {
-							DBG(printf("BLOCK RECEIVED OK\n");)
+						if (block_received_crc==block_calculated_crc)
 							good_block=true;
-						}
 						else {
-							DBG(printf("BLOCK RECEIVED KO\n");)
 							wrong_blocks_counter++;
 							good_block=false;
 						}
 					}
+/* done checking CRC */
 					if (block_number==0 && good_block) {
 						group_assembly_started=true;
 						group_good_blocks_counter=1;
-						DBG(printf("Group Assembly Started @ Block %u\n",block_number);)
 					}
 					if (group_assembly_started) {
-						if (!good_block) {
-							group_assembly_started=false;
-							DBG(printf("Group Assembly Interrupted @ Block %u\n",block_number);)
-						}
+						if (!good_block) group_assembly_started=false;
 						else {
 							group[block_number]=dataword;
-							DBG(printf("Block Number %u Inserted in Group\n",block_number);)
 							group_good_blocks_counter++;
 						}
-						if (group_good_blocks_counter==5) {
-							DBG(printf("GROUP RECEIVED OK!!! (%04X %04X %04X %04X)\n",
-								group[0],group[1],group[2],group[3]);)
-							decode_group(group);
-						}
+						if (group_good_blocks_counter==5) decode_group(group);
 					}
 					block_bit_counter=0;
 					block_number=(block_number+1) % 4;
 					blocks_counter++;
+/* 1187.5 bps / 104 bits = 11.4 groups/sec, or 45.7 blocks/sec */
 					if (blocks_counter==50) {
 						if (wrong_blocks_counter>35) {
 							printf("@@@@@ Lost Sync (Got %u bad blocks on %u total)\n",
 								wrong_blocks_counter,blocks_counter);
 							enter_no_sync();
 						}
+						else
+							printf("@@@@@ Still Sync-ed (Got %u bad blocks on %u total)\n",
+								wrong_blocks_counter,blocks_counter);
 						blocks_counter=0;
 						wrong_blocks_counter=0;
 					}

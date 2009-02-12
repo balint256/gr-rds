@@ -72,6 +72,9 @@ private:
 	char radiotext[65];
 	bool radiotext_AB_flag;
 	int g0_counter;
+	int d_last_clock_sign;
+	int d_zc_counter;
+	int d_buffer_bit_counter;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);

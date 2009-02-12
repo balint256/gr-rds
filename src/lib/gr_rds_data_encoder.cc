@@ -54,15 +54,14 @@ gr_rds_data_encoder::~gr_rds_data_encoder () {
 	xmlMemoryDump();		// this is to debug memory for regression tests
 }
 
-
-
-////////////////////  READING XML FILE  //////////////////
-
 void gr_rds_data_encoder::reset_rds_data(){
 	int i=0;
 	for(i=0; i<4; i++) {group[i]=0; checkword[i]=0;}
 	for(i=0; i<13; i++) buffer[i]=0;
 	g0_counter=0;
+	d_last_clock_sign=0;
+	d_zc_counter=0;
+	d_buffer_bit_counter=0;
 
 	PI=0;
 	TP=false;
@@ -79,6 +78,9 @@ void gr_rds_data_encoder::reset_rds_data(){
 	radiotext[64] = '\0';
 	radiotext_AB_flag=0;
 }
+
+
+////////////////////  READING XML FILE  //////////////////
 
 /* assinging the values from the xml file to our variables
  * i could do some more checking for invalid inputs,
@@ -271,8 +273,22 @@ int gr_rds_data_encoder::work (int noutput_items,
 {
 	const float *clk = (const float *) input_items[0];
 	bool *out = (bool *) output_items[0];
+	int clock_sign=0;
 
-	for (int i = 0; i < noutput_items; i++)
-		out[i]=0;
+/* clk should be 1187.5Hz, independent of the sample rate
+ * every 2 zero-crossings, we change the output to the next buffer bit
+ * FIXME make this output >1 groups */
+	if(d_last_clock_sign==0) d_last_clock_sign=clk[0]>0?1:-1;
+	for (int i = 0; i < noutput_items; i++){
+		clock_sign=clk[0]>0?1:-1;
+		if(clock_sign!=d_last_clock_sign) d_zc_counter++;
+		if(d_zc_counter==2){
+			d_buffer_bit_counter++;
+			d_zc_counter=0;
+		}
+		if(d_buffer_bit_counter==104) d_buffer_bit_counter=0;
+		out[i]=(buffer[d_buffer_bit_counter/8]>>(d_buffer_bit_counter%8))&0x1;
+	}
+
 	return noutput_items;
 }

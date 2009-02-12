@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, optfir, blks2
+from gnuradio import gr, usrp, optfir, blks2, rds
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import stdgui2, fftsink2
 from optparse import OptionParser
 from usrpm import usrp_dbid
-from lxml import etree
 import math, sys, wx
 
 class rds_tx_block(stdgui2.std_top_block):
@@ -110,17 +109,35 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.stereo_carrier, (self.mix_stereo, 1))
 		self.connect (self.mix_stereo, self.audio_lmr_filter)
 
-		# parse the rds xml file (dependency: python-lxml)
-		self.parser = etree.XMLParser(dtd_validation=False)
-		self.xml = etree.parse(options.xml, parser=self.parser)
-		print(etree.tostring(self.xml, pretty_print=True))
+		# rds_data_encoder, diff_encoder, bpsk_mod
+		self.rds_encoder = rds.data_encoder('rds_data.xml')
+		self.diff_encoder = gr.diff_encoder_bb(2)
+		self.bpsk_mod = rds.bpsk_mod(self.audio_rate)
+		self.connect(self.pilot,self.rds_encoder,self.diff_encoder,(self.bpsk_mod, 0))
 
+		# create 57kHz RDS carrier and feed into bpsk_mod
+		self.rds_carrier = gr.multiply_ff()
+		self.connect (self.pilot, (self.rds_carrier, 0))
+		self.connect (self.pilot, (self.rds_carrier, 1))
+		self.connect (self.pilot, (self.rds_carrier, 2))
+		self.connect (self.rds_carrier, (self.bpsk_mod, 1))
 
-		# mix L+R, pilot and L-R
+		# RDS band-pass filter
+		rds_filter_coeffs = gr.firdes.band_pass (1,
+													demod_rate,
+													54e3,
+													60e3,
+													3e3,
+													gr.firdes.WIN_HAMMING)
+		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
+		self.connect (self.bpsk_mod, self.rds_filter)
+
+		# mix L+R, pilot, L-R and RDS
 		self.mixer = gr.add_ff()
 		self.connect (self.audio_lpr_filter, (self.mixer, 0))
 		self.connect (self.pilot, (self.mixer, 1))
 		self.connect (self.audio_lmr_filter, (self.mixer, 2))
+		self.connect (self.rds_filter, (self.mixer, 3))
 
 		# interpolation & pre-emphasis
 		interp_taps = optfir.low_pass (self.sw_interp,		# gain
@@ -147,5 +164,5 @@ class rds_tx_block(stdgui2.std_top_block):
 		vbox.Add (pre_mod.win, 1, wx.EXPAND)
 
 if __name__ == '__main__':
-	app = stdgui2.stdapp(rds_tx_block, "FM Tx")
+	app = stdgui2.stdapp(rds_tx_block, "RDS Tx")
 	app.MainLoop ()

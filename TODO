@@ -1,6 +1,3 @@
 - Complete TMC implementation
 - Add scanning for stations
-- Add qa code
-- Fix the rx-block separation
 - Fix too common "lost sync"
-- Add mp3 support to fmtx code

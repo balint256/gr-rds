@@ -133,44 +133,8 @@ static const char * const coverage_area_codes[16]={"Local",
 											"Regional 11",
 											"Regional 12"};
 
-/* page 74, Annex E, table E.1 in the standard */
-static const char transform_table[16][8] = {
-/* the new, correct characters in the last 2 columns
-   cause "multi-character character constant" warnings
-					{' ', '0', '@', 'P', 'ǁ', 'p', 'á', 'â'},
-					{'!', '1', 'A', 'Q', 'a', 'q', 'à', 'ä'},
-					{'"', '2', 'B', 'R', 'b', 'r', 'é', 'ê'},
-					{'#', '3', 'C', 'S', 'c', 's', 'è', 'ë'},
-					{'°', '4', 'D', 'T', 'd', 't', 'í', 'î'},
-					{'%', '5', 'E', 'U', 'e', 'u', 'ì', 'ï'},
-					{'&', '6', 'F', 'V', 'f', 'v', 'ó', 'ô'},
-					{'\'', '7', 'G', 'W', 'g', 'w', 'ò', 'ö'},
-					{'(', '8', 'H', 'X', 'h', 'x', 'ú', 'û'},
-					{')', '9', 'I', 'Y', 'i', 'y', 'ù', 'ü'},
-					{'*', ':', 'J', 'Z', 'j', 'z', 'Ñ', 'ñ'},
-					{'+', ';', 'K', '[', 'k', '{', 'Ç', 'ç'},
-					{',', '<', 'L', '\\', 'l', '|', 'Ş', 'ş'},
-					{'-', '=', 'M', ']', 'm', '}', 'ß', 'ğ'},
-					{'.', '>', 'N', '-', 'n', '-', 'i', 'i'},
-					{'/', '?', 'O', '-', 'o', ' ', 'Ĳ', 'ĳ'}};
-*/
-					{' ', '0', '@', 'P', ' ', 'p', 'a', 'a'},
-					{'!', '1', 'A', 'Q', 'a', 'q', 'a', 'a'},
-					{'"', '2', 'B', 'R', 'b', 'r', 'e', 'e'},
-					{'#', '3', 'C', 'S', 'c', 's', 'e', 'e'},
-					{'?', '4', 'D', 'T', 'd', 't', 'i', 'i'},
-					{'%', '5', 'E', 'U', 'e', 'u', 'i', 'i'},
-					{'&', '6', 'F', 'V', 'f', 'v', 'o', 'o'},
-					{'\'', '7', 'G', 'W', 'g', 'w', 'o', 'o'},
-					{'(', '8', 'H', 'X', 'h', 'x', 'u', 'u'},
-					{')', '9', 'I', 'Y', 'i', 'y', 'u', 'u'},
-					{'*', ':', 'J', 'Z', 'j', 'z', 'N', 'n'},
-					{'+', ';', 'K', '[', 'k', '{', 'c', 'c'},
-					{',', '<', 'L', '\\', 'l', '|', 's', 's'},
-					{'-', '=', 'M', ']', 'm', '}', 'b', 'g'},
-					{'.', '>', 'N', '-', 'n', '-', 'i', 'i'},
-					{'/', '?', 'O', '-', 'o', ' ', 'I', 'i'}};
-
+/* page 74, Annex E, table E.1 in the standard 
+ * that table is the ASCII table */
 
 /* see page 84, Annex J in the standard */
 static const char * const language_codes[44]={"Unkown/not applicable",
@@ -259,7 +223,6 @@ private:
 			unsigned long poly, unsigned char plen);
 	void printbin(unsigned long number,unsigned char bits);
 	unsigned long bin2dec(char *string);
-	char  transform_char(char z);
 	void send_message(long msgtype, std::string msgtext);
 	void decode_group(unsigned int *group);
 	double decode_af(unsigned int af_code);

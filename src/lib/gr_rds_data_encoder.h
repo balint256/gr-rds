@@ -55,6 +55,8 @@ class gr_rds_data_encoder : public gr_sync_block
 {
 private:
 	unsigned int group[4];
+	unsigned int checkword[4];
+	char buffer[13];		// 13*8=104
 	unsigned int PI;
 	bool TP;
 	unsigned char PTY;
@@ -64,11 +66,12 @@ private:
 	bool AH;
 	bool compressed;
 	bool static_pty;
-	float AF1;
-	float AF2;
+	double AF1;
+	double AF2;
 	char PS[9];
 	char radiotext[65];
 	bool radiotext_AB_flag;
+	int g0_counter;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
@@ -77,6 +80,10 @@ private:
 	void print_element_names(xmlNode * a_node);
 	void assign_from_xml(const char *field, const char *value, const int length);
 	void reset_rds_data();
+	void create_groups(const int group_type, const bool AB);
+	unsigned int encode_af(double af);
+	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,
+			unsigned long poly, unsigned char plen);
 
 public:
 	~gr_rds_data_encoder();		// public destructor

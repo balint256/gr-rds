@@ -151,17 +151,6 @@ unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message,
 	return (reg & ((1<<plen)-1));
 }
 
-char gr_rds_data_decoder::transform_char(char z) {
-	int row, col;
-	row = (z & 0x0F);
-	col = ((z >> 4) & 0x0F);
-	if((col>=2)&&(col<=9))
-		return transform_table[row][col-2];
-	else
-		return '_';
-}
-
-
 
 /////////////////////  RDS LAYERS 5 AND 6  //////////////////////////
 
@@ -177,8 +166,8 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	music_speech=(group[1]>>3) & 0x01;					// "MuSp"
 	bool decoder_control_bit = (group[1]>>2) & 0x01;	// "DI"
 	unsigned char segment_address = group[1] & 0x03;	// "DI segment"
-	program_service_name[segment_address*2]=transform_char((group[3]>>8)&0xff);
-	program_service_name[segment_address*2+1]=transform_char(group[3]&0xff);
+	program_service_name[segment_address*2]=(group[3]>>8)&0xff;
+	program_service_name[segment_address*2+1]=group[3]&0xff;
 /* see page 41, table 9 of the standard */
 	switch (segment_address) {
 		case 0:
@@ -264,9 +253,9 @@ double gr_rds_data_decoder::decode_af(unsigned int af_code) {
 
 /* here we're actually decoding the alternative frequency */
 	if ((af_code > 0) && (af_code < 205) && vhf_or_lfmf)
-		alt_frequency = (double)(af_code+875)*100;		// VHF (87.5-108MHz)
+		alt_frequency = (double)(af_code+875)*100;		// VHF (87.6-107.9MHz)
 	if ((af_code > 0) && (af_code < 16) && !vhf_or_lfmf)
-		alt_frequency = (double)((af_code-1)*9 + 153);	// LF (162-279kHz)
+		alt_frequency = (double)((af_code-1)*9 + 153);	// LF (153-279kHz)
 	if ((af_code > 15) && (af_code < 136) && !vhf_or_lfmf)
 		alt_frequency = (double)((af_code-16)*9 + 531);	// MF (531-1602kHz)
 
@@ -335,14 +324,14 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
 	radiotext_AB_flag=(group[1]>>4)&0x01;
 
 	if (!version_code) {
-		radiotext[text_segment_address_code*4]=transform_char((group[2]>>8)&0xff);
-		radiotext[text_segment_address_code*4+1]=transform_char(group[2]&0xff);
-		radiotext[text_segment_address_code*4+2]=transform_char((group[3]>>8)&0xff);
-		radiotext[text_segment_address_code*4+3]=transform_char(group[3]&0xff);
+		radiotext[text_segment_address_code*4]=(group[2]>>8)&0xff;
+		radiotext[text_segment_address_code*4+1]=group[2]&0xff;
+		radiotext[text_segment_address_code*4+2]=(group[3]>>8)&0xff;
+		radiotext[text_segment_address_code*4+3]=group[3]&0xff;
 	}
 	else {
-		radiotext[text_segment_address_code*2]=transform_char((group[3]>>8)&0xff);
-		radiotext[text_segment_address_code*2+1]=transform_char(group[3]&0xff);
+		radiotext[text_segment_address_code*2]=(group[3]>>8)&0xff;
+		radiotext[text_segment_address_code*2+1]=group[3]&0xff;
 	}
 	printf("Radio Text %c: %s\n", (radiotext_AB_flag?'A':'B'), radiotext);
 	send_message(4,radiotext);
@@ -444,8 +433,8 @@ void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
 			case 1:			// PS(ON)
 			case 2:			// PS(ON)
 			case 3:			// PS(ON)
-				ps_on[variant_code*2]=transform_char((information>>8)&0xff);
-				ps_on[variant_code*2+1]=transform_char(information&0xff);
+				ps_on[variant_code*2]=(information>>8)&0xff;
+				ps_on[variant_code*2+1]=information&0xff;
 				printf("PS(ON): ==>%8s<==", ps_on);
 			break;
 			case 4:			// AF

@@ -46,6 +46,7 @@ gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
 	LIBXML_TEST_VERSION
 	reset_rds_data();
 	read_xml(xmlfile);
+	create_groups(0, false);
 }
 
 gr_rds_data_encoder::~gr_rds_data_encoder () {
@@ -53,10 +54,16 @@ gr_rds_data_encoder::~gr_rds_data_encoder () {
 	xmlMemoryDump();		// this is to debug memory for regression tests
 }
 
-///////////////////////////////////////////////////
+
+
+////////////////////  READING XML FILE  //////////////////
 
 void gr_rds_data_encoder::reset_rds_data(){
-	for(int i=0; i<4; i++) group[i]=0;
+	int i=0;
+	for(i=0; i<4; i++) {group[i]=0; checkword[i]=0;}
+	for(i=0; i<13; i++) buffer[i]=0;
+	g0_counter=0;
+
 	PI=0;
 	TP=false;
 	PTY=0;
@@ -169,6 +176,91 @@ int gr_rds_data_encoder::read_xml (const char *xmlfile){
 
 	xmlFreeDoc(doc);
 	return 0;
+}
+
+
+
+//////////////////////  CREATE DATA GROUPS  ///////////////////////
+
+/* see Annex B, page 64 of the standard */
+unsigned int gr_rds_data_encoder::calc_syndrome(unsigned long message, 
+			unsigned char mlen, unsigned long poly, unsigned char plen) {
+	unsigned long reg=0;
+	unsigned int i;
+
+	for (i=mlen;i>0;i--)  {
+		reg=(reg<<1) | ((message>>(i-1)) & 0x01);
+		if (reg & (1<<plen)) reg=reg^poly;
+	}
+	for (i=plen;i>0;i--) {
+		reg=reg<<1;
+		if (reg & (1<<plen)) reg=reg^poly;
+	}
+	return (reg & ((1<<plen)-1));
+}
+
+/* see page 41 in the standard; this is an implementation of AF method A
+ * FIXME need to add code that declares the number of AF to follow... */
+unsigned int gr_rds_data_encoder::encode_af(const double af){
+	unsigned int af_code=0;
+	if((af>=87.6)&&(af<=107.9))
+		af_code=nearbyint((af-87.5)*10);
+	else if((af>=153)&&(af<=279))
+		af_code=nearbyint((af-144)/9);
+	else if((af>=531)&&(af<=1602))
+		af_code=nearbyint((af-531)/9+16);
+	else
+		printf("invalid alternate frequency: %f\n", af);
+	return(af_code);
+}
+
+/* create the 4 datawords, according to group type.
+ * then calculate checkwords and put everything in the buffer. */
+void gr_rds_data_encoder::create_groups(const int group_type, const bool AB){
+	int i=0;
+	group[0]=PI;
+	group[1]=(((char)group_type)<<12)|(AB<<11)|(TP<<10)|(PTY<<5);
+	if(group_type==0){
+		group[1]=group[1]|(TA<<4)|(MuSp<<3);
+/* d0=1 (stereo), d1-3=0 */
+		if(g0_counter==3) group[1]=group[1]|0x5;
+		group[1]=group[1]|(g0_counter&0x3);
+		if(!AB)
+			group[2]=((encode_af(AF1)&0xff)<<8)|(encode_af(AF2)&0xff);
+		else
+			group[2]=PI;
+		group[3]=(PS[2*g0_counter]<<8)|PS[2*g0_counter+1];
+	}
+	printf("data: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
+
+	for(i=0;i<4;i++){
+		checkword[i]=calc_syndrome(group[i],16,0x5b9,10);
+		group[i]=((group[i]&0xffff)<<10)|(checkword[i]&0x3ff);
+	}
+	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
+
+/* FIXME there's got to be a better way of doing this */
+	buffer[0]=group[0]&0xff;
+	buffer[1]=(group[0]>>8)&0xff;
+	buffer[2]=(group[0]>>16)&0xff;
+	buffer[3]=(group[0]>>24)&0x03;
+	buffer[3]=buffer[3]|((group[1]&0x3f)<<2);
+	buffer[4]=(group[1]>>6)&0xff;
+	buffer[5]=(group[1]>>14)&0xff;
+	buffer[6]=(group[1]>>22)&0x0f;
+	buffer[6]=buffer[6]|((group[2]&0x0f)<<4);
+	buffer[7]=(group[2]>>4)&0xff;
+	buffer[8]=(group[2]>>12)&0xff;
+	buffer[9]=(group[2]>>20)&0x3f;
+	buffer[9]=buffer[9]|((group[3]&0x03)<<6);
+	buffer[10]=(group[3]>>2)&0xff;
+	buffer[11]=(group[3]>>10)&0xff;
+	buffer[12]=(group[3]>>18)&0xff;
+
+	printf("buffer: ");
+	for(i=0;i<13;i++) printf("%X ", buffer[i]&0xff);
+	printf("\n");
+	if(++g0_counter>3) g0_counter=0;
 }
 
 /* the plan for now is to do group0 (basic), group2 (radiotext),

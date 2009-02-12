@@ -124,7 +124,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# RDS band-pass filter
 		rds_filter_coeffs = gr.firdes.band_pass (1,
-													demod_rate,
+													self.audio_rate,
 													54e3,
 													60e3,
 													3e3,

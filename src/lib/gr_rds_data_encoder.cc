@@ -39,8 +39,8 @@ gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 
 gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
   : gr_sync_block ("gr_rds_data_encoder",
-			gr_make_io_signature (0, 0, 0),
-			gr_make_io_signature (1, 1, sizeof (bool)))
+			gr_make_io_signature (1, 1, sizeof(float)),
+			gr_make_io_signature (1, 1, sizeof(bool)))
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
@@ -269,5 +269,10 @@ int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
+	const float *clk = (const float *) input_items[0];
+	bool *out = (bool *) output_items[0];
+
+	for (int i = 0; i < noutput_items; i++)
+		out[i]=0;
 	return noutput_items;
 }

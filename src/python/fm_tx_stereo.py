@@ -16,18 +16,17 @@ class fm_tx_block(stdgui2.std_top_block):
 						help="select USRP Tx side A or B")
 		parser.add_option("-f", "--freq", type="eng_float", default=107.2e6,
 						help="set Tx frequency to FREQ [required]", metavar="FREQ")
-		parser.add_option("-i", "--filename", type="string", default="",
+		parser.add_option("--wavfile", type="string", default="",
 						help="read input from FILE")
 		(options, args) = parser.parse_args()
 		if len(args) != 0:
 			parser.print_help()
 			sys.exit(1)
 
-		self.u = usrp.sink_c ()
-
-		self.dac_rate = self.u.dac_rate()					# 128 MS/s
 		self.usrp_interp = 200
-		self.u.set_interp_rate(self.usrp_interp)
+		self.u = usrp.sink_c (0, self.usrp_interp)
+		print "USRP Serial: ", self.u.serial_number()
+		self.dac_rate = self.u.dac_rate()					# 128 MS/s
 		self.usrp_rate = self.dac_rate / self.usrp_interp	# 640 kS/s
 		self.sw_interp = 5
 		self.audio_rate = self.usrp_rate / self.sw_interp	# 128 kS/s
@@ -37,15 +36,21 @@ class fm_tx_block(stdgui2.std_top_block):
 			options.tx_subdev_spec = usrp.pick_tx_subdevice(self.u)
 		self.u.set_mux(usrp.determine_tx_mux_value(self.u, options.tx_subdev_spec))
 		self.subdev = usrp.selected_subdev(self.u, options.tx_subdev_spec)
-		print "Using TX d'board %s" % (self.subdev.side_and_name(),)
+		print "Using d'board: ", self.subdev.side_and_name()
 
 		# set max Tx gain, tune frequency and enable transmitter
 		self.subdev.set_gain(self.subdev.gain_range()[1])
-		self.u.tune(self.subdev.which(), self.subdev, options.freq)
+		if self.u.tune(self.subdev.which(), self.subdev, options.freq):
+			print "Tuned to", options.freq/1e6, "MHz"
+		else:
+			sys.exit(1)
 		self.subdev.set_enable(True)
 
 		# open wav file containing floats in the [-1, 1] range, repeat
-		self.src = gr.wavfile_source (options.filename, True)
+		if options.wavfile is None:
+			print "Please provide a wavfile to transmit! Exiting\n"
+			sys.exit(1)
+		self.src = gr.wavfile_source (options.wavfile, True)
 		nchans = self.src.channels()
 		sample_rate = self.src.sample_rate()
 		bits_per_sample = self.src.bits_per_sample()
@@ -63,7 +68,7 @@ class fm_tx_block(stdgui2.std_top_block):
 			self.resample_right == blks2.rational_resampler_fff(16,1)
 		else:
 			print sample_rate, "is an unsupported sample rate"
-			exit()
+			sys.exit(1)
 		self.connect ((self.src, 0), self.resample_left)
 		self.connect ((self.src, 1), self.resample_right)
 

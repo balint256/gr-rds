@@ -49,6 +49,9 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.subdev.set_enable(True)
 
 		# open wav file containing floats in the [-1, 1] range, repeat
+		if options.wavfile is None:
+			print "Please provide a wavfile to transmit! Exiting\n"
+			sys.exit(1)
 		self.src = gr.wavfile_source(options.wavfile, True)
 		nchans = self.src.channels()
 		sample_rate = self.src.sample_rate()
@@ -67,7 +70,7 @@ class rds_tx_block(stdgui2.std_top_block):
 			self.resample_right == blks2.rational_resampler_fff(16,1)
 		else:
 			print sample_rate, "is an unsupported sample rate"
-			exit()
+			sys.exit(1)
 		self.connect ((self.src, 0), self.resample_left)
 		self.connect ((self.src, 1), self.resample_right)
 

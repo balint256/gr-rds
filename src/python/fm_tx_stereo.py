@@ -117,12 +117,11 @@ class fm_tx_block(stdgui2.std_top_block):
 		self.connect (self.audio_lmr_filter, (self.mixer, 2))
 
 		# interpolation & pre-emphasis
-		interp_taps = optfir.low_pass (self.sw_interp,		# gain
-										self.usrp_rate,		# Fs
-										60e3,				# passband cutoff
-										65e3,				# stopband cutoff
-										0.1,				# passband ripple dB
-										40)					# stopband atten dB
+		interp_taps = gr.firdes.low_pass (self.sw_interp,	# gain
+										self.audio_rate,	# Fs
+										60e3,				# cutoff freq
+										5e3,				# transition width
+										gr.firdes.WIN_HAMMING)
 		self.interpolator = gr.interp_fir_filter_fff (self.sw_interp, interp_taps)
 		self.pre_emph = blks2.fm_preemph(self.usrp_rate, tau=75e-6)
 		self.connect (self.mixer, self.interpolator, self.pre_emph)
@@ -135,9 +134,13 @@ class fm_tx_block(stdgui2.std_top_block):
 		self.connect (self.pre_emph, self.modulator, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want
-		pre_mod = fftsink2.fft_sink_f(panel, title="Pre-Modulation",
+#		pre_mod = fftsink2.fft_sink_f(panel, title="Pre-Modulation",
+#			fft_size=512, sample_rate=self.usrp_rate, y_per_div=20, ref_level=20)
+#		self.connect (self.pre_emph, pre_mod)
+#		vbox.Add (pre_mod.win, 1, wx.EXPAND)
+		pre_mod = fftsink2.fft_sink_f(panel, title="Before Interpolation",
 			fft_size=512, sample_rate=self.usrp_rate, y_per_div=20, ref_level=20)
-		self.connect (self.pre_emph, pre_mod)
+		self.connect (self.interpolator, pre_mod)
 		vbox.Add (pre_mod.win, 1, wx.EXPAND)
 
 if __name__ == '__main__':

@@ -30,7 +30,9 @@ The RDS signal is a BPSK-modulated, differentially-coded 1187.5 bits-per-second 
 
 Reference: [http://www.rds.org.uk/rds98/rds_standards.htm]
 
-[[Image(rds_flowgraph.png)]]
+[[Image(rds_rx.png)]]
+
+[[Image(rds_tx.png)]]
 
 == Install And Run ==
 

@@ -74,5 +74,6 @@ int gr_rds_bpsk_mod::general_work (int noutput_items,
 	for (int i = 0; i < noutput_items; i++)
 		out[i] = in[i]?clk[i]:(-1*clk[i]);
 
+	consume_each (noutput_items);
 	return noutput_items;
 }

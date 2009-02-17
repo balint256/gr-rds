@@ -83,7 +83,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.resample_right, (self.audio_lmr, 1))
 
 		# low-pass filter for L+R
-		audio_lpr_taps = gr.firdes.low_pass (0.3,	# gain
+		audio_lpr_taps = gr.firdes.low_pass (0.3,				# gain
 											self.audio_rate,	# sampling rate
 											15e3,				# passband cutoff
 											2e3,				# transition width
@@ -92,7 +92,10 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.audio_lpr, self.audio_lpr_filter)
 
 		# create pilot tone at 19 kHz
-		self.pilot = gr.sig_source_f(self.audio_rate, gr.GR_SIN_WAVE, 19e3, 7e-4)
+		self.pilot = gr.sig_source_f(self.audio_rate,	# sampling freq
+									gr.GR_SIN_WAVE,		# waveform
+									19e3,				# frequency
+									1e-2)				# amplitude
 
 		# create the L-R signal carrier at 38 kHz
 		self.stereo_carrier = gr.multiply_ff()
@@ -101,7 +104,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# upconvert L-R to 23-53 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
-		audio_lmr_taps = gr.firdes.band_pass (3e3,	# gain
+		audio_lmr_taps = gr.firdes.band_pass (3e3,				# gain
 											self.audio_rate,	# sampling rate
 											23e3,				# low cutoff
 											53e3,				# high cuttof

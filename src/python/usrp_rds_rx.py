@@ -18,8 +18,8 @@ class rds_rx_graph (stdgui2.std_top_block):
 						  help="select USRP Rx side A or B (default=A)")
 		parser.add_option("-f", "--freq", type="eng_float", default=89.8e6,
 						  help="set frequency to FREQ", metavar="FREQ")
-		parser.add_option("-g", "--gain", type="eng_float", default=10,
-						  help="set gain in dB (default is 10)")
+		parser.add_option("-g", "--gain", type="eng_float", default=None,
+						  help="set gain in dB")
 		parser.add_option("-s", "--squelch", type="eng_float", default=0,
 						  help="set squelch level (default is 0)")
 		parser.add_option("-V", "--volume", type="eng_float", default=None,
@@ -136,7 +136,8 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# if no gain was specified, use the mid-point in dB
 		if options.gain is None:
 			g = self.subdev.gain_range()
-			options.gain = float(g[0]+g[1])/2
+#			options.gain = float(g[0]+g[1])/2
+			options.gain = g[1]
 
 		if options.volume is None:
 			g = self.volume_range()

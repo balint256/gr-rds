@@ -61,7 +61,7 @@ gr_rds_bpsk_mod::~gr_rds_bpsk_mod (){
 
 
 
-////////////////////////////////////////////////////////////////
+/* in[] is the 1187.5bps data stream, clk[] is the 57kHz carrier */
 int gr_rds_bpsk_mod::general_work (int noutput_items,
 					gr_vector_int &ninput_items,
 					gr_vector_const_void_star &input_items,
@@ -71,9 +71,10 @@ int gr_rds_bpsk_mod::general_work (int noutput_items,
 	const float *clk = (const float *) input_items[1];
 	float *out = (float *) output_items[0];
 
-	for (int i = 0; i < noutput_items; i++)
+	for (int i = 0; i < noutput_items; i++){
 		out[i] = in[i]?clk[i]:(-1*clk[i]);
+		consume_each(1);
+	}
 
-	consume_each (noutput_items);
 	return noutput_items;
 }

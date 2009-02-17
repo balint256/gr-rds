@@ -58,6 +58,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
 		print "Using d'board", self.subdev.side_and_name()
 
+		# channel filter, wfm_rcv_pll
 		chan_filt_coeffs = optfir.low_pass (1,
 											demod_rate,
 											80e3,
@@ -65,21 +66,27 @@ class rds_rx_graph (stdgui2.std_top_block):
 											0.1,
 											60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
-
 		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim)
+		self.connect(self.u, self.chan_filt, self.guts)
 
+		# volume control, audio sink
 		self.volume_control_l = gr.multiply_const_ff(self.vol)
 		self.volume_control_r = gr.multiply_const_ff(self.vol)
-		self.audio_sink = audio.sink(int(audio_rate), \
+		self.audio_sink = audio.sink(int(audio_rate),
 									options.audio_output, False)
+		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
+		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
 
+		# fm filter (low-pass 70kHz)
 		coeffs = gr.firdes.low_pass (50,
 										demod_rate,
 										70e3,
 										10e3,
 										gr.firdes.WIN_HAMMING)
 		self.fm_filter = gr.fir_filter_fff (1, coeffs)
+		self.connect(self.guts.fm_demod, self.fm_filter)
 
+		# pilot channel filter (band-pass, 18-20kHz)
 		pilot_filter_coeffs = gr.firdes_band_pass(1, 
 													demod_rate,
 													18e3,
@@ -87,10 +94,9 @@ class rds_rx_graph (stdgui2.std_top_block):
 													3e3,
 													gr.firdes.WIN_HAMMING)
 		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
+		self.connect(self.fm_filter, self.pilot_filter)
 
-		# Data rate = (3 * 19e3) / 48 = 19e3 / 16
-		self.rds_data_clock = rds.freq_divider(16)
-
+		# RDS channel filter (band-pass, 54-60kHz)
 		rds_filter_coeffs = gr.firdes.band_pass (1,
 													demod_rate,
 													54e3,
@@ -98,34 +104,34 @@ class rds_rx_graph (stdgui2.std_top_block):
 													3e3,
 													gr.firdes.WIN_HAMMING)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
+		self.connect(self.fm_filter, self.rds_filter)
 
+		# create 57kHz subcarrier from 19kHz pilot, downconvert RDS channel
 		self.mixer = gr.multiply_ff()
+		self.connect(self.pilot_filter, (self.mixer, 0))
+		self.connect(self.pilot_filter, (self.mixer, 1))
+		self.connect(self.pilot_filter, (self.mixer, 2))
+		self.connect(self.rds_filter, (self.mixer, 3))
 
+		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass (1,
 													demod_rate,
 													1500,
 													2e3,
 													gr.firdes.WIN_HAMMING)
 		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
+		self.connect(self.mixer, self.rds_bb_filter)
 
+
+		# 1187.5bps = 19kHz/16
+		self.rds_data_clock = rds.freq_divider(16)
+		self.connect(self.pilot_filter, self.rds_data_clock)
+
+		# bpsk_demod, diff_decoder, rds_decoder
 		self.bpsk_demod = rds.bpsk_demod(demod_rate)
-#		self.differential_decoder = rds.diff_decoder()
 		self.differential_decoder = gr.diff_decoder_bb(2)
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)
-		
-		self.connect(self.u, self.chan_filt, self.guts)
-		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
-		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
-		self.connect(self.guts.fm_demod, self.fm_filter)
-		self.connect(self.fm_filter, self.pilot_filter)
-		self.connect(self.fm_filter, self.rds_filter)
-		self.connect(self.pilot_filter, (self.mixer, 0))
-		self.connect(self.pilot_filter, (self.mixer, 1))
-		self.connect(self.pilot_filter, (self.mixer, 2))
-		self.connect(self.rds_filter, (self.mixer, 3))
-		self.connect(self.pilot_filter, self.rds_data_clock)
-		self.connect(self.mixer, self.rds_bb_filter)
 		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
 		self.connect(self.rds_data_clock, (self.bpsk_demod, 1))
 		self.connect(self.bpsk_demod, self.differential_decoder)

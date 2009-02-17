@@ -83,7 +83,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.resample_right, (self.audio_lmr, 1))
 
 		# low-pass filter for L+R
-		audio_lpr_taps = gr.firdes.low_pass (0.3,				# gain
+		audio_lpr_taps = gr.firdes.low_pass (1,				# gain
 											self.audio_rate,	# sampling rate
 											15e3,				# passband cutoff
 											2e3,				# transition width
@@ -95,7 +95,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.pilot = gr.sig_source_f(self.audio_rate,	# sampling freq
 									gr.GR_SIN_WAVE,		# waveform
 									19e3,				# frequency
-									1e-2)				# amplitude
+									3e-2)				# amplitude
 
 		# create the L-R signal carrier at 38 kHz
 		self.stereo_carrier = gr.multiply_ff()
@@ -123,9 +123,8 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# create 57kHz RDS carrier and feed into bpsk_mod
 		self.rds_carrier = gr.multiply_ff()
-		self.connect (self.pilot, (self.rds_carrier, 0))
+		self.connect (self.stereo_carrier, (self.rds_carrier, 0))
 		self.connect (self.pilot, (self.rds_carrier, 1))
-		self.connect (self.pilot, (self.rds_carrier, 2))
 		self.connect (self.rds_carrier, (self.bpsk_mod, 1))
 
 		# RDS band-pass filter
@@ -136,7 +135,8 @@ class rds_tx_block(stdgui2.std_top_block):
 													3e3,
 													gr.firdes.WIN_HAMMING)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
-		self.connect (self.bpsk_mod, self.rds_filter)
+		self.rds_amp = gr.multiply_const_ff(1e4)
+		self.connect (self.bpsk_mod, self.rds_amp, self.rds_filter)
 
 		# mix L+R, pilot, L-R and RDS
 		self.mixer = gr.add_ff()
@@ -153,11 +153,11 @@ class rds_tx_block(stdgui2.std_top_block):
 										0.1,				# passband ripple dB
 										40)					# stopband atten dB
 		self.interpolator = gr.interp_fir_filter_fff (self.sw_interp, interp_taps)
-		self.pre_emph = blks2.fm_preemph(self.usrp_rate, tau=75e-6)
+		self.pre_emph = blks2.fm_preemph(self.usrp_rate, tau=50e-6)
 		self.connect (self.mixer, self.interpolator, self.pre_emph)
 
 		# fm modulation, gain & TX
-		max_dev = 100e3
+		max_dev = 120e3
 		k = 2 * math.pi * max_dev / self.usrp_rate		# modulator sensitivity
 		self.modulator = gr.frequency_modulator_fc (k)
 		self.gain = gr.multiply_const_cc (1e3)
@@ -166,7 +166,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		# plot an FFT to verify we are sending what we want
 		pre_mod = fftsink2.fft_sink_f(panel, title="Pre-Modulation",
 			fft_size=512, sample_rate=self.usrp_rate, y_per_div=20, ref_level=20)
-		self.connect (self.pre_emph, pre_mod)
+		self.connect (self.interpolator, pre_mod)
 		vbox.Add (pre_mod.win, 1, wx.EXPAND)
 
 if __name__ == '__main__':

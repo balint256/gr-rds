@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, optfir, blks2
+from gnuradio import gr, usrp, blks2
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import stdgui2, fftsink2
 from optparse import OptionParser

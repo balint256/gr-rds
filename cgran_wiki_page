@@ -36,13 +36,11 @@ Reference: [http://www.rds.org.uk/rds98/rds_standards.htm]
 
 These instructions have been verified to work on recent versions of Ubuntu Linux:
    * {{{svn co https://www.cgran.org/svn/projects/radio_data_system/trunk/ gr-rds}}}
-   * {{{./bootstrap}}}
-   * {{{./configure --with-boost-include-dir=<path to your libboost include directory>}}}, (e.g. /opt/boost_1_36_0/include/boost-1_36)
+   * {{{./configure}}}
    * {{{make}}}
-   * {{{make check}}}
    * {{{sudo make install}}}
 
-Then run the python script src/python/usrp_rds_scope_pll.py
+Then run the python script {{{python src/python/usrp_rds_rx.py}}} to receive, or {{{python src/python/usrp_rds_tx.py --wavfile <wavfile.wav>}}} to transmit.
 
 == News ==
 ||12.02.2009|| - transform_char was equivalent to ASCII, so it was removed[[BR]] - Minor fixes to AF calculations[[BR]] - rds_data_encoder now creates group0||
@@ -58,6 +56,4 @@ Then run the python script src/python/usrp_rds_scope_pll.py
 == To Do ==
    * Complete TMC implementation
    * Add scanning for stations
-   * Add qa code
-   * Fix the rx-block separation
    * Fix too common "lost sync"

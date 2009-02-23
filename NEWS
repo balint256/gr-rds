@@ -1,3 +1,8 @@
+23.02.2009
+- corrected the pre-emphasis time constant: 50μsec for EU, 75μsec for US
+- added highpass filter for 38kHz stereo carrier (remove 0Hz tone)
+- added lowpass filter for 1187.5bps RDS data clock
+
 12.02.2009
 - transform_char was equivalent to ASCII, so it was removed
 - Minor fixes to AF calculations

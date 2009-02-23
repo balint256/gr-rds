@@ -86,12 +86,12 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.fm_filter = gr.fir_filter_fff (1, coeffs)
 		self.connect(self.guts.fm_demod, self.fm_filter)
 
-		# pilot channel filter (band-pass, 18-20kHz)
-		pilot_filter_coeffs = gr.firdes_band_pass(1, 
+		# pilot channel filter (band-pass, 18.5-19.5kHz)
+		pilot_filter_coeffs = gr.firdes.band_pass(1, 
 													demod_rate,
-													18e3,
-													20e3,
-													3e3,
+													18.5e3,
+													19.5e3,
+													1e3,
 													gr.firdes.WIN_HAMMING)
 		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
 		self.connect(self.fm_filter, self.pilot_filter)
@@ -125,7 +125,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# 1187.5bps = 19kHz/16
 		self.rds_data_clock = rds.freq_divider(16)
-		self.connect(self.pilot_filter, self.rds_data_clock)
+		data_clock_taps = gr.firdes.low_pass (1,			# gain
+											demod_rate,		# sampling rate
+											1.2e3,			# passband cutoff
+											1.5e3,			# transition width
+											gr.firdes.WIN_HANN)
+		self.data_clock_filter = gr.fir_filter_fff (1, data_clock_taps)
+		self.connect(self.pilot_filter, self.rds_data_clock,
+						self.data_clock_filter)
 
 		# bpsk_demod, diff_decoder, rds_decoder
 		self.bpsk_demod = rds.bpsk_demod(demod_rate)
@@ -133,7 +140,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)
 		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
-		self.connect(self.rds_data_clock, (self.bpsk_demod, 1))
+		self.connect(self.data_clock_filter, (self.bpsk_demod, 1))
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 

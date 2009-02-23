@@ -274,6 +274,7 @@ int gr_rds_data_encoder::work (int noutput_items,
 	const float *clk = (const float *) input_items[0];
 	bool *out = (bool *) output_items[0];
 	int clock_sign=0;
+	int a=0, b=0;
 
 /* clk should be 1187.5Hz, independent of the sample rate
  * every 2 zero-crossings, we change the output to the next buffer bit
@@ -287,7 +288,10 @@ int gr_rds_data_encoder::work (int noutput_items,
 			d_zc_counter=0;
 		}
 		if(d_buffer_bit_counter==104) d_buffer_bit_counter=0;
-		out[i]=(buffer[d_buffer_bit_counter/8]>>(d_buffer_bit_counter%8))&0x1;
+		a=floor(d_buffer_bit_counter/8);
+		b=d_buffer_bit_counter%8;
+		out[i]=(buffer[a]>>b)&0x1;
+		consume_each(1);
 	}
 
 	return noutput_items;

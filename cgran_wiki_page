@@ -6,7 +6,7 @@ __Project Root__: [browser:/projects/radio_data_system]
 
 __GNU Radio Compatibility__: 
   * Release: v3.1.3,
-  * Subversion: 10402
+  * Subversion: 10479
 
 __Quick Links__:
   * [wiki:RDS#Credits Credits]
@@ -45,6 +45,8 @@ These instructions have been verified to work on recent versions of Ubuntu Linux
 Then run the python script {{{python src/python/usrp_rds_rx.py}}} to receive, or {{{python src/python/usrp_rds_tx.py --wavfile <wavfile.wav>}}} to transmit.
 
 == News ==
+||27.02.2009|| - changed rds_data_encoder output from bool to char[[BR]] - changed the way the 1187.5bps rate is achieved[[BR]] - replaced bpsk_mod with gr.chunks_to_symbols[1, -1] (NRZ) and a multiplier[[BR]] - removed the diff_decoder, diff_encoder & bpsk_mod blocks[[BR]] - removed omnithread dependency||
+||23.02.2009|| - corrected the pre-emphasis time constant: 50μsec for EU, 75μsec for US[[BR]] - added highpass filter for 38kHz stereo carrier (remove 0Hz tone)[[BR]] - added lowpass filter for 1187.5bps RDS data clock||
 ||12.02.2009|| - transform_char was equivalent to ASCII, so it was removed[[BR]] - Minor fixes to AF calculations[[BR]] - rds_data_encoder now creates group0||
 ||07.02.2009|| - Added assignment of xml values to variables. Next step: CRC32||
 ||06.02.2009|| - Added rds_data_encoder, so far it only parses an XML file||

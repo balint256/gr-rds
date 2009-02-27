@@ -3,6 +3,7 @@
 - changed the way the 1187.5bps rate is achieved
 - replaced bpsk_mod with gr.chunks_to_symbols[1, -1] (NRZ) and a multiplier
 - removed the diff_decoder, diff_encoder & bpsk_mod blocks
+- removed omnithread dependency
 
 23.02.2009
 - corrected the pre-emphasis time constant: 50μsec for EU, 75μsec for US

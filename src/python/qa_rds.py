@@ -30,29 +30,7 @@ class qa_rds (gr_unittest.TestCase):
 	def tearDown (self):
 		self.fg = None
 
-	def test_001_diff_encoder (self):
-		src_data = 			(0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1)
-		expected_result = 	(0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0)
-		src = gr.vector_source_b (src_data)
-		dut = rds.diff_encoder ()
-		dst = gr.vector_sink_b ()
-		self.fg.connect (src, dut, dst)
-		self.fg.run ()
-		result_data = dst.data()
-		self.assertEqual (expected_result, result_data)
-
-	def test_002_diff_decoder (self):
-		src_data = 			(0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0)
-		expected_result = 	(0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1)
-		src = gr.vector_source_b (src_data)
-		dut = rds.diff_decoder ()
-		dst = gr.vector_sink_b ()
-		self.fg.connect (src, dut, dst)
-		self.fg.run ()
-		result_data = dst.data()
-		self.assertEqual (expected_result, result_data)
-
-	def test_003_freq_divider (self):
+	def test_001_freq_divider (self):
 		src_data = 			(-1, 1, -1,  1, -1, 1, -1,  1, -1, 1, -1,  1, -1, 1)
 		expected_result = 	(1,  1, -1, -1,  1, 1, -1, -1,  1, 1, -1, -1,  1, 1)
 		src = gr.vector_source_f (src_data)

@@ -48,7 +48,8 @@ class gr_rds_data_encoder;
  * As a convention, the _sptr suffix indicates a boost::shared_ptr
  */
 typedef boost::shared_ptr<gr_rds_data_encoder> gr_rds_data_encoder_sptr;
-gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
+gr_rds_data_encoder_sptr 
+gr_rds_make_data_encoder (const char *xmlfile);
 
 
 class gr_rds_data_encoder : public gr_sync_block
@@ -72,13 +73,10 @@ private:
 	char radiotext[65];
 	bool radiotext_AB_flag;
 	int g0_counter;
-	int d_last_clock_sign;
-	int d_zc_counter;
-	int d_buffer_bit_counter;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
-	gr_rds_data_encoder (const char *xmlfile);		// private constructor
+	gr_rds_data_encoder (const char *xmlfile);	// private constructor
 	int read_xml(const char *xmlfile);
 	void print_element_names(xmlNode * a_node);
 	void assign_from_xml(const char *field, const char *value, const int length);

@@ -39,8 +39,8 @@ gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 
 gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
   : gr_sync_block ("gr_rds_data_encoder",
-			gr_make_io_signature (1, 1, sizeof(float)),
-			gr_make_io_signature (1, 1, sizeof(bool)))
+			gr_make_io_signature (0, 0, 0),
+			gr_make_io_signature (1, 8, sizeof(char)))
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
@@ -59,9 +59,6 @@ void gr_rds_data_encoder::reset_rds_data(){
 	for(i=0; i<4; i++) {group[i]=0; checkword[i]=0;}
 	for(i=0; i<13; i++) buffer[i]=0;
 	g0_counter=0;
-	d_last_clock_sign=0;
-	d_zc_counter=0;
-	d_buffer_bit_counter=0;
 
 	PI=0;
 	TP=false;
@@ -271,27 +268,18 @@ int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
-	const float *clk = (const float *) input_items[0];
-	bool *out = (bool *) output_items[0];
-	int clock_sign=0;
+	char *out = (char *) output_items[0];
 	int a=0, b=0;
+	static int d_buffer_bit_counter=0;
 
-/* clk should be 1187.5Hz, independent of the sample rate
- * every 2 zero-crossings, we change the output to the next buffer bit
- * FIXME make this output >1 groups */
-	if(d_last_clock_sign==0) d_last_clock_sign=clk[0]>0?1:-1;
+/* FIXME make this output >1 groups */
 	for (int i = 0; i < noutput_items; i++){
-		clock_sign=clk[0]>0?1:-1;
-		if(clock_sign!=d_last_clock_sign) d_zc_counter++;
-		if(d_zc_counter==2){
-			d_buffer_bit_counter++;
-			d_zc_counter=0;
-		}
-		if(d_buffer_bit_counter==104) d_buffer_bit_counter=0;
+		d_buffer_bit_counter++;
+		if(d_buffer_bit_counter>103) d_buffer_bit_counter=0;
 		a=floor(d_buffer_bit_counter/8);
 		b=d_buffer_bit_counter%8;
 		out[i]=(buffer[a]>>b)&0x1;
-		consume_each(1);
+//		printf("out[%i]=%i ", d_buffer_bit_counter, (int)out[i]);
 	}
 
 	return noutput_items;

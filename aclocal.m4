@@ -8978,11 +8978,9 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
-m4_include([config/acx_pthread.m4])
 m4_include([config/gr_boost.m4])
 m4_include([config/gr_gprof.m4])
 m4_include([config/gr_no_undefined.m4])
-m4_include([config/gr_omnithread.m4])
 m4_include([config/gr_pwin32.m4])
 m4_include([config/gr_python.m4])
 m4_include([config/gr_scripting.m4])

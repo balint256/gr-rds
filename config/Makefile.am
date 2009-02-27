@@ -38,7 +38,6 @@ m4macros = 			\
 	gr_gprof.m4		\
 	gr_libgnuradio_core_extra_ldflags.m4 \
 	gr_no_undefined.m4	\
-	gr_omnithread.m4	\
 	gr_pwin32.m4		\
 	gr_python.m4		\
 	gr_require_mc4020.m4	\

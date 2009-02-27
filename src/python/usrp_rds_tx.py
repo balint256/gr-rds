@@ -89,7 +89,8 @@ class rds_tx_block(stdgui2.std_top_block):
 											2e3,				# transition width
 											gr.firdes.WIN_HANN)
 		self.audio_lpr_filter = gr.fir_filter_fff (1, audio_lpr_taps)
-		self.connect (self.audio_lpr, self.audio_lpr_filter)
+		self.preemph_lpr = blks2.fm_preemph(self.audio_rate, tau=50e-6)
+		self.connect (self.audio_lpr, self.audio_lpr_filter, self.preemph_lpr)
 
 		# create pilot tone at 19 kHz
 		self.pilot = gr.sig_source_f(self.audio_rate,	# sampling freq
@@ -118,9 +119,10 @@ class rds_tx_block(stdgui2.std_top_block):
 											2e3,				# transition width
 											gr.firdes.WIN_HANN)
 		self.audio_lmr_filter = gr.fir_filter_fff (1, audio_lmr_taps)
+		self.preemph_lmr = blks2.fm_preemph(self.audio_rate, tau=50e-6)
 		self.connect (self.audio_lmr, (self.mix_stereo, 0))
 		self.connect (self.stereo_carrier_filter, (self.mix_stereo, 1))
-		self.connect (self.mix_stereo, self.audio_lmr_filter)
+		self.connect (self.mix_stereo, self.audio_lmr_filter, self.preemph_lmr)
 
 		# rds_encoder, diff_encoder
 		self.rds_encoder = rds.data_encoder('rds_data.xml')
@@ -169,9 +171,9 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# mix L+R, pilot, L-R and RDS
 		self.mixer = gr.add_ff()
-		self.connect (self.audio_lpr_filter, (self.mixer, 0))
+		self.connect (self.preemph_lpr, (self.mixer, 0))
 		self.connect (self.pilot, (self.mixer, 1))
-		self.connect (self.audio_lmr_filter, (self.mixer, 2))
+		self.connect (self.preemph_lmr, (self.mixer, 2))
 		self.connect (self.rds_filter, (self.mixer, 3))
 
 		# interpolation, channel filter & pre-emphasis
@@ -188,15 +190,14 @@ class rds_tx_block(stdgui2.std_top_block):
 											5e3,				# transition width
 											gr.firdes.WIN_HANN)
 		self.channel_filter = gr.fir_filter_fff (1, channel_taps)
-		self.pre_emph = blks2.fm_preemph(self.usrp_rate, tau=50e-6)
-		self.connect (self.mixer, self.interpolator, self.channel_filter, self.pre_emph)
+		self.connect (self.mixer, self.interpolator, self.channel_filter)
 
 		# fm modulation, gain & TX
 		max_dev = 120e3
 		k = 2 * math.pi * max_dev / self.usrp_rate		# modulator sensitivity
 		self.modulator = gr.frequency_modulator_fc (k)
 		self.gain = gr.multiply_const_cc (1e3)
-		self.connect (self.pre_emph, self.modulator, self.gain, self.u)
+		self.connect (self.channel_filter, self.modulator, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want
 		if 1:

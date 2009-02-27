@@ -361,7 +361,7 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
 // concatenate into a string, print and send message
 	for (int i=0; i<32; i++) clocktime_string[i]=' ';
 	clocktime_string[32]='\0';
-	sprintf(clocktime_string, "%2i.%2i.%4i, %2i:%2i (%c%i)", (int)day_of_month, month, 
+	sprintf(clocktime_string, "%02i.%02i.%4i, %2i:%2i (%c%i)", (int)day_of_month, month, 
 		(1900+year), hours, minutes, (local_time_offset>=0?'+':'-'), local_time_offset);
 	std::cout << "Clocktime - " << clocktime_string << std::endl;
 	send_message(5,clocktime_string);

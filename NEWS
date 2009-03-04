@@ -1,3 +1,10 @@
+04.03.2009
+- upgraded and tested for python2.6
+- simplified usrp_rds_tx.py
+- added emph tau param to blks2.wfm_rcv_pll in usrp_rds_rx.py
+- fixed rds_tx.png
+- updated TODO
+
 27.02.2009
 - changed rds_data_encoder output from bool to char
 - changed the way the 1187.5bps rate is achieved

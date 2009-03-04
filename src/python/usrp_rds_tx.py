@@ -124,12 +124,14 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.stereo_carrier_filter, (self.mix_stereo, 1))
 		self.connect (self.mix_stereo, self.audio_lmr_filter, self.preemph_lmr)
 
-		# rds_encoder, diff_encoder
+		# rds_encoder, diff_encoder, NRZ
 		self.rds_encoder = rds.data_encoder('rds_data.xml')
 		self.diff_encoder = gr.diff_encoder_bb(2)
-		# NRZ (equivalent to BPSK)
 		self.c2s = gr.chunks_to_symbols_bf([1, -1])
-		# resample from 1187.5Hz (=19e3/16) to self.audio_rate
+		self.connect (self.rds_encoder, self.diff_encoder, self.c2s)
+
+		# resample from 1187.5Hz (=19e3/16) to self.audio_rate,
+		# band-pass to remove harmonics
 		self.resample = blks2.rational_resampler_fff(int(self.audio_rate*16/1e3), 19)
 		rds_data_taps = gr.firdes.band_pass (1,					# gain
 											self.audio_rate,	# sampling rate
@@ -138,36 +140,25 @@ class rds_tx_block(stdgui2.std_top_block):
 											2e2,				# transition width
 											gr.firdes.WIN_HANN)
 		self.rds_data_filter = gr.fir_filter_fff (1, rds_data_taps)
-		self.bpsk_mod = gr.multiply_ff()
-		self.connect(self.rds_encoder, self.diff_encoder, self.c2s)
-		self.connect(self.c2s, self.resample, self.rds_data_filter, (self.bpsk_mod, 0))
+		self.connect (self.c2s, self.resample, self.rds_data_filter)
 
-		# create 57kHz RDS carrier, high-pass to remove 0Hz tone,
-		# and feed into bpsk_mod
-		self.rds_carrier = gr.multiply_ff()
-		self.connect (self.pilot, (self.rds_carrier, 0))
-		self.connect (self.pilot, (self.rds_carrier, 1))
-		self.connect (self.pilot, (self.rds_carrier, 2))
-		rds_carrier_taps = gr.firdes.high_pass (
-											1e2,				# gain
-											self.audio_rate,	# sampling rate
-											5e4,				# cutoff freq
-											5e3,				# transition width
-											gr.firdes.WIN_HANN)
-		self.rds_carrier_filter = gr.fir_filter_fff(1, rds_carrier_taps)
-		self.connect (self.rds_carrier, self.rds_carrier_filter, (self.bpsk_mod, 1))
+		# mutliply NRZ with 57kHz RDS carrier (equivalent to BPSK)
+		self.bpsk_mod = gr.multiply_ff()
+		self.connect (self.rds_data_filter, (self.bpsk_mod, 0))
+		self.connect (self.pilot, (self.bpsk_mod, 1))
+		self.connect (self.pilot, (self.bpsk_mod, 2))
+		self.connect (self.pilot, (self.bpsk_mod, 3))
 
 		# RDS band-pass filter
-		rds_filter_coeffs = gr.firdes.band_pass (
-											1,					# gain
+		rds_filter_taps = gr.firdes.band_pass (
+											1e4,				# gain
 											self.audio_rate,	# sampling rate
-											54e3,				# low cutoff
-											60e3,				# high cutoff
+											55e3,				# low cutoff
+											59e3,				# high cutoff
 											3e3,				# transition width
 											gr.firdes.WIN_HANN)
-		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
-		self.rds_amp = gr.multiply_const_ff(1e2)
-		self.connect (self.bpsk_mod, self.rds_amp, self.rds_filter)
+		self.rds_filter = gr.fir_filter_fff (1, rds_filter_taps)
+		self.connect (self.bpsk_mod, self.rds_filter)
 
 		# mix L+R, pilot, L-R and RDS
 		self.mixer = gr.add_ff()
@@ -200,12 +191,12 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.channel_filter, self.modulator, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want
-		if 1:
+		if 0:
 			self.fft = fftsink2.fft_sink_f(panel, title="After Interpolation",
 				fft_size=512, sample_rate=self.usrp_rate, y_per_div=30, ref_level=0)
 			self.connect (self.channel_filter, self.fft)
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
-		if 0:
+		if 1:
 			self.fft = fftsink2.fft_sink_f(panel, title="Before Interpolation",
 				fft_size=512, sample_rate=self.audio_rate, y_per_div=20, ref_level=0)
 			self.connect (self.mixer, self.fft)

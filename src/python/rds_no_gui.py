@@ -10,7 +10,7 @@ class rds_rx_graph (gr.top_block):
 
 ####################
 		vol = .5
-		freq = 89.8e6
+		freq = 92.4e6
 		usrp_decim = 250
 		audio_decim = 8
 ####################
@@ -52,7 +52,7 @@ class rds_rx_graph (gr.top_block):
 											gr.firdes.WIN_HAMMING)
 		self.audio_filter = gr.fir_filter_fff (audio_decim, audio_coeffs)
 
-		self.deemph = blks2.fm_deemph (demod_rate)
+		self.deemph = blks2.fm_deemph (demod_rate, 50e-6)
 
 		self.volume_control = gr.multiply_const_ff(vol)
 		self.audio_sink = audio.sink(int(audio_rate), 'plughw:0,0', False)
@@ -63,8 +63,6 @@ class rds_rx_graph (gr.top_block):
 										10e3,
 										gr.firdes.WIN_HAMMING)
 		self.fm_filter = gr.fir_filter_fff (1, coeffs)
-
-
 
 		pilot_filter_coeffs = gr.firdes_band_pass(1, 
 													demod_rate,

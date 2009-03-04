@@ -16,7 +16,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		parser=OptionParser(option_class=eng_option)
 		parser.add_option("-R", "--rx-subdev-spec", type="subdev", default=None,
 						  help="select USRP Rx side A or B (default=A)")
-		parser.add_option("-f", "--freq", type="eng_float", default=89.8e6,
+		parser.add_option("-f", "--freq", type="eng_float", default=92.4e6,
 						  help="set frequency to FREQ", metavar="FREQ")
 		parser.add_option("-g", "--gain", type="eng_float", default=None,
 						  help="set gain in dB")
@@ -66,7 +66,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 											0.1,
 											60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
-		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim)
+		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim, 50e-6)
 		self.connect(self.u, self.chan_filt, self.guts)
 
 		# volume control, audio sink
@@ -125,6 +125,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# 1187.5bps = 19kHz/16
 		self.rds_data_clock = rds.freq_divider(16)
+		#self.rds_data_clock = gr.fractional_interpolator_ff(0, 1/16.)
 		data_clock_taps = gr.firdes.low_pass (1,			# gain
 											demod_rate,		# sampling rate
 											1.2e3,			# passband cutoff

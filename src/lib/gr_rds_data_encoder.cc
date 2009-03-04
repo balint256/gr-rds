@@ -58,7 +58,8 @@ void gr_rds_data_encoder::reset_rds_data(){
 	int i=0;
 	for(i=0; i<4; i++) {group[i]=0; checkword[i]=0;}
 	for(i=0; i<13; i++) buffer[i]=0;
-	g0_counter=0;
+	d_g0_counter=0;
+	d_buffer_bit_counter=0;
 
 	PI=0;
 	TP=false;
@@ -222,13 +223,13 @@ void gr_rds_data_encoder::create_groups(const int group_type, const bool AB){
 	if(group_type==0){
 		group[1]=group[1]|(TA<<4)|(MuSp<<3);
 /* d0=1 (stereo), d1-3=0 */
-		if(g0_counter==3) group[1]=group[1]|0x5;
-		group[1]=group[1]|(g0_counter&0x3);
+		if(d_g0_counter==3) group[1]=group[1]|0x5;
+		group[1]=group[1]|(d_g0_counter&0x3);
 		if(!AB)
 			group[2]=((encode_af(AF1)&0xff)<<8)|(encode_af(AF2)&0xff);
 		else
 			group[2]=PI;
-		group[3]=(PS[2*g0_counter]<<8)|PS[2*g0_counter+1];
+		group[3]=(PS[2*d_g0_counter]<<8)|PS[2*d_g0_counter+1];
 	}
 	printf("data: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
 
@@ -259,7 +260,7 @@ void gr_rds_data_encoder::create_groups(const int group_type, const bool AB){
 	printf("buffer: ");
 	for(i=0;i<13;i++) printf("%X ", buffer[i]&0xff);
 	printf("\n");
-	if(++g0_counter>3) g0_counter=0;
+	if(++d_g0_counter>3) d_g0_counter=0;
 }
 
 /* the plan for now is to do group0 (basic), group2 (radiotext),
@@ -270,7 +271,6 @@ int gr_rds_data_encoder::work (int noutput_items,
 {
 	char *out = (char *) output_items[0];
 	int a=0, b=0;
-	static int d_buffer_bit_counter=0;
 
 /* FIXME make this output >1 groups */
 	for (int i = 0; i < noutput_items; i++){

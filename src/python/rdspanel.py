@@ -60,7 +60,7 @@ class rdsPanel(wx.Panel):
 		self.compressed_flag = wx.StaticText(self, -1, "CMP")
 		self.staticpty_flag = wx.StaticText(self, -1, "stPTY")
 		self.radiotext = wx.StaticText(self, -1, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-		self.clocktime = wx.StaticText(self, -1, "xxxxxxxxxx")
+		self.clocktime = wx.StaticText(self, -1, "xxxxxxxxxxxxxxxxxxxxx")
 		self.alt_freq = wx.StaticText(self, -1, "xxxxxxxxxx")
 
 		self.__set_properties()
@@ -123,19 +123,19 @@ class rdsPanel(wx.Panel):
 		sizer_1.Add(grid_sizer_2, 1, wx.EXPAND, 0)
 
 		grid_sizer_3.Add(self.label_5, 0, 
-			wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+			wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		grid_sizer_3.Add(self.radiotext, 0, 
-			wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+			wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		sizer_1.Add(grid_sizer_3, 1, wx.EXPAND, 0)
 
 		grid_sizer_4.Add(self.label_6, 0, 
-			wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+			wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		grid_sizer_4.Add(self.clocktime, 0, 
-			wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+			wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		grid_sizer_4.Add(self.label_7, 0, 
-			wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+			wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		grid_sizer_4.Add(self.alt_freq, 0, 
-			wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
+			wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE, 0)
 		sizer_1.Add(grid_sizer_4, 1, wx.EXPAND, 0)
 
 		self.SetAutoLayout(True)
@@ -189,22 +189,23 @@ class rdsPanel(wx.Panel):
 			self.radiotext.SetLabel(message.to_string())
 		elif (message.type()==5):	#clocktime
 			self.clocktime.SetLabel(message.to_string())
-#		elif (message.type()==6):	#alternative frequencies
-#			self.alt_freq.SetLabel(message.to_string())
-		elif (message.type()==9):	#lost sync - reset
-			self.program_information.SetLabel("xxxx")
-			self.station_name.SetLabel("xxxxxxxx")
-			self.program_type.SetLabel("xxxxx")
-			self.ta_flag.SetForegroundColour(wx.BLACK)
-			self.tp_flag.SetForegroundColour(wx.BLACK)
-			self.musicspeech_flag.SetLabel("MUS/SPE")
-			self.musicspeech_flag.SetForegroundColour(wx.BLACK)
-			self.monostereo_flag.SetLabel("MN/ST")
-			self.monostereo_flag.SetForegroundColour(wx.BLACK)
-			self.artificialhead_flag.SetForegroundColour(wx.BLACK)
-			self.compressed_flag.SetForegroundColour(wx.BLACK)
-			self.staticpty_flag.SetForegroundColour(wx.BLACK)
-			self.radiotext.SetLabel("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-			self.clocktime.SetLabel("xxxxxxxxxxxx")
-			self.alt_freq.SetLabel("xxxxxxxxxxxx")
+		elif (message.type()==6):	#alternative frequencies
+			self.alt_freq.SetLabel(message.to_string())
+
+	def clear_data(self):
+		self.program_information.SetLabel("xxxx")
+		self.station_name.SetLabel("xxxxxxxx")
+		self.program_type.SetLabel("xxxxx")
+		self.ta_flag.SetForegroundColour(wx.BLACK)
+		self.tp_flag.SetForegroundColour(wx.BLACK)
+		self.musicspeech_flag.SetLabel("MUS/SPE")
+		self.musicspeech_flag.SetForegroundColour(wx.BLACK)
+		self.monostereo_flag.SetLabel("MN/ST")
+		self.monostereo_flag.SetForegroundColour(wx.BLACK)
+		self.artificialhead_flag.SetForegroundColour(wx.BLACK)
+		self.compressed_flag.SetForegroundColour(wx.BLACK)
+		self.staticpty_flag.SetForegroundColour(wx.BLACK)
+		self.radiotext.SetLabel("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+		self.clocktime.SetLabel("xxxxxxxxxxxx")
+		self.alt_freq.SetLabel("xxxxxxxxxxxx")
 # end of class rdsPanel

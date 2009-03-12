@@ -112,7 +112,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# upconvert L-R to 23-53 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
-		audio_lmr_taps = gr.firdes.band_pass (1e3,				# gain
+		audio_lmr_taps = gr.firdes.band_pass (1e2,				# gain
 											self.audio_rate,	# sampling rate
 											23e3,				# low cutoff
 											53e3,				# high cutoff
@@ -151,7 +151,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# RDS band-pass filter
 		rds_filter_taps = gr.firdes.band_pass (
-											1e4,				# gain
+											1e5,				# gain
 											self.audio_rate,	# sampling rate
 											55e3,				# low cutoff
 											59e3,				# high cutoff
@@ -168,37 +168,30 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.rds_filter, (self.mixer, 3))
 
 		# interpolation, channel filter & pre-emphasis
-		interp_taps = optfir.low_pass (self.sw_interp,		# gain
+		interp_taps = gr.firdes.low_pass (self.sw_interp,		# gain
 										self.usrp_rate,		# Fs
 										60e3,				# passband cutoff
-										65e3,				# stopband cutoff
-										0.1,				# passband ripple dB
-										40)					# stopband atten dB
+										5e3,				# stopband cutoff
+										gr.firdes.WIN_HAMMING)
 		self.interpolator = gr.interp_fir_filter_fff (self.sw_interp, interp_taps)
-		channel_taps = gr.firdes.low_pass (1,					# gain
-											self.usrp_rate,		# sampling rate
-											60e3,				# passband cutoff
-											5e3,				# transition width
-											gr.firdes.WIN_HANN)
-		self.channel_filter = gr.fir_filter_fff (1, channel_taps)
-		self.connect (self.mixer, self.interpolator, self.channel_filter)
+		self.connect (self.mixer, self.interpolator)
 
 		# fm modulation, gain & TX
 		max_dev = 120e3
 		k = 2 * math.pi * max_dev / self.usrp_rate		# modulator sensitivity
 		self.modulator = gr.frequency_modulator_fc (k)
 		self.gain = gr.multiply_const_cc (1e3)
-		self.connect (self.channel_filter, self.modulator, self.gain, self.u)
+		self.connect (self.interpolator, self.modulator, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want
 		if 0:
 			self.fft = fftsink2.fft_sink_f(panel, title="After Interpolation",
-				fft_size=512, sample_rate=self.usrp_rate, y_per_div=30, ref_level=0)
-			self.connect (self.channel_filter, self.fft)
+				fft_size=512, sample_rate=self.usrp_rate, y_per_div=30, ref_level=20)
+			self.connect (self.interpolator, self.fft)
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
 		if 1:
 			self.fft = fftsink2.fft_sink_f(panel, title="Before Interpolation",
-				fft_size=512, sample_rate=self.audio_rate, y_per_div=20, ref_level=0)
+				fft_size=512, sample_rate=self.audio_rate, y_per_div=20, ref_level=20)
 			self.connect (self.mixer, self.fft)
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
 		if 0:

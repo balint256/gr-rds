@@ -1,3 +1,8 @@
+12.03.2009
+- fixed interpolating filter in usrp_rds_tx
+- some tuning attempts in usrp_rds_rx
+- reset rdspanel fields now only when re-tuning
+
 04.03.2009
 - upgraded and tested for python2.6
 - simplified usrp_rds_tx.py

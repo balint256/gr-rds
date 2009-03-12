@@ -6,7 +6,7 @@ from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2
 from optparse import OptionParser
 from rdspanel import rdsPanel
 from usrpm import usrp_dbid
-import sys, math, wx
+import sys, math, wx, time
 
 
 class rds_rx_graph (stdgui2.std_top_block):
@@ -145,6 +145,10 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
+#		# used to detect stations
+#		self.dst = gr.vector_sink_f()
+#		self.connect(self.pilot_filter, self.dst)
+
 		self._build_gui(vbox, demod_rate, audio_rate)
 
 		# if no gain was specified, use the mid-point in dB
@@ -187,53 +191,61 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
-		if 1:
+		if 0:
 			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=demod_rate, y_per_div=10, ref_level=0)
 			self.connect (self.guts.fm_demod, post_fm_demod_fft)
 			vbox.Add (post_fm_demod_fft.win, 4, wx.EXPAND)
 
 		if 0:
-			rds_fft1 = fftsink2.fft_sink_f (self.panel, title="RDS baseband",
+			rds_fft = fftsink2.fft_sink_f (self.panel, title="RDS baseband",
 				fft_size=512, sample_rate=demod_rate, y_per_div=20, ref_level=20)
-			self.connect (self.rds_bb_filter, rds_fft1)
-			vbox.Add (rds_fft1.win, 4, wx.EXPAND)
+			self.connect (self.rds_data_clock, rds_fft)
+			vbox.Add (rds_fft.win, 4, wx.EXPAND)
 
 		if 0:
 			rds_scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
 				sample_rate=demod_rate,num_inputs=2)
 			self.connect (self.rds_bb_filter, (rds_scope,1))
-			self.connect (self.data_clock, (rds_scope,0))
+			self.connect (self.rds_data_clock, (rds_scope,0))
 			vbox.Add(rds_scope.win, 4, wx.EXPAND)
 
 		self.rdspanel = rdsPanel(self.msgq, self.panel)
 		vbox.Add(self.rdspanel, 4, wx.EXPAND)
 
 		# control area form at bottom
-		self.myform = myform = form.form()
+		self.myform = form.form()
 
+		# 1st line
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
+		self.myform.btn_down = wx.Button(self.panel, -1, "<<")
+		self.myform.btn_down.Bind(wx.EVT_BUTTON, self.Seek_Down)
+		hbox.Add(self.myform.btn_down, 0)
+		self.myform['freq'] = form.float_field(
+			parent=self.panel, sizer=hbox, label="Freq", weight=1,
+			callback=self.myform.check_input_and_call(_form_set_freq, self._set_status_msg))
 		hbox.Add((5,0), 0)
-		myform['freq'] = form.float_field(parent=self.panel, sizer=hbox, label="Freq", 
-			weight=1, callback=myform.check_input_and_call(_form_set_freq, self._set_status_msg))
-
-		hbox.Add((5,0), 0)
-		myform['freq_slider'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
-			weight=3, range=(87.5e6, 108e6, 0.1e6), callback=self.set_freq)
+#		myform.freq_field = wx.TextCtrl(self.panel, name="freq")
+#		hbox.Add(myform.freq_field, 0)
+		self.myform.btn_up = wx.Button(self.panel, -1, ">>")
+		self.myform.btn_up.Bind(wx.EVT_BUTTON, self.Seek_Up)
+		hbox.Add(self.myform.btn_up, 0)
+		self.myform['freq_slider'] = form.quantized_slider_field(
+			parent=self.panel, sizer=hbox, weight=3,
+			range=(87.5e6, 108e6, 0.1e6), callback=self.set_freq)
 		hbox.Add((5,0), 0)
 		vbox.Add(hbox, 0, wx.EXPAND)
 
+
+		# 2nd line
 		hbox = wx.BoxSizer(wx.HORIZONTAL)
 		hbox.Add((5,0), 0)
-
-		myform['volume'] = form.quantized_slider_field(parent=self.panel, sizer=hbox, 
+		self.myform['volume'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
 			label="Volume", weight=3, range=self.volume_range(), callback=self.set_vol)
 		hbox.Add((5,0), 1)
-
-		myform['gain'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
+		self.myform['gain'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
 			label="Gain", weight=3, range=self.subdev.gain_range(), callback=self.set_gain)
 		hbox.Add((5,0), 0)
-
 		vbox.Add(hbox, 0, wx.EXPAND)
 
 
@@ -260,27 +272,18 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.update_status_bar ()
 
 	def set_freq(self, target_freq):
-		"""
-		Set the center frequency we're interested in.
-
-		@param target_freq: frequency in Hz
-		@rypte: bool
-
-		Tuning is a two step process.  First we ask the front-end to
-		tune as close to the desired frequency as it can.  Then we use
-		the result of that operation and our target_frequency to
-		determine the value for the digital down converter.
-		"""
 		r = usrp.tune(self.u, 0, self.subdev, target_freq)
-		
 		if r:
 			self.freq = target_freq
 			self.myform['freq'].set_value(target_freq)
+#			self.myform.freq_field.SetValue(str(target_freq/1e6))
+#			self.myform.freq_field.AppendText(" MHz")
 			self.myform['freq_slider'].set_value(target_freq)
-			self.rdspanel.frequency.SetLabel('%3.2f' % (target_freq/1000000.0))
+			self.rdspanel.frequency.SetLabel('%3.2f' % (target_freq/1e6))
 			self.update_status_bar()
 			self.bpsk_demod.reset()
 			self.rds_decoder.reset()
+			self.rdspanel.clear_data()
 			self._set_status_msg("OK", 0)
 			return True
 		else:
@@ -298,6 +301,36 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 	def volume_range(self):
 		return (-20.0, 0.0, 0.5)		# hardcoded values
+
+	def Seek_Up(self, event):
+		new_freq = self.freq + 1e5
+		if new_freq > 108e6:
+			new_freq=88e6
+		self.set_freq(new_freq)
+#		self.dst.clear()
+#		time.sleep (.05)
+#		result_data = self.dst.data()
+#		numberofelements = len(result_data)
+#		avg=0
+#		for i in range(numberofelements):
+#			avg+=math.fabs(result_data[i])
+#		avg /= numberofelements
+#		print numberofelements, avg
+
+	def Seek_Down(self, event):
+		new_freq = self.freq - 1e5
+		if new_freq < 88e6:
+			new_freq=108e6
+		self.set_freq(new_freq)
+#		self.dst.clear()
+#		time.sleep (.1)
+#		result_data = self.dst.data()
+#		numberofelements = len(result_data)
+#		avg=0
+#		for i in range(numberofelements):
+#			avg+=math.fabs(result_data[i])
+#		avg /= numberofelements
+#		print numberofelements, avg
 
 
 if __name__ == '__main__':

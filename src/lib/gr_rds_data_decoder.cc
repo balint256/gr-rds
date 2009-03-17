@@ -192,17 +192,19 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	flagstring[6]=static_pty?'1':'0';
 	if (!version_code) {			// type 0A
 		af_code_1=(int)(group[2]>>8)&0xff;
-		af_code_2=(int) group[2]&0xff;
+		af_code_2=(int)group[2]&0xff;
 		af_1=decode_af(af_code_1);
 		af_2=decode_af(af_code_2);
-		for (int i=0; i<9; i++) af1_string[i]=af2_string[i]=' ';
-		for (int i=0; i<20; i++) af_string[i]=' ';
-		af_string[20]='\0';
+		printf("afc1=%u, afc2=%u, af1=%f, af2=%f\n", af_code_1, af_code_2, af_1, af_2);
+		memset(af1_string, ' ', sizeof(af1_string));
+		memset(af2_string, ' ', sizeof(af2_string));
+		memset(af_string, ' ', sizeof(af_string));
+		af1_string[10]=af2_string[10]=af_string[20]='\0';
 		if (af_1||af_2) {
-			if (af_1>50e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
-			else if ((af_1<10e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
-			if (af_2>50e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
-			else if ((af_2<10e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
+			if (af_1>80e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
+			else if ((af_1<2e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
+			if (af_2>80e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
+			else if ((af_2<2e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
 			sprintf(af_string, "%s %s", af1_string, af2_string);
 		}
 	}
@@ -220,16 +222,16 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 }
 
 /* see page 41 in the standard
- this is an implementation of AF method A */
+ * this is an implementation of AF method A */
 double gr_rds_data_decoder::decode_af(unsigned int af_code) {
 	static unsigned int number_of_freqs;
 	double alt_frequency=0;				// in kHz
 	static bool vhf_or_lfmf=0;			// 0 = vhf, 1 = lf/mf
 
 /* in all the following cases the message either tells us
-   that there are no alternative frequencies, or it indicates
-   the number of AF to follow, which is not relevant at this
-   stage, since we're not actually re-tuning */
+ * that there are no alternative frequencies, or it indicates
+ * the number of AF to follow, which is not relevant at this
+ * stage, since we're not actually re-tuning */
 	if ((af_code == 0)||						// not to be used
 		(af_code == 205)||						// filler code
 		((af_code >= 206)&&(af_code <= 223))||	// not assigned
@@ -252,12 +254,12 @@ double gr_rds_data_decoder::decode_af(unsigned int af_code) {
 /* here we're actually decoding the alternative frequency */
 	if ((af_code > 0) && (af_code < 205) && vhf_or_lfmf)
 		alt_frequency = (double)(af_code+875)*100;		// VHF (87.6-107.9MHz)
-	if ((af_code > 0) && (af_code < 16) && !vhf_or_lfmf)
+	else if ((af_code > 0) && (af_code < 16) && !vhf_or_lfmf)
 		alt_frequency = (double)((af_code-1)*9 + 153);	// LF (153-279kHz)
-	if ((af_code > 15) && (af_code < 136) && !vhf_or_lfmf)
+	else if ((af_code > 15) && (af_code < 136) && !vhf_or_lfmf)
 		alt_frequency = (double)((af_code-16)*9 + 531);	// MF (531-1602kHz)
 
-	return alt_frequency;
+	return alt_frequency;		// in kHz
 }
 
 /* SLOW LABELLING: see page 23 in the standard 
@@ -493,7 +495,7 @@ void gr_rds_data_decoder::decode_type15b(unsigned int *group){
 void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	unsigned char group_type_code=(group[1]>>12)&0x0f;
 	bool version_code=(group[1]>>11) & 0x01;
-//	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
+	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
 	printf("%i%c", (int)group_type_code, (version_code?'B':'A'));
 
 	program_identification=group[0];			// "PI"

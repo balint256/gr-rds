@@ -145,9 +145,9 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
-#		# used to detect stations
-#		self.dst = gr.vector_sink_f()
-#		self.connect(self.pilot_filter, self.dst)
+		# this is used for tuning to stations automatically
+		self.probe = gr.probe_avg_mag_sqrd_c(5, 0.1)
+		self.connect (self.chan_filt, self.probe)
 
 		self._build_gui(vbox, demod_rate, audio_rate)
 
@@ -165,7 +165,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 			options.freq *= 1e6
 
 		# set initial values
-
 		self.set_gain(options.gain)
 		self.set_vol(options.volume)
 		if not(self.set_freq(options.freq)):
@@ -307,30 +306,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if new_freq > 108e6:
 			new_freq=88e6
 		self.set_freq(new_freq)
-#		self.dst.clear()
-#		time.sleep (.05)
-#		result_data = self.dst.data()
-#		numberofelements = len(result_data)
-#		avg=0
-#		for i in range(numberofelements):
-#			avg+=math.fabs(result_data[i])
-#		avg /= numberofelements
-#		print numberofelements, avg
+		print self.probe.level()
 
 	def Seek_Down(self, event):
 		new_freq = self.freq - 1e5
 		if new_freq < 88e6:
 			new_freq=108e6
 		self.set_freq(new_freq)
-#		self.dst.clear()
-#		time.sleep (.1)
-#		result_data = self.dst.data()
-#		numberofelements = len(result_data)
-#		avg=0
-#		for i in range(numberofelements):
-#			avg+=math.fabs(result_data[i])
-#		avg /= numberofelements
-#		print numberofelements, avg
+		print self.probe.level()
 
 
 if __name__ == '__main__':

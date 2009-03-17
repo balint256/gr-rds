@@ -56,7 +56,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		nchans = self.src.channels()
 		sample_rate = self.src.sample_rate()
 		bits_per_sample = self.src.bits_per_sample()
-		print nchans, "channels,", sample_rate, "kS/s,", bits_per_sample, "bits/sample"
+		print nchans, "channels,", sample_rate, "samples/sec,", bits_per_sample, "bits/sample"
 
 		# resample to 128kS/s
 		if sample_rate == 44100:

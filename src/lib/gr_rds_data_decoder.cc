@@ -155,7 +155,7 @@ unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message,
 
 /* BASIC TUNING: see page 21 of the standard */
 void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
-	unsigned int af_code_1=0, af_code_2=0;
+	unsigned int af_code_1=0, af_code_2=0, no_af=0;
 	double af_1=0, af_2=0;
 	char flagstring[8]="0000000";
 	
@@ -193,19 +193,26 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	if (!version_code) {			// type 0A
 		af_code_1=(int)(group[2]>>8)&0xff;
 		af_code_2=(int)group[2]&0xff;
-		af_1=decode_af(af_code_1);
-		af_2=decode_af(af_code_2);
+		if((af_1=decode_af(af_code_1))) no_af+=1;
+		if((af_2=decode_af(af_code_2))) no_af+=2;
+/* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
 		printf("afc1=%u, afc2=%u, af1=%f, af2=%f\n", af_code_1, af_code_2, af_1, af_2);
 		memset(af1_string, ' ', sizeof(af1_string));
 		memset(af2_string, ' ', sizeof(af2_string));
 		memset(af_string, ' ', sizeof(af_string));
-		af1_string[10]=af2_string[10]=af_string[20]='\0';
-		if (af_1||af_2) {
+		af1_string[9]=af2_string[9]=af_string[20]='\0';
+		if (no_af) {
 			if (af_1>80e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
 			else if ((af_1<2e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
 			if (af_2>80e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
 			else if ((af_2<2e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
-			sprintf(af_string, "%s %s", af1_string, af2_string);
+		}
+		if (no_af==1) strcpy(af_string, af1_string);
+		else if (no_af==2) strcpy(af_string, af2_string);
+		else if (no_af==3){
+			strcpy(af_string, af1_string);
+			strcat(af_string, ", ");
+			strcat(af_string, af2_string);
 		}
 	}
 
@@ -495,7 +502,7 @@ void gr_rds_data_decoder::decode_type15b(unsigned int *group){
 void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	unsigned char group_type_code=(group[1]>>12)&0x0f;
 	bool version_code=(group[1]>>11) & 0x01;
-	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
+//	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
 	printf("%i%c", (int)group_type_code, (version_code?'B':'A'));
 
 	program_identification=group[0];			// "PI"

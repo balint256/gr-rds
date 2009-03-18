@@ -11,8 +11,25 @@
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_data_encoder.h"
 #include "gr_rds_freq_divider.h"
+#include "gr_rds_freq_statistics.h"
 #include <stdexcept>
 %}
+
+//------------------------------------------------------------------
+
+GR_SWIG_BLOCK_MAGIC (gr_rds, freq_statistics);
+
+gr_rds_freq_statistics_sptr gr_rds_make_freq_statistics(unsigned int vlen,
+			double start_freq,
+			double step_freq);
+
+class gr_rds_freq_statistics: public gr_sync_block
+{
+private:
+	gr_rds_freq_statistics(unsigned int vlen,
+			double start_freq,
+			double step_freq);
+};
 
 //------------------------------------------------------------------
 

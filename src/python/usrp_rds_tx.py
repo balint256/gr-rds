@@ -83,41 +83,41 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.resample_right, (self.audio_lmr, 1))
 
 		# low-pass filter for L+R
-		audio_lpr_taps = gr.firdes.low_pass (1,				# gain
-											self.audio_rate,	# sampling rate
-											15e3,				# passband cutoff
-											2e3,				# transition width
-											gr.firdes.WIN_HANN)
+		audio_lpr_taps = gr.firdes.low_pass (1,			# gain
+						self.audio_rate,	# sampling rate
+						15e3,			# passband cutoff
+						2e3,			# transition width
+						gr.firdes.WIN_HANN)
 		self.audio_lpr_filter = gr.fir_filter_fff (1, audio_lpr_taps)
 		self.preemph_lpr = blks2.fm_preemph(self.audio_rate, tau=50e-6)
 		self.connect (self.audio_lpr, self.audio_lpr_filter, self.preemph_lpr)
 
 		# create pilot tone at 19 kHz
-		self.pilot = gr.sig_source_f(self.audio_rate,	# sampling freq
-									gr.GR_SIN_WAVE,		# waveform
-									19e3,				# frequency
-									3e-2)				# amplitude
+		self.pilot = gr.sig_source_f(self.audio_rate,		# sampling freq
+						gr.GR_SIN_WAVE,		# waveform
+						19e3,			# frequency
+						3e-2)			# amplitude
 
 		# create the L-R signal carrier at 38 kHz, high-pass to remove 0Hz tone
 		self.stereo_carrier = gr.multiply_ff()
 		self.connect (self.pilot, (self.stereo_carrier, 0))
 		self.connect (self.pilot, (self.stereo_carrier, 1))
-		stereo_carrier_taps = gr.firdes.high_pass (1,			# gain
-											self.audio_rate,	# sampling rate
-											1e4,				# cutoff freq
-											2e3,				# transition width
-											gr.firdes.WIN_HANN)
+		stereo_carrier_taps = gr.firdes.high_pass (1,		# gain
+						self.audio_rate,	# sampling rate
+						1e4,			# cutoff freq
+						2e3,			# transition width
+						gr.firdes.WIN_HANN)
 		self.stereo_carrier_filter = gr.fir_filter_fff(1, stereo_carrier_taps)
 		self.connect (self.stereo_carrier, self.stereo_carrier_filter)
 
 		# upconvert L-R to 23-53 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
-		audio_lmr_taps = gr.firdes.band_pass (1e2,				# gain
-											self.audio_rate,	# sampling rate
-											23e3,				# low cutoff
-											53e3,				# high cutoff
-											2e3,				# transition width
-											gr.firdes.WIN_HANN)
+		audio_lmr_taps = gr.firdes.band_pass (1e2,		# gain
+						self.audio_rate,	# sampling rate
+						23e3,			# low cutoff
+						53e3,			# high cutoff
+						2e3,			# transition width
+						gr.firdes.WIN_HANN)
 		self.audio_lmr_filter = gr.fir_filter_fff (1, audio_lmr_taps)
 		self.preemph_lmr = blks2.fm_preemph(self.audio_rate, tau=50e-6)
 		self.connect (self.audio_lmr, (self.mix_stereo, 0))
@@ -133,12 +133,12 @@ class rds_tx_block(stdgui2.std_top_block):
 		# resample from 1187.5Hz (=19e3/16) to self.audio_rate,
 		# band-pass to remove harmonics
 		self.resample = blks2.rational_resampler_fff(int(self.audio_rate*16/1e3), 19)
-		rds_data_taps = gr.firdes.band_pass (1,					# gain
-											self.audio_rate,	# sampling rate
-											1e3,				# low cutoff
-											2e3,				# high cutoff
-											2e2,				# transition width
-											gr.firdes.WIN_HANN)
+		rds_data_taps = gr.firdes.band_pass (1,			# gain
+						self.audio_rate,	# sampling rate
+						1e3,			# low cutoff
+						2e3,			# high cutoff
+						2e2,			# transition width
+						gr.firdes.WIN_HANN)
 		self.rds_data_filter = gr.fir_filter_fff (1, rds_data_taps)
 		self.connect (self.c2s, self.resample, self.rds_data_filter)
 
@@ -150,13 +150,12 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.pilot, (self.bpsk_mod, 3))
 
 		# RDS band-pass filter
-		rds_filter_taps = gr.firdes.band_pass (
-											1e5,				# gain
-											self.audio_rate,	# sampling rate
-											55e3,				# low cutoff
-											59e3,				# high cutoff
-											3e3,				# transition width
-											gr.firdes.WIN_HANN)
+		rds_filter_taps = gr.firdes.band_pass (	1e5,		# gain
+						self.audio_rate,	# sampling rate
+						55e3,			# low cutoff
+						59e3,			# high cutoff
+						3e3,			# transition width
+						gr.firdes.WIN_HANN)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_taps)
 		self.connect (self.bpsk_mod, self.rds_filter)
 
@@ -168,11 +167,11 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.rds_filter, (self.mixer, 3))
 
 		# interpolation, channel filter & pre-emphasis
-		interp_taps = gr.firdes.low_pass (self.sw_interp,		# gain
-										self.usrp_rate,		# Fs
-										60e3,				# passband cutoff
-										5e3,				# stopband cutoff
-										gr.firdes.WIN_HAMMING)
+		interp_taps = gr.firdes.low_pass (self.sw_interp,	# gain
+						self.usrp_rate,		# Fs
+						60e3,			# passband cutoff
+						5e3,			# stopband cutoff
+						gr.firdes.WIN_HAMMING)
 		self.interpolator = gr.interp_fir_filter_fff (self.sw_interp, interp_taps)
 		self.connect (self.mixer, self.interpolator)
 

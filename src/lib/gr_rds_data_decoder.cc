@@ -196,7 +196,6 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 		if((af_1=decode_af(af_code_1))) no_af+=1;
 		if((af_2=decode_af(af_code_2))) no_af+=2;
 /* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
-		printf("afc1=%u, afc2=%u, af1=%f, af2=%f\n", af_code_1, af_code_2, af_1, af_2);
 		memset(af1_string, ' ', sizeof(af1_string));
 		memset(af2_string, ' ', sizeof(af2_string));
 		memset(af_string, ' ', sizeof(af_string));

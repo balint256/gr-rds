@@ -32,16 +32,12 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if len(args) != 0:
 			parser.print_help()
 			sys.exit(1)
-		
+
 		self.frame = frame
 		self.panel = panel
-		
-		self.vol = .5
-		self.state = "FREQ"
-		self.freq = 0
 
-		# build graph
 
+		# connect to USRP
 		usrp_decim = 250
 		self.u = usrp.source_c(0, usrp_decim)
 		print "USRP Serial: ", self.u.serial_number()
@@ -49,7 +45,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		demod_rate = adc_rate / usrp_decim			# 256 kS/s
 		audio_decim = 8
 		audio_rate = demod_rate / audio_decim		# 32 kS/s
-
 		if options.rx_subdev_spec is None:
 			options.rx_subdev_spec = usrp.pick_subdev(self.u, 
 				(usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2, usrp_dbid.BASIC_RX))
@@ -58,13 +53,29 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
 		print "Using d'board", self.subdev.side_and_name()
 
+
+		# gain, volume, frequency
+		self.gain = options.gain
+		if options.gain is None:
+			g = self.subdev.gain_range()
+			self.gain = g[1]
+
+		self.vol = options.volume
+		if self.vol is None:
+			g = self.volume_range()
+			self.vol = float(g[0]+g[1])/2
+
+		self.freq = options.freq
+		if abs(self.freq) < 1e6:
+			self.freq *= 1e6
+
 		# channel filter, wfm_rcv_pll
 		chan_filt_coeffs = optfir.low_pass (1,
-											demod_rate,
-											80e3,
-											115e3,
-											0.1,
-											60)
+						demod_rate,
+						80e3,
+						115e3,
+						0.1,
+						60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
 		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim, 50e-6)
 		self.connect(self.u, self.chan_filt, self.guts)
@@ -73,36 +84,36 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.volume_control_l = gr.multiply_const_ff(self.vol)
 		self.volume_control_r = gr.multiply_const_ff(self.vol)
 		self.audio_sink = audio.sink(int(audio_rate),
-									options.audio_output, False)
+							options.audio_output, False)
 		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
 		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
 
 		# fm filter (low-pass 70kHz)
 		coeffs = gr.firdes.low_pass (50,
-										demod_rate,
-										70e3,
-										10e3,
-										gr.firdes.WIN_HAMMING)
+						demod_rate,
+						70e3,
+						10e3,
+						gr.firdes.WIN_HAMMING)
 		self.fm_filter = gr.fir_filter_fff (1, coeffs)
 		self.connect(self.guts.fm_demod, self.fm_filter)
 
 		# pilot channel filter (band-pass, 18.5-19.5kHz)
 		pilot_filter_coeffs = gr.firdes.band_pass(1, 
-													demod_rate,
-													18.5e3,
-													19.5e3,
-													1e3,
-													gr.firdes.WIN_HAMMING)
+						demod_rate,
+						18.5e3,
+						19.5e3,
+						1e3,
+						gr.firdes.WIN_HAMMING)
 		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
 		self.connect(self.fm_filter, self.pilot_filter)
 
 		# RDS channel filter (band-pass, 54-60kHz)
 		rds_filter_coeffs = gr.firdes.band_pass (1,
-													demod_rate,
-													54e3,
-													60e3,
-													3e3,
-													gr.firdes.WIN_HAMMING)
+						demod_rate,
+						54e3,
+						60e3,
+						3e3,
+						gr.firdes.WIN_HAMMING)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
 		self.connect(self.fm_filter, self.rds_filter)
 
@@ -115,10 +126,10 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass (1,
-													demod_rate,
-													1500,
-													2e3,
-													gr.firdes.WIN_HAMMING)
+						demod_rate,
+						1500,
+						2e3,
+						gr.firdes.WIN_HAMMING)
 		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
 		self.connect(self.mixer, self.rds_bb_filter)
 
@@ -126,11 +137,11 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# 1187.5bps = 19kHz/16
 		self.rds_data_clock = rds.freq_divider(16)
 		#self.rds_data_clock = gr.fractional_interpolator_ff(0, 1/16.)
-		data_clock_taps = gr.firdes.low_pass (1,			# gain
-											demod_rate,		# sampling rate
-											1.2e3,			# passband cutoff
-											1.5e3,			# transition width
-											gr.firdes.WIN_HANN)
+		data_clock_taps = gr.firdes.low_pass (1,	# gain
+						demod_rate,	# sampling rate
+						1.2e3,		# passband cutoff
+						1.5e3,		# transition width
+						gr.firdes.WIN_HANN)
 		self.data_clock_filter = gr.fir_filter_fff (1, data_clock_taps)
 		self.connect(self.pilot_filter, self.rds_data_clock,
 						self.data_clock_filter)
@@ -145,32 +156,17 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
-		# this is used for tuning to stations automatically
-		self.probe = gr.probe_avg_mag_sqrd_c(5, 0.1)
-		self.connect (self.chan_filt, self.probe)
+#		# this is used for tuning to stations automatically
+#		self.probe = gr.probe_avg_mag_sqrd_f(5, 0.1)
+#		self.connect (self.pilot_filter, self.probe)
 
 		self._build_gui(vbox, demod_rate, audio_rate)
 
-		# if no gain was specified, use the mid-point in dB
-		if options.gain is None:
-			g = self.subdev.gain_range()
-#			options.gain = float(g[0]+g[1])/2
-			options.gain = g[1]
-
-		if options.volume is None:
-			g = self.volume_range()
-			options.volume = float(g[0]+g[1])/2
-
-		if abs(options.freq) < 1e6:
-			options.freq *= 1e6
-
 		# set initial values
-		self.set_gain(options.gain)
-		self.set_vol(options.volume)
-		if not(self.set_freq(options.freq)):
+		self.set_gain(self.gain)
+		self.set_vol(self.vol)
+		if not(self.set_freq(self.freq)):
 			self._set_status_msg("Failed to set initial frequency")
-
-
 
 
 
@@ -186,7 +182,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		if 0:
 			self.src_fft = fftsink2.fft_sink_c (self.panel, title="Data from USRP",
-											fft_size=512, sample_rate=demod_rate)
+				fft_size=512, sample_rate=demod_rate)
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
@@ -224,8 +220,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 			parent=self.panel, sizer=hbox, label="Freq", weight=1,
 			callback=self.myform.check_input_and_call(_form_set_freq, self._set_status_msg))
 		hbox.Add((5,0), 0)
-#		myform.freq_field = wx.TextCtrl(self.panel, name="freq")
-#		hbox.Add(myform.freq_field, 0)
 		self.myform.btn_up = wx.Button(self.panel, -1, ">>")
 		self.myform.btn_up.Bind(wx.EVT_BUTTON, self.Seek_Up)
 		hbox.Add(self.myform.btn_up, 0)
@@ -251,17 +245,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 ########################### EVENTS ############################
 
-	def on_button (self, event):
-		if event.value == 0:		# button up
-			return
-		self.rot = 0
-		if self.state == "FREQ":
-			self.state = "VOL"
-		else:
-			self.state = "FREQ"
-		self.update_status_bar ()
-
-
 	def set_vol (self, vol):
 		g = self.volume_range()
 		self.vol = max(g[0], min(g[1], vol))
@@ -275,8 +258,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if r:
 			self.freq = target_freq
 			self.myform['freq'].set_value(target_freq)
-#			self.myform.freq_field.SetValue(str(target_freq/1e6))
-#			self.myform.freq_field.AppendText(" MHz")
 			self.myform['freq_slider'].set_value(target_freq)
 			self.rdspanel.frequency.SetLabel('%3.2f' % (target_freq/1e6))
 			self.update_status_bar()
@@ -295,7 +276,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 
 	def update_status_bar (self):
-		msg = "Volume:%r  Setting:%s" % (self.vol, self.state)
+		msg = "Volume:%r" % (self.vol)
 		self._set_status_msg(msg, 1)
 
 	def volume_range(self):
@@ -306,14 +287,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if new_freq > 108e6:
 			new_freq=88e6
 		self.set_freq(new_freq)
-		print self.probe.level()
+#		print self.probe.level()
 
 	def Seek_Down(self, event):
 		new_freq = self.freq - 1e5
 		if new_freq < 88e6:
 			new_freq=108e6
 		self.set_freq(new_freq)
-		print self.probe.level()
+#		print self.probe.level()
 
 
 if __name__ == '__main__':

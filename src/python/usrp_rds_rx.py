@@ -41,8 +41,8 @@ class rds_rx_graph (stdgui2.std_top_block):
 		usrp_decim = 250
 		self.u = usrp.source_c(0, usrp_decim)
 		print "USRP Serial: ", self.u.serial_number()
-		adc_rate = self.u.adc_rate()				# 64 MS/s
-		demod_rate = adc_rate / usrp_decim			# 256 kS/s
+		adc_rate = self.u.adc_rate()			# 64 MS/s
+		demod_rate = adc_rate / usrp_decim		# 256 kS/s
 		audio_decim = 8
 		audio_rate = demod_rate / audio_decim		# 32 kS/s
 		if options.rx_subdev_spec is None:
@@ -88,15 +88,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
 		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
 
-		# fm filter (low-pass 70kHz)
-		coeffs = gr.firdes.low_pass (50,
-						demod_rate,
-						70e3,
-						10e3,
-						gr.firdes.WIN_HAMMING)
-		self.fm_filter = gr.fir_filter_fff (1, coeffs)
-		self.connect(self.guts.fm_demod, self.fm_filter)
-
 		# pilot channel filter (band-pass, 18.5-19.5kHz)
 		pilot_filter_coeffs = gr.firdes.band_pass(1, 
 						demod_rate,
@@ -105,7 +96,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 						1e3,
 						gr.firdes.WIN_HAMMING)
 		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
-		self.connect(self.fm_filter, self.pilot_filter)
+		self.connect(self.guts.fm_demod, self.pilot_filter)
 
 		# RDS channel filter (band-pass, 54-60kHz)
 		rds_filter_coeffs = gr.firdes.band_pass (1,
@@ -115,7 +106,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 						3e3,
 						gr.firdes.WIN_HAMMING)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
-		self.connect(self.fm_filter, self.rds_filter)
+		self.connect(self.guts.fm_demod, self.rds_filter)
 
 		# create 57kHz subcarrier from 19kHz pilot, downconvert RDS channel
 		self.mixer = gr.multiply_ff()
@@ -135,16 +126,15 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 
 		# 1187.5bps = 19kHz/16
-		self.rds_data_clock = rds.freq_divider(16)
-		#self.rds_data_clock = gr.fractional_interpolator_ff(0, 1/16.)
-		data_clock_taps = gr.firdes.low_pass (1,	# gain
+		self.rds_clock = rds.freq_divider(16)
+		#self.rds_clock = gr.fractional_interpolator_ff(0, 1/16.)
+		clock_taps = gr.firdes.low_pass (1,	# gain
 						demod_rate,	# sampling rate
 						1.2e3,		# passband cutoff
 						1.5e3,		# transition width
 						gr.firdes.WIN_HANN)
-		self.data_clock_filter = gr.fir_filter_fff (1, data_clock_taps)
-		self.connect(self.pilot_filter, self.rds_data_clock,
-						self.data_clock_filter)
+		self.clock_filter = gr.fir_filter_fff (1, clock_taps)
+		self.connect(self.pilot_filter, self.rds_clock, self.clock_filter)
 
 		# bpsk_demod, diff_decoder, rds_decoder
 		self.bpsk_demod = rds.bpsk_demod(demod_rate)
@@ -152,7 +142,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)
 		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
-		self.connect(self.data_clock_filter, (self.bpsk_demod, 1))
+		self.connect(self.clock_filter, (self.bpsk_demod, 1))
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
@@ -195,14 +185,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if 0:
 			rds_fft = fftsink2.fft_sink_f (self.panel, title="RDS baseband",
 				fft_size=512, sample_rate=demod_rate, y_per_div=20, ref_level=20)
-			self.connect (self.rds_data_clock, rds_fft)
+			self.connect (self.rds_clock, rds_fft)
 			vbox.Add (rds_fft.win, 4, wx.EXPAND)
 
 		if 0:
 			rds_scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
 				sample_rate=demod_rate,num_inputs=2)
 			self.connect (self.rds_bb_filter, (rds_scope,1))
-			self.connect (self.rds_data_clock, (rds_scope,0))
+			self.connect (self.rds_clock, (rds_scope,0))
 			vbox.Add(rds_scope.win, 4, wx.EXPAND)
 
 		self.rdspanel = rdsPanel(self.msgq, self.panel)
@@ -276,7 +266,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 
 	def update_status_bar (self):
-		msg = "Volume:%r" % (self.vol)
+		msg = "Volume:%r, Gain:%r, Freq:%3.1f MHz" % (self.vol, self.gain, self.freq/1e6)
 		self._set_status_msg(msg, 1)
 
 	def volume_range(self):

@@ -42,9 +42,9 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.u = usrp.source_c(0, usrp_decim)
 		print "USRP Serial: ", self.u.serial_number()
 		adc_rate = self.u.adc_rate()			# 64 MS/s
-		demod_rate = adc_rate / usrp_decim		# 256 kS/s
+		usrp_rate = adc_rate / usrp_decim		# 256 kS/s
 		audio_decim = 8
-		audio_rate = demod_rate / audio_decim		# 32 kS/s
+		audio_rate = usrp_rate / audio_decim		# 32 kS/s
 		if options.rx_subdev_spec is None:
 			options.rx_subdev_spec = usrp.pick_subdev(self.u, 
 				(usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2, usrp_dbid.BASIC_RX))
@@ -71,13 +71,13 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# channel filter, wfm_rcv_pll
 		chan_filt_coeffs = optfir.low_pass (1,
-						demod_rate,
+						usrp_rate,
 						80e3,
 						115e3,
 						0.1,
 						60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
-		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim)
+		self.guts = blks2.wfm_rcv_pll (usrp_rate, audio_decim)
 		self.connect(self.u, self.chan_filt, self.guts)
 
 		# volume control, audio sink
@@ -90,7 +90,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# pilot channel filter (band-pass, 18.5-19.5kHz)
 		pilot_filter_coeffs = gr.firdes.band_pass(1, 
-						demod_rate,
+						usrp_rate,
 						18.5e3,
 						19.5e3,
 						1e3,
@@ -100,7 +100,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# RDS channel filter (band-pass, 54-60kHz)
 		rds_filter_coeffs = gr.firdes.band_pass (1,
-						demod_rate,
+						usrp_rate,
 						54e3,
 						60e3,
 						3e3,
@@ -117,7 +117,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass (1,
-						demod_rate,
+						usrp_rate,
 						1500,
 						2e3,
 						gr.firdes.WIN_HAMMING)
@@ -129,7 +129,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.rds_clock = rds.freq_divider(16)
 		#self.rds_clock = gr.fractional_interpolator_ff(0, 1/16.)
 		clock_taps = gr.firdes.low_pass (1,	# gain
-						demod_rate,	# sampling rate
+						usrp_rate,	# sampling rate
 						1.2e3,		# passband cutoff
 						1.5e3,		# transition width
 						gr.firdes.WIN_HANN)
@@ -137,7 +137,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.pilot_filter, self.rds_clock, self.clock_filter)
 
 		# bpsk_demod, diff_decoder, rds_decoder
-		self.bpsk_demod = rds.bpsk_demod(demod_rate)
+		self.bpsk_demod = rds.bpsk_demod(usrp_rate)
 		self.differential_decoder = gr.diff_decoder_bb(2)
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)
@@ -150,7 +150,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 #		self.probe = gr.probe_avg_mag_sqrd_f(5, 0.1)
 #		self.connect (self.pilot_filter, self.probe)
 
-		self._build_gui(vbox, demod_rate, audio_rate)
+		self._build_gui(vbox, usrp_rate, audio_rate)
 
 		# set initial values
 		self.set_gain(self.gain)
@@ -165,32 +165,32 @@ class rds_rx_graph (stdgui2.std_top_block):
 	def _set_status_msg(self, msg, which=0):
 		self.frame.GetStatusBar().SetStatusText(msg, which)
 
-	def _build_gui(self, vbox, demod_rate, audio_rate):
+	def _build_gui(self, vbox, usrp_rate, audio_rate):
 
 		def _form_set_freq(kv):
 			return self.set_freq(kv['freq'])
 
 		if 0:
 			self.src_fft = fftsink2.fft_sink_c (self.panel, title="Data from USRP",
-				fft_size=512, sample_rate=demod_rate)
+				fft_size=512, sample_rate=usrp_rate)
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
 		if 0:
 			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
-				fft_size=512, sample_rate=demod_rate, y_per_div=10, ref_level=0)
+				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
 			self.connect (self.guts.fm_demod, post_fm_demod_fft)
 			vbox.Add (post_fm_demod_fft.win, 4, wx.EXPAND)
 
 		if 0:
 			rds_fft = fftsink2.fft_sink_f (self.panel, title="RDS baseband",
-				fft_size=512, sample_rate=demod_rate, y_per_div=20, ref_level=20)
+				fft_size=512, sample_rate=usrp_rate, y_per_div=20, ref_level=20)
 			self.connect (self.rds_clock, rds_fft)
 			vbox.Add (rds_fft.win, 4, wx.EXPAND)
 
 		if 0:
 			rds_scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
-				sample_rate=demod_rate,num_inputs=2)
+				sample_rate=usrp_rate,num_inputs=2)
 			self.connect (self.rds_bb_filter, (rds_scope,1))
 			self.connect (self.rds_clock, (rds_scope,0))
 			vbox.Add(rds_scope.win, 4, wx.EXPAND)

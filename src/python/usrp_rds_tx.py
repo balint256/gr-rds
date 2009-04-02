@@ -25,13 +25,11 @@ class rds_tx_block(stdgui2.std_top_block):
 			parser.print_help()
 			sys.exit(1)
 
-		self.usrp_interp = 200
+		self.usrp_interp = 500
 		self.u = usrp.sink_c (0, self.usrp_interp)
 		print "USRP Serial: ", self.u.serial_number()
-		self.dac_rate = self.u.dac_rate()					# 128 MS/s
-		self.usrp_rate = self.dac_rate / self.usrp_interp	# 640 kS/s
-		self.sw_interp = 5
-		self.audio_rate = self.usrp_rate / self.sw_interp	# 128 kS/s
+		self.dac_rate = self.u.dac_rate()			# 128 MS/s
+		self.usrp_rate = self.dac_rate / self.usrp_interp	# 256 kS/s
 
 		# determine the daughterboard subdevice we're using
 		if options.tx_subdev_spec is None:
@@ -58,19 +56,9 @@ class rds_tx_block(stdgui2.std_top_block):
 		bits_per_sample = self.src.bits_per_sample()
 		print nchans, "channels,", sample_rate, "samples/sec,", bits_per_sample, "bits/sample"
 
-		# resample to 128kS/s
-		if sample_rate == 44100:
-			self.resample_left = blks2.rational_resampler_fff(32,11)
-			self.resample_right = blks2.rational_resampler_fff(32,11)
-		elif sample_rate == 48000:
-			self.resample_left == blks2.rational_resampler_fff(8,3)
-			self.resample_right == blks2.rational_resampler_fff(8,3)
-		elif sample_rate == 8000:
-			self.resample_left == blks2.rational_resampler_fff(16,1)
-			self.resample_right == blks2.rational_resampler_fff(16,1)
-		else:
-			print sample_rate, "is an unsupported sample rate"
-			sys.exit(1)
+		# resample to audio rate
+		self.resample_left = blks2.rational_resampler_fff(self.usrp_rate,sample_rate)
+		self.resample_right = blks2.rational_resampler_fff(self.usrp_rate,sample_rate)
 		self.connect ((self.src, 0), self.resample_left)
 		self.connect ((self.src, 1), self.resample_right)
 
@@ -84,16 +72,16 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# low-pass filter for L+R
 		audio_lpr_taps = gr.firdes.low_pass (1,			# gain
-						self.audio_rate,	# sampling rate
+						self.usrp_rate,		# sampling rate
 						15e3,			# passband cutoff
 						2e3,			# transition width
 						gr.firdes.WIN_HANN)
 		self.audio_lpr_filter = gr.fir_filter_fff (1, audio_lpr_taps)
-		self.preemph_lpr = blks2.fm_preemph(self.audio_rate, tau=50e-6)
+		self.preemph_lpr = blks2.fm_preemph(self.usrp_rate, tau=50e-6)
 		self.connect (self.audio_lpr, self.audio_lpr_filter, self.preemph_lpr)
 
 		# create pilot tone at 19 kHz
-		self.pilot = gr.sig_source_f(self.audio_rate,		# sampling freq
+		self.pilot = gr.sig_source_f(self.usrp_rate,		# sampling freq
 						gr.GR_SIN_WAVE,		# waveform
 						19e3,			# frequency
 						3e-2)			# amplitude
@@ -103,7 +91,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.pilot, (self.stereo_carrier, 0))
 		self.connect (self.pilot, (self.stereo_carrier, 1))
 		stereo_carrier_taps = gr.firdes.high_pass (1,		# gain
-						self.audio_rate,	# sampling rate
+						self.usrp_rate,		# sampling rate
 						1e4,			# cutoff freq
 						2e3,			# transition width
 						gr.firdes.WIN_HANN)
@@ -113,13 +101,13 @@ class rds_tx_block(stdgui2.std_top_block):
 		# upconvert L-R to 23-53 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
 		audio_lmr_taps = gr.firdes.band_pass (1e2,		# gain
-						self.audio_rate,	# sampling rate
+						self.usrp_rate,		# sampling rate
 						23e3,			# low cutoff
 						53e3,			# high cutoff
 						2e3,			# transition width
 						gr.firdes.WIN_HANN)
 		self.audio_lmr_filter = gr.fir_filter_fff (1, audio_lmr_taps)
-		self.preemph_lmr = blks2.fm_preemph(self.audio_rate, tau=50e-6)
+		self.preemph_lmr = blks2.fm_preemph(self.usrp_rate, tau=50e-6)
 		self.connect (self.audio_lmr, (self.mix_stereo, 0))
 		self.connect (self.stereo_carrier_filter, (self.mix_stereo, 1))
 		self.connect (self.mix_stereo, self.audio_lmr_filter, self.preemph_lmr)
@@ -130,11 +118,11 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.c2s = gr.chunks_to_symbols_bf([1, -1])
 		self.connect (self.rds_encoder, self.diff_encoder, self.c2s)
 
-		# resample from 1187.5Hz (=19e3/16) to self.audio_rate,
+		# resample from 1187.5Hz (=19e3/16) to self.usrp_rate,
 		# band-pass to remove harmonics
-		self.resample = blks2.rational_resampler_fff(int(self.audio_rate*16/1e3), 19)
+		self.resample = blks2.rational_resampler_fff(int(self.usrp_rate*16/1e3), 19)
 		rds_data_taps = gr.firdes.band_pass (1,			# gain
-						self.audio_rate,	# sampling rate
+						self.usrp_rate,		# sampling rate
 						1e3,			# low cutoff
 						2e3,			# high cutoff
 						2e2,			# transition width
@@ -151,7 +139,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# RDS band-pass filter
 		rds_filter_taps = gr.firdes.band_pass (	1e5,		# gain
-						self.audio_rate,	# sampling rate
+						self.usrp_rate,		# sampling rate
 						55e3,			# low cutoff
 						59e3,			# high cutoff
 						3e3,			# transition width
@@ -166,13 +154,13 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.preemph_lmr, (self.mixer, 2))
 		self.connect (self.rds_filter, (self.mixer, 3))
 
-		# interpolation, channel filter & pre-emphasis
-		interp_taps = gr.firdes.low_pass (self.sw_interp,	# gain
+		# interpolation, channel filter
+		interp_taps = gr.firdes.low_pass (1,			# gain
 						self.usrp_rate,		# Fs
 						60e3,			# passband cutoff
 						5e3,			# stopband cutoff
 						gr.firdes.WIN_HAMMING)
-		self.interpolator = gr.interp_fir_filter_fff (self.sw_interp, interp_taps)
+		self.interpolator = gr.interp_fir_filter_fff (1, interp_taps)
 		self.connect (self.mixer, self.interpolator)
 
 		# fm modulation, gain & TX
@@ -190,17 +178,17 @@ class rds_tx_block(stdgui2.std_top_block):
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
 		if 1:
 			self.fft = fftsink2.fft_sink_f(panel, title="Before Interpolation",
-				fft_size=512, sample_rate=self.audio_rate, y_per_div=20, ref_level=20)
+				fft_size=512, sample_rate=self.usrp_rate, y_per_div=20, ref_level=20)
 			self.connect (self.mixer, self.fft)
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
 		if 0:
 			self.fft = fftsink2.fft_sink_f(panel, title="BPSK output",
-				fft_size=512*4, sample_rate=self.audio_rate, y_per_div=20, ref_level=-100)
+				fft_size=512*4, sample_rate=self.usrp_rate, y_per_div=20, ref_level=-100)
 			self.connect (self.bpsk_mod, self.fft)
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
 		if 0:
 			self.scope = scopesink2.scope_sink_f(panel, title="BPSK output",
-				sample_rate=self.audio_rate, size=2048, v_scale=2e-7, t_scale=1e-4)
+				sample_rate=self.usrp_rate, size=2048, v_scale=2e-7, t_scale=1e-4)
 			self.connect (self.bpsk_mod, self.scope)
 			vbox.Add (self.scope.win, 1, wx.EXPAND)
 

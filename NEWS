@@ -1,3 +1,10 @@
+02.04.2009
+- some more cleaning up
+- set exact rate conversion for wav file input in usrp_rds_tx
+- set audio_rate = usrp_rate in usrp_rds_tx
+- add loopback testing python code (for testing w/o USRP)
+- draft grc block for rds_encoder
+
 12.03.2009
 - fixed interpolating filter in usrp_rds_tx
 - some tuning attempts in usrp_rds_rx

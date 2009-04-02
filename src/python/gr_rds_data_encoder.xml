@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##RDS Data Encoder
+###################################################
+ -->
+<block>
+	<name>RDS Data Encoder</name>
+	<key>gr_rds_data_encoder</key>
+	<import>from gnuradio import gr, rds</import>
+	<make>gr.rds_data_encoder($xmlfile)</make>
+	<param>
+		<name>File</name>
+		<key>xmlfile</key>
+		<value></value>
+		<type>file_open</type>
+	</param>
+	<source>
+		<name>out</name>
+		<type>byte</type>
+		<vlen>gr.sizeof_char</vlen>
+	</source>
+	<doc>
+This is a source block. It reads its configuration from an XML file,\
+and outputs a bitstream of RDS data.
+
+This block does not set the RDS rate of 1187.5 bits/second, you need to\
+do that in your flowgraph (calculate backwards from the USRP sink).
+</block>

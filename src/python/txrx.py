@@ -10,7 +10,9 @@ class txrx(stdgui2.std_top_block):
 	def __init__(self,frame,panel,vbox,argv):
 		stdgui2.std_top_block.__init__ (self,frame,panel,vbox,argv)
 
-		usrp_rate=128e3
+		usrp_rate=256e3
+		audio_decim = 8
+		audio_rate = usrp_rate / audio_decim		# 32 kS/s
 		wavfile='/home/azimout/limmenso_stereo.wav'
 		xmlfile='/home/azimout/sandbox/gr/rds_data.xml'
 
@@ -142,11 +144,11 @@ class txrx(stdgui2.std_top_block):
 						0.1,
 						60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
-		self.guts = blks2.wfm_rcv_pll (usrp_rate, 1)
+		self.guts = blks2.wfm_rcv_pll (usrp_rate, audio_decim)
 		self.connect(self.u, self.chan_filt, self.guts)
 
 		# audio sink
-		self.audio_sink = audio.sink(int(usrp_rate), "plughw:0,0", False)
+		self.audio_sink = audio.sink(int(audio_rate), "plughw:0,0", False)
 		self.connect ((self.guts, 0), (self.audio_sink, 0))
 		self.connect ((self.guts, 1), (self.audio_sink, 1))
 #		self.connect (self.guts, self.audio_sink)

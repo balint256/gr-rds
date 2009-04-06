@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##RDS Data Sink
+###################################################
+ -->
+<block>
+	<name>RDS Data Sink</name>
+	<key>gr_rds_data_decoder</key>
+	<import>from gnuradio import gr, rds</import>
+	<make>gr.rds_data_decoder($msgq)</make>
+	<param>
+		<name>Message Queue</name>
+		<key>msgq</key>
+		<value></value>
+		<type>msg_queue</type>
+	</param>
+	<sink>
+		<name>in</name>
+		<type>byte</type>
+		<vlen>gr.sizeof_char</vlen>
+	</sink>
+	<doc>
+This is a sink block. It receives a bitstream of RDS data (after DBPSK-demodulation)\
+and does the framing, checksumming, and decoding of the data, which it then sends\
+to a message gueue.
+	</doc>
+</block>

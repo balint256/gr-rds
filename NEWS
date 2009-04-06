@@ -1,3 +1,6 @@
+06.04.2009
+- GRC blocks (only problem: msg_queue argument not supported in GRC)
+
 02.04.2009
 - some more cleaning up
 - set exact rate conversion for wav file input in usrp_rds_tx

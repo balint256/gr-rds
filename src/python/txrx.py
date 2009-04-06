@@ -3,11 +3,12 @@
 " This code is for testing Tx/Rx without a USRP (via loopback) "
 
 from gnuradio import gr, rds, blks2, audio, optfir
-import math
+import math, wx
+from gnuradio.wxgui import stdgui2, fftsink2, scopesink2
 
-class rds_txrx(gr.top_block):
-	def __init__(self):
-		gr.top_block.__init__ (self)
+class txrx(stdgui2.std_top_block):
+	def __init__(self,frame,panel,vbox,argv):
+		stdgui2.std_top_block.__init__ (self,frame,panel,vbox,argv)
 
 		usrp_rate=128e3
 		wavfile='/home/azimout/limmenso_stereo.wav'
@@ -19,9 +20,9 @@ class rds_txrx(gr.top_block):
 		bits_per_sample = self.src.bits_per_sample()
 		print nchans, "channels,", sample_rate, "samples/sec,", bits_per_sample, "bits/sample"
 
-		# resample from 44.1kS/s to 256kS/s
-		self.resample_left = blks2.rational_resampler_fff(2560,441)
-		self.resample_right = blks2.rational_resampler_fff(2560,441)
+		# resample from 44.1kS/s to usrp_rate
+		self.resample_left = blks2.rational_resampler_fff(int(usrp_rate), int(sample_rate))
+		self.resample_right = blks2.rational_resampler_fff(int(usrp_rate), int(sample_rate))
 		self.connect ((self.src, 0), self.resample_left)
 		self.connect ((self.src, 1), self.resample_right)
 
@@ -35,7 +36,7 @@ class rds_txrx(gr.top_block):
 
 		# low-pass filter for L+R
 		audio_lpr_taps = gr.firdes.low_pass (1,			# gain
-						usrp_rate,	# sampling rate
+						usrp_rate,		# sampling rate
 						15e3,			# passband cutoff
 						2e3,			# transition width
 						gr.firdes.WIN_HANN)
@@ -44,7 +45,7 @@ class rds_txrx(gr.top_block):
 		self.connect (self.audio_lpr, self.audio_lpr_filter, self.preemph_lpr)
 
 		# create pilot tone at 19 kHz
-		self.pilot = gr.sig_source_f(usrp_rate,		# sampling freq
+		self.pilot = gr.sig_source_f(usrp_rate,			# sampling freq
 						gr.GR_SIN_WAVE,		# waveform
 						19e3,			# frequency
 						3e-2)			# amplitude
@@ -76,10 +77,10 @@ class rds_txrx(gr.top_block):
 		self.connect (self.mix_stereo, self.audio_lmr_filter, self.preemph_lmr)
 
 		# rds_encoder, diff_encoder, NRZ
-		self.rds_encoder = rds.data_encoder(xmlfile)
+		self.rds_source = rds.data_encoder(xmlfile)
 		self.diff_encoder = gr.diff_encoder_bb(2)
 		self.c2s = gr.chunks_to_symbols_bf([1, -1])
-		self.connect (self.rds_encoder, self.diff_encoder, self.c2s)
+		self.connect (self.rds_source, self.diff_encoder, self.c2s)
 
 		# resample from 1187.5Hz (=19e3/16) to usrp_rate,
 		# band-pass to remove harmonics
@@ -202,16 +203,19 @@ class rds_txrx(gr.top_block):
 		self.bpsk_demod = rds.bpsk_demod(usrp_rate)
 		self.differential_decoder = gr.diff_decoder_bb(2)
 		self.msgq = gr.msg_queue()
-		self.rds_decoder = rds.data_decoder(self.msgq)
+		self.rds_sink = rds.data_decoder(self.msgq)
 		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
 		self.connect(self.clock_filter, (self.bpsk_demod, 1))
 		self.connect(self.bpsk_demod, self.differential_decoder)
-		self.connect(self.differential_decoder, self.rds_decoder)
+		self.connect(self.differential_decoder, self.rds_sink)
+
+		if 1:
+			myfft = fftsink2.fft_sink_f (panel, title="Signal, before FM modulation",
+				fft_size=512, sample_rate=usrp_rate, y_per_div=20, ref_level=0)
+			self.connect (self.mixer, myfft)
+			vbox.Add (myfft.win, 4, wx.EXPAND)
 
 
 if __name__ == '__main__':
-	tb =rds_txrx()
-	try:
-		tb.run()
-	except KeyboardInterrupt:
-		pass
+	app = stdgui2.stdapp (txrx, "TXRX")
+	app.MainLoop ()

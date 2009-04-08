@@ -43,7 +43,8 @@ class txrx(stdgui2.std_top_block):
 						2e3,			# transition width
 						gr.firdes.WIN_HANN)
 		self.audio_lpr_filter = gr.fir_filter_fff (1, audio_lpr_taps)
-		self.preemph_lpr = blks2.fm_preemph(usrp_rate, tau=50e-6)
+#		self.preemph_lpr = blks2.fm_preemph(usrp_rate, tau=50e-6)
+		self.preemph_lpr = gr.kludge_copy(gr.sizeof_float)
 		self.connect (self.audio_lpr, self.audio_lpr_filter, self.preemph_lpr)
 
 		# create pilot tone at 19 kHz
@@ -73,7 +74,8 @@ class txrx(stdgui2.std_top_block):
 						2e3,			# transition width
 						gr.firdes.WIN_HANN)
 		self.audio_lmr_filter = gr.fir_filter_fff (1, audio_lmr_taps)
-		self.preemph_lmr = blks2.fm_preemph(usrp_rate, tau=50e-6)
+#		self.preemph_lmr = blks2.fm_preemph(usrp_rate, tau=50e-6)
+		self.preemph_lmr = gr.kludge_copy(gr.sizeof_float)
 		self.connect (self.audio_lmr, (self.mix_stereo, 0))
 		self.connect (self.stereo_carrier_filter, (self.mix_stereo, 1))
 		self.connect (self.mix_stereo, self.audio_lmr_filter, self.preemph_lmr)
@@ -139,8 +141,8 @@ class txrx(stdgui2.std_top_block):
 		# channel filter, wfm_rcv_pll
 		chan_filt_coeffs = optfir.low_pass (1,
 						usrp_rate,
-						60e3,
-						64e3,
+						65e3,
+						80e3,
 						0.1,
 						60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
@@ -151,7 +153,6 @@ class txrx(stdgui2.std_top_block):
 		self.audio_sink = audio.sink(int(audio_rate), "plughw:0,0", False)
 		self.connect ((self.guts, 0), (self.audio_sink, 0))
 		self.connect ((self.guts, 1), (self.audio_sink, 1))
-#		self.connect (self.guts, self.audio_sink)
 
 		# pilot channel filter (band-pass, 18.5-19.5kHz)
 		pilot_filter_coeffs = gr.firdes.band_pass(1, 
@@ -211,7 +212,7 @@ class txrx(stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_sink)
 
-		if 1:
+		if 0:
 			myfft = fftsink2.fft_sink_f (panel, title="Signal, before FM modulation",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=20, ref_level=0)
 			self.connect (self.mixer, myfft)

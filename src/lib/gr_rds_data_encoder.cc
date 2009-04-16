@@ -269,7 +269,7 @@ int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
-	char *out = (char *) output_items[0];
+	bool *out = (bool *) output_items[0];
 	int a=0, b=0;
 
 /* FIXME make this output >1 groups */

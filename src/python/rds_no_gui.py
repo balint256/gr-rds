@@ -79,8 +79,7 @@ class rds_rx_graph (gr.top_block):
 		# volume control, audio sink
 		self.volume_control_l = gr.multiply_const_ff(self.vol)
 		self.volume_control_r = gr.multiply_const_ff(self.vol)
-		self.audio_sink = audio.sink(int(audio_rate),
-							options.audio_output, False)
+		self.audio_sink = audio.sink(int(audio_rate), options.audio_output, False)
 		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
 		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
 

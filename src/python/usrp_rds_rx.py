@@ -2,7 +2,7 @@
 
 from gnuradio import gr, usrp, optfir, blks2, rds, audio
 from gnuradio.eng_option import eng_option
-from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2
+from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2, constsink_gl
 from optparse import OptionParser
 from rdspanel import rdsPanel
 from usrpm import usrp_dbid
@@ -194,6 +194,25 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.rds_bb_filter, (rds_scope,1))
 			self.connect (self.rds_clock, (rds_scope,0))
 			vbox.Add(rds_scope.win, 4, wx.EXPAND)
+		
+#		if 1:
+#			const_sink = constsink_gl.const_sink_c(
+#				self.panel,
+#				title="Constellation Plot",
+#				sample_rate=usrp_rate,
+##				frame_rate=5,
+##				const_size=2048,
+##				M=4,
+##				theta=0,
+##				alpha=0.005,
+##				fmax=0.06,
+##				mu=0.5,
+##				gain_mu=0.005,
+##				symbol_rate=usrp_rate/4.,
+##				omega_limit=0.005,
+#			)
+#			self.connect (self.rds_bb_filter, gr.float_to_complex(), const_sink)
+#			vbox.Add(const_sink.win, 4, wx.EXPAND)
 
 		self.rdspanel = rdsPanel(self.msgq, self.panel)
 		vbox.Add(self.rdspanel, 4, wx.EXPAND)

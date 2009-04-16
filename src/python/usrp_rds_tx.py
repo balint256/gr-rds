@@ -39,7 +39,9 @@ class rds_tx_block(stdgui2.std_top_block):
 		print "Using d'board", self.subdev.side_and_name()
 
 		# set max Tx gain, tune frequency and enable transmitter
-		self.subdev.set_gain(self.subdev.gain_range()[1])
+		gain = self.subdev.gain_range()[1]
+		self.subdev.set_gain(gain)
+		print "Gain set to", gain
 		if self.u.tune(self.subdev.which(), self.subdev, options.freq):
 			print "Tuned to", options.freq/1e6, "MHz"
 		else:

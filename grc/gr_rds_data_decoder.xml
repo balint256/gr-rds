@@ -12,8 +12,8 @@
 	<param>
 		<name>Message Queue</name>
 		<key>msgq</key>
-		<value></value>
-		<type>msg_queue</type>
+		<value>0</value>
+		<type>raw</type>
 	</param>
 	<sink>
 		<name>in</name>

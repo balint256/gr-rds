@@ -176,7 +176,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
-		if 0:
+		if 1:
 			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
 			self.connect (self.guts.fm_demod, post_fm_demod_fft)

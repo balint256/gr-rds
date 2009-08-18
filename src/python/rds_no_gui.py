@@ -73,7 +73,7 @@ class rds_rx_graph (gr.top_block):
 						0.1,
 						60)
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
-		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim, 50e-6)
+		self.guts = blks2.wfm_rcv_pll (demod_rate, audio_decim)
 		self.connect(self.u, self.chan_filt, self.guts)
 
 		# volume control, audio sink

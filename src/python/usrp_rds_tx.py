@@ -16,7 +16,8 @@ class rds_tx_block(stdgui2.std_top_block):
 						help="select USRP Tx side A or B")
 		parser.add_option("-f", "--freq", type="eng_float", default=107.2e6,
 						help="set Tx frequency to FREQ [required]", metavar="FREQ")
-		parser.add_option("--wavfile", type="string", default="",
+		parser.add_option("--wavfile", type="string",
+						default="/home/azimout/limmenso_stereo.wav",
 						help="open .wav audio file FILE")
 		parser.add_option("--xml", type="string", default="rds_data.xml",
 						help="open .xml RDS data FILE")

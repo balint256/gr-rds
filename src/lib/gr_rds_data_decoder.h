@@ -38,6 +38,7 @@
 #include <string.h>
 #include <vector>
 #include <iostream>
+#include <stdio.h>
 
 class gr_rds_data_decoder;
 

@@ -19,11 +19,13 @@ def detect_usrp1():
 			if(a.dbid()!=-1):
 				print "daughterboard a:", a.name(), "(0x%04X)" % (a.dbid())
 				print "freq range: ", a.freq_min()/1e6, "MHz -", a.freq_max()/1e6, "MHz"
+				print "gain rainge: ", a.gain_min(), "dB -", a.gain_max(), "dB"
 			else:	print "no daughterboard on side a"
 			b = usrp.selected_subdev(u, (1,0))
 			if(b.dbid()!=-1):
 				print "daughterboard b:", b.name(), "(0x%04X)" % (b.dbid())
 				print "freq range: ", b.freq_min()/1e6, "MHz -", b.freq_max()/1e6, "MHz"
+				print "gain rainge: ", b.gain_min(), "dB -", b.gain_max(), "dB"
 			else:	print "no daughterboard on side b"
 		except:
 			print "\033[1;31mno more usrp's found\033[1;m"

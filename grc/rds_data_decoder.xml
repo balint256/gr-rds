@@ -7,8 +7,10 @@
 <block>
 	<name>RDS Data Sink</name>
 	<key>gr_rds_data_decoder</key>
+	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
-	<make>gr.rds_data_decoder($msgq)</make>
+	<make>rds.data_decoder($msgq)</make>
+	<callback></callback>
 	<param>
 		<name>Message Queue</name>
 		<key>msgq</key>

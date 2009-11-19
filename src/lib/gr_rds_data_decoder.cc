@@ -586,7 +586,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 
 /* the synchronization process is described in Annex C, page 66 of the standard */
 	while (i<noutput_items) {
-		reg=(reg<<1)|in[i];
+		reg=(reg<<1)|in[i];		// convert from byte to bit
 		switch (d_state) {
 			case ST_NO_SYNC:
 				reg_syndrome = calc_syndrome(reg,26,0x5b9,10);

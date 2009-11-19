@@ -7,19 +7,23 @@
 <block>
 	<name>RDS Data Source</name>
 	<key>gr_rds_data_encoder</key>
+	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
-	<make>gr.rds_data_encoder($xmlfile)</make>
+	<make>rds.data_encoder($xmlfile)</make>
+	<callback></callback>
 	<param>
 		<name>File</name>
 		<key>xmlfile</key>
 		<value></value>
 		<type>file_open</type>
 	</param>
+	<check>len($xmlfile) &gt; 0</check>
 	<source>
 		<name>out</name>
 		<type>byte</type>
 		<vlen>gr.sizeof_char</vlen>
 	</source>
+	
 	<doc>
 This is a source block. It reads its configuration from an XML file,\
 and outputs a bitstream of RDS data.

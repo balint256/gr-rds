@@ -146,10 +146,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
-#		# this is used for tuning to stations automatically
-#		self.probe = gr.probe_avg_mag_sqrd_f(5, 0.1)
-#		self.connect (self.pilot_filter, self.probe)
-
 		self._build_gui(vbox, usrp_rate, audio_rate)
 
 		# set initial values
@@ -176,7 +172,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
-		if 1:
+		if 0:
 			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
 			self.connect (self.guts.fm_demod, post_fm_demod_fft)
@@ -188,31 +184,12 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.rds_clock, rds_fft)
 			vbox.Add (rds_fft.win, 4, wx.EXPAND)
 
-		if 0:
+		if 1:
 			rds_scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
 				sample_rate=usrp_rate,num_inputs=2)
 			self.connect (self.rds_bb_filter, (rds_scope,1))
 			self.connect (self.rds_clock, (rds_scope,0))
 			vbox.Add(rds_scope.win, 4, wx.EXPAND)
-		
-#		if 1:
-#			const_sink = constsink_gl.const_sink_c(
-#				self.panel,
-#				title="Constellation Plot",
-#				sample_rate=usrp_rate,
-##				frame_rate=5,
-##				const_size=2048,
-##				M=4,
-##				theta=0,
-##				alpha=0.005,
-##				fmax=0.06,
-##				mu=0.5,
-##				gain_mu=0.005,
-##				symbol_rate=usrp_rate/4.,
-##				omega_limit=0.005,
-#			)
-#			self.connect (self.rds_bb_filter, gr.float_to_complex(), const_sink)
-#			vbox.Add(const_sink.win, 4, wx.EXPAND)
 
 		self.rdspanel = rdsPanel(self.msgq, self.panel)
 		vbox.Add(self.rdspanel, 4, wx.EXPAND)
@@ -256,7 +233,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 	def set_vol (self, vol):
 		g = self.volume_range()
-		self.vol = max(g[0], min(g[1], vol))
+		self.vol = max(g[0], min(g[1], vol))		# clever trick
 		self.volume_control_l.set_k(10**(self.vol/10))
 		self.volume_control_r.set_k(10**(self.vol/10))
 		self.myform['volume'].set_value(self.vol)
@@ -296,14 +273,12 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if new_freq > 108e6:
 			new_freq=88e6
 		self.set_freq(new_freq)
-#		print self.probe.level()
 
 	def Seek_Down(self, event):
 		new_freq = self.freq - 1e5
 		if new_freq < 88e6:
 			new_freq=108e6
 		self.set_freq(new_freq)
-#		print self.probe.level()
 
 
 if __name__ == '__main__':

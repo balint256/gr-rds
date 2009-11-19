@@ -1,3 +1,12 @@
+19.11.2009
+- added gain range to detect_usrps.py
+- renamed grc blocks
+- some more cleaning up
+
+14.10.2009
+- changed grc blocks installation
+- some more cleaning up
+
 16.04.2009
 - GRC blocks and rds_tx grc graph
 - changed encoder output from char to bool

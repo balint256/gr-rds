@@ -1,11 +1,11 @@
 #
-# Copyright 2004,2005 Free Software Foundation, Inc.
+# Copyright 2004,2005,2006,2008,2009 Free Software Foundation, Inc.
 # 
 # This file is part of GNU Radio
 # 
 # GNU Radio is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
+# the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 # 
 # GNU Radio is distributed in the hope that it will be useful,
@@ -15,84 +15,72 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with GNU Radio; see the file COPYING.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-# Boston, MA 02111-1307, USA.
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 # 
 
 include $(top_srcdir)/Makefile.common
 
-# Install this stuff so that it ends up as the gnuradio.howto module
-# This usually ends up at:
-#   ${prefix}/lib/python${python_version}/site-packages/gnuradio
+# C/C++ headers get installed in ${prefix}/include/gnuradio
+grinclude_HEADERS =			\
+	gr_rds_bpsk_demod.h		\
+	gr_rds_data_decoder.h		\
+	gr_rds_data_encoder.h		\
+	gr_rds_freq_statistics.h	\
+	gr_rds_freq_divider.h
 
-ourpythondir = $(grpythondir)
-ourlibdir    = $(grpyexecdir)
+###################################
+# SWIG Python interface and library
 
-INCLUDES = $(STD_DEFINES_AND_INCLUDES) $(PYTHON_CPPFLAGS)
-
-SWIGCPPPYTHONARGS = -python $(PYTHON_CPPFLAGS) \
-	-I$(swigincludedir) -I$(grincludedir)
-
-ALL_IFILES = 					\
-	$(LOCAL_IFILES)				\
-	$(NON_LOCAL_IFILES)
-
-NON_LOCAL_IFILES =				\
-	$(GNURADIO_I)
-
-
-LOCAL_IFILES = 					\
+TOP_SWIG_IFILES = 		\
 	rds.i
 
-# These files are built by SWIG.  The first is the C++ glue.
-# The second is the python wrapper that loads the _howto shared library
-# and knows how to call our extensions.
+# Install so that they end up available as:
+#   import gnuradio.howto
+# This ends up at:
+#   ${prefix}/lib/python${python_version}/site-packages/gnuradio
+howto_pythondir_category =	\
+	gnuradio
 
-BUILT_SOURCES = 				\
-	rds.cc						\
-	rds.py
+# additional arguments to the SWIG command
+#howto_la_swig_args =		\
+#	-g
 
-# This gets howto.py installed in the right place
-ourpython_PYTHON =				\
-	rds.py
-
-ourlib_LTLIBRARIES = _rds.la
-
-# These are the source files that go into the shared library
-_rds_la_SOURCES = 				\
-	rds.cc						\
+# additional sources for the SWIG-generated library
+_rds_la_SOURCES = 			\
+	rds.cc				\
 	gr_rds_bpsk_demod.cc		\
 	gr_rds_data_decoder.cc		\
 	gr_rds_data_encoder.cc		\
 	gr_rds_freq_statistics.cc	\
 	gr_rds_freq_divider.cc
 
-# magic flags
+# additional arguments to the SWIG command
+#howto_la_swig_args =		\
+#	$(SWIG_PYTHON_ARGS)
+
+# additional libraries for linking with the SWIG-generated library
+#howto_la_swig_libadd =		\
+#	libm.dylib
+
+# additional LD flags for linking the SWIG-generated library
+#howto_la_swig_ldflags =	\
+#	-L/opt/local/bin
 _rds_la_LDFLAGS = -module -avoid-version
 
-# link the library against some comon swig runtime code and the 
-# c++ standard library
-_rds_la_LIBADD = 				\
-	$(GNURADIO_CORE_LIBS)		\
-	$(PYTHON_LDFLAGS)			\
-	-lxml2						\
-	-lstdc++
+# additional Python files to be installed along with the SWIG-generated one
+#howto_python =			\
+#	__init__.py
 
-rds.cc rds.py: rds.i $(ALL_IFILES)
-	$(SWIG) $(SWIGCPPPYTHONARGS) -module rds -o rds.cc $<
+# additional SWIG files to be installed
+#howto_swiginclude_headers =	\
+#	nothing.i
 
-# These headers get installed in ${prefix}/include/gnuradio
-grinclude_HEADERS =				\
-	gr_rds_bpsk_demod.h			\
-	gr_rds_data_decoder.h		\
-	gr_rds_data_encoder.h		\
-	gr_rds_freq_statistics.h	\
-	gr_rds_freq_divider.h
+include $(top_srcdir)/Makefile.swig
 
-# These swig headers get installed in ${prefix}/include/gnuradio/swig
-swiginclude_HEADERS = 			\
-	$(LOCAL_IFILES)
+BUILT_SOURCES = 			\
+	rds.cc				\
+	rds.py
 
-
-MOSTLYCLEANFILES = $(BUILT_SOURCES) *.pyc
-
+# Do not distribute the output of SWIG
+no_dist_files = $(swig_built_sources)

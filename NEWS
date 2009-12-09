@@ -1,3 +1,9 @@
+07.12.2009
+- ported to gr-howto-write-a-block-3.2.2
+- resulting license change: GPLv2 -> GPLv3
+- tweaked the autotools to my liking
+- configure now fails if libxml2-dev not found
+
 19.11.2009
 - added gain range to detect_usrps.py
 - renamed grc blocks

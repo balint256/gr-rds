@@ -1,11 +1,11 @@
 dnl 
-dnl  Copyright 2004,2005 Free Software Foundation, Inc.
+dnl  Copyright 2004,2005,2007,2008,2009 Free Software Foundation, Inc.
 dnl  
 dnl  This file is part of GNU Radio
 dnl  
 dnl  GNU Radio is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU General Public License as published by
-dnl  the Free Software Foundation; either version 2, or (at your option)
+dnl  the Free Software Foundation; either version 3, or (at your option)
 dnl  any later version.
 dnl  
 dnl  GNU Radio is distributed in the hope that it will be useful,
@@ -19,73 +19,64 @@ dnl  the Free Software Foundation, Inc., 51 Franklin Street,
 dnl  Boston, MA 02110-1301, USA.
 dnl 
 
-AC_INIT
-AC_PREREQ(2.57)
-AC_CONFIG_SRCDIR([src/lib/rds.i])
-AM_CONFIG_HEADER(config.h)
-AC_CANONICAL_TARGET([])
-AM_INIT_AUTOMAKE(gr-rds,3.0svn)
+AC_INIT(gr-howto-write-a-block,3.2.2)
+AC_PREREQ(2.61)
+AC_CONFIG_AUX_DIR([.])	
 
-GR_X86_64
-dnl LF_CONFIGURE_CC
-LF_CONFIGURE_CXX
-LF_SET_WARNINGS
-GR_SET_GPROF
-GR_SET_PROF
-AM_PROG_AS
-AC_PROG_LN_S
-AC_PROG_MAKE_SET
-AC_PROG_INSTALL
-AC_PATH_PROG([RM_PROG], [rm])
-
-AC_LIBTOOL_WIN32_DLL
-AC_ENABLE_SHARED	dnl do build shared libraries
-AC_DISABLE_STATIC	dnl don't build static libraries
-AC_PROG_LIBTOOL
-
-dnl Locate python, SWIG, etc
-GR_NO_UNDEFINED
-GR_SCRIPTING
-
-dnl Checks for libraries.
-
-CFLAGS="${CFLAGS} $PTHREAD_CFLAGS"
-CXXFLAGS="${CXXFLAGS} $PTHREAD_CFLAGS"
-
-if test "x$CXX_FOR_BUILD" = x
-then
-  CXX_FOR_BUILD=${CXX}
-fi
-AC_SUBST(CXX_FOR_BUILD)
-
-dnl Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(fcntl.h limits.h strings.h sys/ioctl.h sys/time.h unistd.h)
-AC_CHECK_HEADERS(sys/mman.h)
+dnl This is kind of non-standard, but it sure shortens up this file :-)
+m4_include([config/gr_standalone.m4])
+GR_STANDALONE
 
 dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
+AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
+AC_TYPE_SSIZE_T
+AC_CHECK_TYPES([ptrdiff_t])
+
+dnl Checks for programs.
+AC_PROG_CXX
+AC_PROG_AWK
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS([])
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([floor gettimeofday memset strstr strtol])
 
-dnl Check for Mingw support
-GR_PWIN32
+dnl Check for header files you need
+AC_CHECK_HEADERS([float.h limits.h stdlib.h string.h sys/time.h])
 
-PKG_CHECK_MODULES(GNURADIO_CORE, gnuradio-core >= 2)
-LIBS="$LIBS $GNURADIO_CORE_LIBS"
+dnl Check for libxml2-dev
+AC_CHECK_LIB([xml2], [xmlParseFile])
+PKG_CHECK_MODULES(XML2, "libxml-2.0")
 
-dnl Define where to find boost includes
-dnl defines BOOST_CFLAGS
-GR_REQUIRE_BOOST_INCLUDES
+dnl We pick up the boost cppflags, cxxflags and thread lib via GNURADIO_CORE
+dnl
+dnl If you need additional boost libraries, you'll need to
+dnl uncomment AX_BOOST_BASE, plus some of the following:
+dnl
+dnl calls AC_SUBST(BOOST_CPPFLAGS), AC_SUBST(BOOST_LDFLAGS) and defines HAVE_BOOST
+dnl AX_BOOST_BASE([1.35])
+dnl
+dnl All the rest of these call AC_SUBST(BOOST_<foo>_LIB) and define HAVE_BOOST_<foo>
+dnl
+dnl AX_BOOST_DATE_TIME
+dnl AX_BOOST_FILESYSTEM
+dnl AX_BOOST_IOSTREAMS
+dnl AX_BOOST_PROGRAM_OPTIONS
+dnl AX_BOOST_REGEX
+dnl AX_BOOST_SERIALIZATION
+dnl AX_BOOST_SIGNALS
+dnl AX_BOOST_SYSTEM
+dnl AX_BOOST_TEST_EXEC_MONITOR
+dnl AX_BOOST_UNIT_TEST_FRAMEWORK
+dnl AX_BOOST_WSERIALIZATION
 
-STD_DEFINES_AND_INCLUDES="$GNURADIO_CORE_CFLAGS $BOOST_CFLAGS"
-AC_SUBST(STD_DEFINES_AND_INCLUDES)
- 
 AC_CONFIG_FILES([\
 	  Makefile \
 	  config/Makefile \

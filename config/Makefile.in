@@ -22,7 +22,7 @@
 # 
 # GNU Radio is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3, or (at your option)
+# the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 # 
 # GNU Radio is distributed in the hope that it will be useful,
@@ -38,13 +38,13 @@
 
 # -*- Makefile -*-
 #
-# Copyright 2004,2006,2009 Free Software Foundation, Inc.
+# Copyright 2004,2006 Free Software Foundation, Inc.
 # 
 # This file is part of GNU Radio
 # 
 # GNU Radio is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3, or (at your option)
+# the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 # 
 # GNU Radio is distributed in the hope that it will be useful,
@@ -81,23 +81,17 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/Makefile.common
 subdir = config
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/gr_gprof.m4 \
-	$(top_srcdir)/config/gr_lib64.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/gr_boost.m4 \
+	$(top_srcdir)/config/gr_gprof.m4 \
 	$(top_srcdir)/config/gr_no_undefined.m4 \
 	$(top_srcdir)/config/gr_pwin32.m4 \
 	$(top_srcdir)/config/gr_python.m4 \
 	$(top_srcdir)/config/gr_scripting.m4 \
-	$(top_srcdir)/config/gr_swig.m4 $(top_srcdir)/config/lf_cc.m4 \
+	$(top_srcdir)/config/gr_swig.m4 \
+	$(top_srcdir)/config/gr_x86_64.m4 \
 	$(top_srcdir)/config/lf_cxx.m4 \
 	$(top_srcdir)/config/lf_warnings.m4 \
-	$(top_srcdir)/config/libtool.m4 \
-	$(top_srcdir)/config/ltoptions.m4 \
-	$(top_srcdir)/config/ltsugar.m4 \
-	$(top_srcdir)/config/ltversion.m4 \
-	$(top_srcdir)/config/lt~obsolete.m4 \
-	$(top_srcdir)/config/pkg.m4 \
-	$(top_srcdir)/config/gr_standalone.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/config/pkg.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -115,6 +109,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BOOST_CFLAGS = @BOOST_CFLAGS@
 CC = @CC@
 CCAS = @CCAS@
 CCASDEPMODE = @CCASDEPMODE@
@@ -127,6 +122,7 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
+CXX_FOR_BUILD = @CXX_FOR_BUILD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -140,7 +136,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GNURADIO_CORE_CFLAGS = @GNURADIO_CORE_CFLAGS@
-GNURADIO_CORE_CPPFLAGS = @GNURADIO_CORE_CPPFLAGS@
 GNURADIO_CORE_INCLUDEDIR = @GNURADIO_CORE_INCLUDEDIR@
 GNURADIO_CORE_LIBS = @GNURADIO_CORE_LIBS@
 GREP = @GREP@
@@ -187,17 +182,13 @@ RM_PROG = @RM_PROG@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STD_DEFINES_AND_INCLUDES = @STD_DEFINES_AND_INCLUDES@
 STRIP = @STRIP@
 SWIG = @SWIG@
 SWIG_PYTHON_CPPFLAGS = @SWIG_PYTHON_CPPFLAGS@
 SWIG_PYTHON_LIB = @SWIG_PYTHON_LIB@
 SWIG_PYTHON_OPT = @SWIG_PYTHON_OPT@
 VERSION = @VERSION@
-XML2_CFLAGS = @XML2_CFLAGS@
-XML2_CPPFLAGS = @XML2_CPPFLAGS@
-XML2_INCLUDEDIR = @XML2_INCLUDEDIR@
-XML2_LIBS = @XML2_LIBS@
-XMLTO = @XMLTO@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -210,7 +201,6 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
-autoconf_default_CXXFLAGS = @autoconf_default_CXXFLAGS@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -223,7 +213,6 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-gr_libdir_suffix = @gr_libdir_suffix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -252,7 +241,6 @@ pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-swig_CXXFLAGS = @swig_CXXFLAGS@
 sysconfdir = @sysconfdir@
 target = @target@
 target_alias = @target_alias@
@@ -262,26 +250,6 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-# these flags are used when compiling non-SWIG-wrapper files
-# when going in to non-SWIG libraries
-AM_CXXFLAGS = @autoconf_default_CXXFLAGS@
-
-# these flags are used when compiling any CXX file
-AM_CPPFLAGS = \
-	$(STD_DEFINES_AND_INCLUDES) \
-	$(PYTHON_CPPFLAGS) \
-	$(CPPUNIT_INCLUDES) \
-	$(GNURADIO_CORE_CPPFLAGS) \
-	$(XML2_CPPFLAGS)
-
-
-# these are used by both SWIG and CXX
-STD_DEFINES_AND_INCLUDES = \
-	$(DEFINES) \
-	-I$(GNURADIO_CORE_INCLUDEDIR) \
-	-I$(GNURADIO_CORE_INCLUDEDIR)/swig
-
 
 # includes
 grincludedir = $(includedir)/gnuradio
@@ -295,67 +263,50 @@ swigincludedir = $(grincludedir)/swig
 grpythondir = $(pythondir)/gnuradio
 grpyexecdir = $(pyexecdir)/gnuradio
 
+# swig flags
+SWIGPYTHONFLAGS = -fvirtual -python -modern
+SWIGGRFLAGS = -I$(GNURADIO_CORE_INCLUDEDIR)/swig -I$(GNURADIO_CORE_INCLUDEDIR)
+
 # Don't assume that make predefines $(RM), because BSD make does
 # not. We define it now in configure.ac using AM_PATH_PROG, but now
 # here have to add a -f to be like GNU make.
 RM = $(RM_PROG) -f
-
-# Other common defines; use "+=" to add to these
-STAMPS = 
-MOSTLYCLEANFILES = $(BUILT_SOURCES) $(STAMPS) *.pyc *.pyo *~ *.tmp *.loT
 
 # Install m4 macros in this directory
 m4datadir = $(datadir)/aclocal
 
 # List your m4 macros here
 m4macros = \
-	acx_pthread.m4 \
-	ax_boost_base.m4 \
-	ax_boost_date_time.m4 \
-	ax_boost_filesystem.m4 \
-	ax_boost_iostreams.m4 \
-	ax_boost_program_options.m4 \
-	ax_boost_python.m4 \
-	ax_boost_regex.m4 \
-	ax_boost_serialization.m4 \
-	ax_boost_signals.m4 \
-	ax_boost_system.m4 \
-	ax_boost_test_exec_monitor.m4 \
-	ax_boost_thread.m4 \
-	ax_boost_unit_test_framework.m4 \
-	ax_boost_wserialization.m4 \
-	bnv_have_qt.m4 \
-	cppunit.m4 \
+	acx_pthread.m4		\
+	bnv_have_qt.m4		\
+	cppunit.m4		\
+	gr_boost.m4		\
 	gr_check_createfilemapping.m4 \
-	gr_check_mc4020.m4 \
-	gr_check_shm_open.m4 \
-	gr_check_usrp.m4 \
-	gr_doxygen.m4 \
-	gr_fortran.m4 \
-	gr_gprof.m4 \
-	gr_lib64.m4 \
+	gr_check_usrp.m4	\
+	gr_check_mc4020.m4	\
+	gr_check_shm_open.m4	\
+	gr_doxygen.m4		\
+	gr_gprof.m4		\
 	gr_libgnuradio_core_extra_ldflags.m4 \
-	gr_no_undefined.m4 \
-	gr_omnithread.m4 \
-	gr_pwin32.m4 \
-	gr_python.m4 \
-	gr_require_mc4020.m4 \
-	gr_scripting.m4 \
-	gr_set_md_cpu.m4 \
-	gr_standalone.m4 \
-	gr_subversion.m4 \
-	gr_swig.m4 \
-	gr_sysv_shm.m4 \
-	lf_cc.m4 \
-	lf_cxx.m4 \
-	lf_warnings.m4 \
-	lf_x11.m4 \
-	mkstemp.m4 \
-	onceonly.m4 \
-	pkg.m4 \
-	usrp_fusb_tech.m4 \
-	usrp_libusb.m4 \
-	usrp_sdcc.m4
+	gr_no_undefined.m4	\
+	gr_pwin32.m4		\
+	gr_python.m4		\
+	gr_require_mc4020.m4	\
+	gr_scripting.m4		\
+	gr_set_md_cpu.m4	\
+	gr_swig.m4		\
+	gr_sysv_shm.m4		\
+	gr_x86_64.m4		\
+	lf_cc.m4		\
+	lf_cxx.m4		\
+	lf_warnings.m4		\
+	lf_x11.m4		\
+	mkstemp.m4		\
+	onceonly.m4		\
+	pkg.m4			\
+	usrp_fusb_tech.m4	\
+	usrp_libusb.m4		\
+	usrp_sdcc.m4		
 
 
 # Don't install m4 macros anymore
@@ -437,9 +388,6 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	$(MAKE) $(AM_MAKEFLAGS) \
-	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
-	  dist-hook
 check-am: all-am
 check: check-am
 all-am: Makefile
@@ -459,7 +407,6 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -539,24 +486,16 @@ uninstall-am:
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	dist-hook distclean distclean-generic distclean-libtool \
-	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am
+	distclean distclean-generic distclean-libtool distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
 
-
-# Don't distribute the files defined in the variable 'no_dist_files'
-dist-hook:
-	@for file in $(no_dist_files); do \
-		echo $(RM) $(distdir)/$$file; \
-		$(RM) $(distdir)/$$file; \
-	done;
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

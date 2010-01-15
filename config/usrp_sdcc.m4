@@ -4,7 +4,7 @@
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3, or (at your option)
+# the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 
 # This program is distributed in the hope that it will be useful,
@@ -19,57 +19,49 @@
 
 AC_DEFUN([USRP_SDCC],
 [
-	sdccok=yes
 	AC_CHECK_PROG(XCC, sdcc, sdcc -mmcs51 --no-xinit-opt,no)
 	AC_CHECK_PROG(XAS, asx8051, asx8051 -plosgff,no)
 
 	if test "$XCC" = "no" -o "$XAS" = "no" ; then
-		AC_MSG_RESULT([USRP requires sdcc. sdcc not found. See http://sdcc.sf.net])
-		sdccok=no
-	else
-		sdcc_version_min=$1
-
-		sdcc_version=`sdcc --version 2>&1 | \
-			sed  's/\(SDCC.* \)\([[0-9]]*\.[[0-9]]*\.[[0-9]]*\)\( .*$\)/\2/'`
-
-	        AC_MSG_CHECKING([sdcc_version "$sdcc_version"])
-
-		sdcc_major_version=`echo $sdcc_version | \
-			sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-		sdcc_minor_version=`echo $sdcc_version | \
-			sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-		sdcc_micro_version=`echo $sdcc_version | \
-			sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-
-		sdcc_major_min=`echo $sdcc_version_min | \
-			sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-		sdcc_minor_min=`echo $sdcc_version_min | \
-			sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-		sdcc_micro_min=`echo $sdcc_version_min | \
-			sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-
-		sdcc_version_proper=`expr \
-			"$sdcc_major_version" \> "$sdcc_major_min" \| \
-			"$sdcc_major_version" \= "$sdcc_major_min" \& \
-	    		"$sdcc_minor_version" \> "$sdcc_minor_min" \| \
-			"$sdcc_major_version" \= "$sdcc_major_min" \& \
-			"$sdcc_minor_version" \= "$sdcc_minor_min" \& \
-			"$sdcc_micro_version" \>= "$sdcc_micro_min" `
-
-		if test "$sdcc_version_proper" = "1" ; then
-			AC_MSG_RESULT([$sdcc_major_version.$sdcc_minor_version.$sdcc_micro_version])
-		else
-			sdccok=no
-			AC_MSG_RESULT([USRP requires sdcc >= $sdcc_version_min. sdcc not found. See http://sdcc.sf.net])
-		fi
-
-		AC_SUBST(XCC)
-		AC_SUBST(XAS)
+		AC_MSG_ERROR([USRP requires sdcc. sdcc not found, stop. See http://sdcc.sf.net])
 	fi
 
-	if test $sdccok = yes; then
-		ifelse([$2], , :, [$2])
+	sdcc_version_min=$1
+
+	sdcc_version=`sdcc --version 2>&1 | \
+		sed  's/\(SDCC.* \)\([[0-9]]*\.[[0-9]]*\.[[0-9]]*\)\( .*$\)/\2/'`
+
+        AC_MSG_CHECKING([sdcc_version "$sdcc_version"])
+
+	sdcc_major_version=`echo $sdcc_version | \
+		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+	sdcc_minor_version=`echo $sdcc_version | \
+		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+	sdcc_micro_version=`echo $sdcc_version | \
+		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+
+	sdcc_major_min=`echo $sdcc_version_min | \
+		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+	sdcc_minor_min=`echo $sdcc_version_min | \
+		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+	sdcc_micro_min=`echo $sdcc_version_min | \
+		sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+
+	sdcc_version_proper=`expr \
+		"$sdcc_major_version" \> "$sdcc_major_min" \| \
+		"$sdcc_major_version" \= "$sdcc_major_min" \& \
+		"$sdcc_minor_version" \> "$sdcc_minor_min" \| \
+		"$sdcc_major_version" \= "$sdcc_major_min" \& \
+		"$sdcc_minor_version" \= "$sdcc_minor_min" \& \
+		"$sdcc_micro_version" \>= "$sdcc_micro_min" `
+
+	if test "$sdcc_version_proper" = "1" ; then
+		AC_MSG_RESULT([$sdcc_major_version.$sdcc_minor_version.$sdcc_micro_version])
 	else
-		ifelse([$3], , :, [$3])
+		AC_MSG_ERROR([USRP requires sdcc >= $sdcc_version_min. sdcc not found, stop. See http://sdcc.sf.net])
 	fi
+
+	AC_SUBST(XCC)
+	AC_SUBST(XAS)
+
 ])

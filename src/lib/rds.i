@@ -3,9 +3,10 @@
 %feature("autodoc", "1");		// generate python docstrings
 
 %include "exception.i"
-%include "gnuradio.i"			// the common stuff
+%import "gnuradio.i"			// the common stuff
 
 %{
+#include "gnuradio_swig_bug_workaround.h"	// mandatory bug fix
 #include "gr_rds_bpsk_demod.h"
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_data_encoder.h"
@@ -15,14 +16,6 @@
 %}
 
 //------------------------------------------------------------------
-
-/*
- * First arg is the package prefix.
- * Second arg is the name of the class minus the prefix.
- *
- * This does some behind-the-scenes magic so we can
- * access howto_square_ff from python as howto.square_ff
- */
 
 GR_SWIG_BLOCK_MAGIC (gr_rds, freq_statistics);
 

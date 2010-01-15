@@ -1,11 +1,11 @@
 #
-# Copyright 2004,2008,2009 Free Software Foundation, Inc.
+# Copyright 2004 Free Software Foundation, Inc.
 # 
 # This file is part of GNU Radio
 # 
 # GNU Radio is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3, or (at your option)
+# the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 # 
 # GNU Radio is distributed in the hope that it will be useful,
@@ -19,13 +19,9 @@
 # Boston, MA 02110-1301, USA.
 # 
 
-ACLOCAL_AMFLAGS = -I config
-
 include $(top_srcdir)/Makefile.common
 
-EXTRA_DIST = bootstrap configure config.h.in \
-	Makefile.swig Makefile.swig.gen.t
-
+EXTRA_DIST = configure config.h.in config.guess config.sub depcomp py-compile
 SUBDIRS = config src
 DIST_SUBDIRS = config src
 

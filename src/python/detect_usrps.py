@@ -11,7 +11,7 @@ import subprocess
 
 def detect_usrp1():
 	print "\033[1;33mdetecting usrp's...\033[1;m"
-	for i in [0,1,2,3]:
+	for i in range(3):
 		try:
 			u = usrp.source_c(i)
 			print "usrp found, serial:", u.serial_number()

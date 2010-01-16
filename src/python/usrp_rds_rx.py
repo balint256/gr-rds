@@ -8,6 +8,8 @@ from rdspanel import rdsPanel
 from usrpm import usrp_dbid
 import sys, math, wx, time
 
+dblist = (usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2,
+		usrp_dbid.TV_RX_REV_3, usrp_dbid.BASIC_RX)
 
 class rds_rx_graph (stdgui2.std_top_block):
 	def __init__(self,frame,panel,vbox,argv):
@@ -27,7 +29,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		parser.add_option("-O", "--audio-output", type="string", default="plughw:0,0",
 						  help="pcm device name (default is plughw:0,0)")
 
-
+		# print help when called with wrong arguments
 		(options, args) = parser.parse_args()
 		if len(args) != 0:
 			parser.print_help()
@@ -46,8 +48,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		audio_decim = 8
 		audio_rate = usrp_rate / audio_decim		# 32 kS/s
 		if options.rx_subdev_spec is None:
-			options.rx_subdev_spec = usrp.pick_subdev(self.u, 
-				(usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2, usrp_dbid.BASIC_RX))
+			options.rx_subdev_spec = usrp.pick_subdev(self.u, dblist)
 
 		self.u.set_mux(usrp.determine_rx_mux_value(self.u, options.rx_subdev_spec))
 		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
@@ -172,7 +173,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.u, self.src_fft)
 			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
 
-		if 0:
+		if 1:
 			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
 			self.connect (self.guts.fm_demod, post_fm_demod_fft)
@@ -184,7 +185,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			self.connect (self.rds_clock, rds_fft)
 			vbox.Add (rds_fft.win, 4, wx.EXPAND)
 
-		if 1:
+		if 0:
 			rds_scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
 				sample_rate=usrp_rate,num_inputs=2)
 			self.connect (self.rds_bb_filter, (rds_scope,1))

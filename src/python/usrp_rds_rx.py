@@ -35,16 +35,13 @@ class rds_rx_graph (stdgui2.std_top_block):
 			parser.print_help()
 			sys.exit(1)
 
-		self.frame = frame
-		self.panel = panel
 
 
 		# connect to USRP
 		usrp_decim = 250
 		self.u = usrp.source_c(0, usrp_decim)
 		print "USRP Serial: ", self.u.serial_number()
-		adc_rate = self.u.adc_rate()			# 64 MS/s
-		usrp_rate = adc_rate / usrp_decim		# 256 kS/s
+		usrp_rate = self.u.adc_rate() / usrp_decim		# 256 kS/s
 		audio_decim = 8
 		audio_rate = usrp_rate / audio_decim		# 32 kS/s
 		if options.rx_subdev_spec is None:
@@ -55,28 +52,28 @@ class rds_rx_graph (stdgui2.std_top_block):
 		print "Using d'board", self.subdev.side_and_name()
 
 
+
 		# gain, volume, frequency
 		self.gain = options.gain
 		if options.gain is None:
-			g = self.subdev.gain_range()
-			self.gain = g[1]
-
+			self.gain = self.subdev.gain_range()[1]
 		self.vol = options.volume
 		if self.vol is None:
 			g = self.volume_range()
 			self.vol = float(g[0]+g[1])/2
-
 		self.freq = options.freq
 		if abs(self.freq) < 1e6:
 			self.freq *= 1e6
 
+
 		# channel filter, wfm_rcv_pll
-		chan_filt_coeffs = optfir.low_pass (1,
-						usrp_rate,
-						80e3,
-						115e3,
-						0.1,
-						60)
+		chan_filt_coeffs = optfir.low_pass(
+			1,				# gain
+			usrp_rate,		# rate
+			100e3,			# passband cutoff
+			120e3,			# stopband cutoff
+			0.1,			# passband ripple
+			60)				# stopband attenuation
 		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
 		self.guts = blks2.wfm_rcv_pll (usrp_rate, audio_decim)
 		self.connect(self.u, self.chan_filt, self.guts)
@@ -90,22 +87,24 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
 
 		# pilot channel filter (band-pass, 18.5-19.5kHz)
-		pilot_filter_coeffs = gr.firdes.band_pass(1, 
-						usrp_rate,
-						18.5e3,
-						19.5e3,
-						1e3,
-						gr.firdes.WIN_HAMMING)
+		pilot_filter_coeffs = gr.firdes.band_pass(
+			1,				# gain
+			usrp_rate,		# sampling rate
+			18.5e3,			# low cutoff
+			19.5e3,			# high cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
 		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
 		self.connect(self.guts.fm_demod, self.pilot_filter)
 
 		# RDS channel filter (band-pass, 54-60kHz)
-		rds_filter_coeffs = gr.firdes.band_pass (1,
-						usrp_rate,
-						54e3,
-						60e3,
-						3e3,
-						gr.firdes.WIN_HAMMING)
+		rds_filter_coeffs = gr.firdes.band_pass(
+			1,				# gain
+			usrp_rate,		# sampling rate
+			54e3,			# low cutoff
+			60e3,			# high cutoff
+			3e3,			# transition width
+			gr.firdes.WIN_HAMMING)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
 		self.connect(self.guts.fm_demod, self.rds_filter)
 
@@ -117,23 +116,24 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.rds_filter, (self.mixer, 3))
 
 		# low-pass the baseband RDS signal at 1.5kHz
-		rds_bb_filter_coeffs = gr.firdes.low_pass (1,
-						usrp_rate,
-						1500,
-						2e3,
-						gr.firdes.WIN_HAMMING)
+		rds_bb_filter_coeffs = gr.firdes.low_pass(
+			1,				# gain
+			usrp_rate,		# sampling rate
+			1.5e3,			# passband cutoff
+			2e3,			# transition width
+			gr.firdes.WIN_HAMMING)
 		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
 		self.connect(self.mixer, self.rds_bb_filter)
 
 
 		# 1187.5bps = 19kHz/16
 		self.rds_clock = rds.freq_divider(16)
-		#self.rds_clock = gr.fractional_interpolator_ff(0, 1/16.)
-		clock_taps = gr.firdes.low_pass (1,	# gain
-						usrp_rate,	# sampling rate
-						1.2e3,		# passband cutoff
-						1.5e3,		# transition width
-						gr.firdes.WIN_HANN)
+		clock_taps = gr.firdes.low_pass(
+			1,				# gain
+			usrp_rate,		# sampling rate
+			1.2e3,			# passband cutoff
+			1.5e3,			# transition width
+			gr.firdes.WIN_HANN)
 		self.clock_filter = gr.fir_filter_fff (1, clock_taps)
 		self.connect(self.pilot_filter, self.rds_clock, self.clock_filter)
 
@@ -147,14 +147,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
-		self._build_gui(vbox, usrp_rate, audio_rate)
 
-		# set initial values
+		self.frame = frame
+		self.panel = panel
+		self._build_gui(vbox, usrp_rate, audio_rate)
 		self.set_gain(self.gain)
 		self.set_vol(self.vol)
 		if not(self.set_freq(self.freq)):
-			self._set_status_msg("Failed to set initial frequency")
-
+			self._set_status_msg("Failed to set initial frequency")	
 
 
 ####################### GUI ################################
@@ -167,30 +167,17 @@ class rds_rx_graph (stdgui2.std_top_block):
 		def _form_set_freq(kv):
 			return self.set_freq(kv['freq'])
 
-		if 0:
-			self.src_fft = fftsink2.fft_sink_c (self.panel, title="Data from USRP",
-				fft_size=512, sample_rate=usrp_rate)
-			self.connect (self.u, self.src_fft)
-			vbox.Add (self.src_fft.win, 4, wx.EXPAND)
-
 		if 1:
-			post_fm_demod_fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
+			self.fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
-			self.connect (self.guts.fm_demod, post_fm_demod_fft)
-			vbox.Add (post_fm_demod_fft.win, 4, wx.EXPAND)
-
+			self.connect (self.guts.fm_demod, self.fft)
+			vbox.Add (self.fft.win, 4, wx.EXPAND)
 		if 0:
-			rds_fft = fftsink2.fft_sink_f (self.panel, title="RDS baseband",
-				fft_size=512, sample_rate=usrp_rate, y_per_div=20, ref_level=20)
-			self.connect (self.rds_clock, rds_fft)
-			vbox.Add (rds_fft.win, 4, wx.EXPAND)
-
-		if 0:
-			rds_scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
-				sample_rate=usrp_rate,num_inputs=2)
+			self.scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",
+				sample_rate=usrp_rate, num_inputs=2)
 			self.connect (self.rds_bb_filter, (rds_scope,1))
 			self.connect (self.rds_clock, (rds_scope,0))
-			vbox.Add(rds_scope.win, 4, wx.EXPAND)
+			vbox.Add(self.scope.win, 4, wx.EXPAND)
 
 		self.rdspanel = rdsPanel(self.msgq, self.panel)
 		vbox.Add(self.rdspanel, 4, wx.EXPAND)

@@ -84,10 +84,10 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# create pilot tone at 19 kHz
 		self.pilot = gr.sig_source_f(
-			usrp_rate,			# sampling freq
+			usrp_rate,			# sampling rate
 			gr.GR_SIN_WAVE,		# waveform
 			19e3,				# frequency
-			3e-2)				# amplitude
+			5e-2)				# amplitude
 
 		# create the L-R signal carrier at 38 kHz, high-pass to remove 0Hz tone
 		self.stereo_carrier = gr.multiply_ff()
@@ -105,7 +105,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		# upconvert L-R to 23-53 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
 		audio_lmr_taps = gr.firdes.band_pass(
-			1e2,			# gain
+			2e2,			# gain
 			usrp_rate,		# sampling rate
 			23e3,			# low cutoff
 			53e3,			# high cutoff
@@ -138,7 +138,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# RDS band-pass filter
 		rds_filter_taps = gr.firdes.band_pass(
-			10,				# gain
+			50,				# gain
 			usrp_rate,		# sampling rate
 			55e3,			# low cutoff
 			59e3,			# high cutoff
@@ -155,7 +155,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.rds_filter, (self.mixer, 3))
 
 		# fm modulation, gain & TX
-		max_dev = 120e3
+		max_dev = 75e3
 		k = 2*math.pi*max_dev/usrp_rate		# modulator sensitivity
 		self.modulator = gr.frequency_modulator_fc (k)
 		self.gain = gr.multiply_const_cc (1e4)
@@ -163,9 +163,9 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# plot an FFT to verify we are sending what we want
 		if 1:
-			self.fft = fftsink2.fft_sink_f(panel, title="BPSK output",
+			self.fft = fftsink2.fft_sink_f(panel, title="Pre FM modulation",
 				fft_size=512*4, sample_rate=usrp_rate, y_per_div=20, ref_level=-20)
-			self.connect (self.audio_lpr, self.fft)
+			self.connect (self.mixer, self.fft)
 			vbox.Add (self.fft.win, 1, wx.EXPAND)
 		if 0:
 			self.scope = scopesink2.scope_sink_f(panel, title="RDS encoder output",

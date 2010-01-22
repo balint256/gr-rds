@@ -3,6 +3,8 @@
 - fixed the buffer preparation in the rds_encoder
 - removed the freq_statistics code that was temporarily stored here
 - fixed compilation with libxml-dev
+- corrected fm modulation maximum deviation
+- toying around with the rds panel layout
 
 19.11.2009
 - added gain range to detect_usrps.py

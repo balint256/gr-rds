@@ -80,49 +80,46 @@ class rdsPanel(wx.Panel):
 		self.artificialhead_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
 		self.compressed_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
 		self.staticpty_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
+		self.radiotext.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
+		self.clocktime.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
 		self.alt_freq.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
 
 	def __do_layout(self):
-		sizer_1 = wx.BoxSizer(wx.VERTICAL)
-		grid_sizer_4 = wx.GridSizer(1, 4)
-		grid_sizer_3 = wx.GridSizer(1, 2)
-		grid_sizer_2 = wx.GridSizer(1, 7)
-		grid_sizer_1 = wx.GridSizer(1, 8)
-
-		cell_settings_a = wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE
+		sizer_0 = wx.BoxSizer(wx.VERTICAL)
+		sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
+		sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
+		sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
 		
-		grid_sizer_1.Add(self.label_1, 0, cell_settings_a, 0)
-		grid_sizer_1.Add(self.frequency, 0, cell_settings_a, 0)
-		grid_sizer_1.Add(self.label_2, 0, cell_settings_a, 0)
-		grid_sizer_1.Add(self.station_name, 0, cell_settings_a, 5)
-		grid_sizer_1.Add(self.label_3, 0, cell_settings_a, 0)
-		grid_sizer_1.Add(self.program_type, 0, cell_settings_a, 0)
-		grid_sizer_1.Add(self.label_4, 0, cell_settings_a, 0)
-		grid_sizer_1.Add(self.program_information, 0, cell_settings_a, 0)
-		sizer_1.Add(grid_sizer_1, 0, wx.EXPAND, 0)
-
-		grid_sizer_2.Add(self.tp_flag, 0, cell_settings_a, 0)
-		grid_sizer_2.Add(self.ta_flag, 0, cell_settings_a, 0)
-		grid_sizer_2.Add(self.musicspeech_flag, 0, cell_settings_a, 0)
-		grid_sizer_2.Add(self.monostereo_flag, 0, cell_settings_a, 0)
-		grid_sizer_2.Add(self.artificialhead_flag, 0, cell_settings_a, 0)
-		grid_sizer_2.Add(self.compressed_flag, 0, cell_settings_a, 0)
-		grid_sizer_2.Add(self.staticpty_flag, 0, cell_settings_a, 0)
-		sizer_1.Add(grid_sizer_2, 0, wx.EXPAND, 0)
+		flag = wx.ALIGN_CENTER_VERTICAL|wx.LEFT
 		
-		cell_settings_b = wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ADJUST_MINSIZE
+		sizer_1.Add(self.label_1, 0, flag)
+		sizer_1.Add(self.frequency, 0, flag, 20)
+		sizer_1.Add(self.label_2, 0, flag, 20)
+		sizer_1.Add(self.station_name, 0, flag, 20)
+		sizer_1.Add(self.label_3, 0, flag, 20)
+		sizer_1.Add(self.program_type, 0, flag, 20)
+		sizer_1.Add(self.label_4, 0, flag, 20)
+		sizer_1.Add(self.program_information, 0, flag, 20)
+		sizer_0.Add(sizer_1, 1, wx.ALIGN_CENTER)
+
+		sizer_2.Add(self.tp_flag, 0, flag)
+		sizer_2.Add(self.ta_flag, 0, flag, 30)
+		sizer_2.Add(self.musicspeech_flag, 0, flag, 30)
+		sizer_2.Add(self.monostereo_flag, 0, flag, 30)
+		sizer_2.Add(self.artificialhead_flag, 0, flag, 30)
+		sizer_2.Add(self.compressed_flag, 0, flag, 30)
+		sizer_2.Add(self.staticpty_flag, 0, flag, 30)
+		sizer_0.Add(sizer_2, 1, wx.ALIGN_CENTER)
 		
-		grid_sizer_3.Add(self.label_5, 0, cell_settings_b, 0)
-		grid_sizer_3.Add(self.radiotext, 0, cell_settings_b, 0)
-		sizer_1.Add(grid_sizer_3, 0, wx.EXPAND, 0)
+		sizer_3.Add(self.label_5, 0, flag)
+		sizer_3.Add(self.radiotext, 0, flag, 10)
+		sizer_3.Add(self.label_6, 0, flag, 10)
+		sizer_3.Add(self.clocktime, 0, flag, 10)
+		sizer_3.Add(self.label_7, 0, flag, 10)
+		sizer_3.Add(self.alt_freq, 0, flag, 10)
+		sizer_0.Add(sizer_3, 0, wx.ALIGN_CENTER)
 
-		grid_sizer_4.Add(self.label_6, 0, cell_settings_b, 0)
-		grid_sizer_4.Add(self.clocktime, 0, cell_settings_b, 0)
-		grid_sizer_4.Add(self.label_7, 0, cell_settings_b, 0)
-		grid_sizer_4.Add(self.alt_freq, 0, cell_settings_b, 0)
-		sizer_1.Add(grid_sizer_4, 0, wx.EXPAND, 0)
-
-		self.SetSizer(sizer_1)
+		self.SetSizer(sizer_0)
 
 	def display_data(self,event):
 		message = event.data

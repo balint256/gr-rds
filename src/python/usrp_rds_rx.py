@@ -180,7 +180,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			vbox.Add(self.scope.win, 4, wx.EXPAND)
 
 		self.rdspanel = rdsPanel(self.msgq, self.panel)
-		vbox.Add(self.rdspanel, 4, wx.EXPAND)
+		vbox.Add(self.rdspanel, 1, wx.EXPAND|wx.TOP|wx.BOTTOM, 20)
 
 		# control area form at bottom
 		self.myform = form.form()
@@ -191,7 +191,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.myform.btn_down.Bind(wx.EVT_BUTTON, self.Seek_Down)
 		hbox.Add(self.myform.btn_down, 0)
 		self.myform['freq'] = form.float_field(
-			parent=self.panel, sizer=hbox, label="Freq", weight=1,
+			parent=self.panel, sizer=hbox, label="Freq", weight=0,
 			callback=self.myform.check_input_and_call(_form_set_freq, self._set_status_msg))
 		hbox.Add((5,0), 0)
 		self.myform.btn_up = wx.Button(self.panel, -1, ">>")

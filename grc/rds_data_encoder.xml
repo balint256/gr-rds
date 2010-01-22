@@ -18,17 +18,17 @@
 		<type>file_open</type>
 	</param>
 	<check>len($xmlfile) &gt; 0</check>
+	<sink>
+		<name>in</name>
+		<type>float</type>
+	</sink>	
 	<source>
 		<name>out</name>
-		<type>byte</type>
-		<vlen>gr.sizeof_char</vlen>
+		<type>float</type>
 	</source>
-	
 	<doc>
-This is a source block. It reads its configuration from an XML file,\
-and outputs a bitstream of RDS data.
-
-This block does not set the RDS rate of 1187.5 bits/second, you need to\
-do that in your flowgraph (calculate backwards from the USRP sink).
+It reads its configuration from an XML file, takes as an input a stream \
+at the desired sampling rate carrying a signal at 1187.5 Hz, and outputs \
+a bitstream of RDS data at 1187.5bps sampled at the same sampling rate.
 	</doc>
 </block>

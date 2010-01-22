@@ -35,8 +35,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 			parser.print_help()
 			sys.exit(1)
 
-
-
 		# connect to USRP
 		usrp_decim = 250
 		self.u = usrp.source_c(0, usrp_decim)
@@ -51,8 +49,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
 		print "Using d'board", self.subdev.side_and_name()
 
-
-
 		# gain, volume, frequency
 		self.gain = options.gain
 		if options.gain is None:
@@ -64,7 +60,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.freq = options.freq
 		if abs(self.freq) < 1e6:
 			self.freq *= 1e6
-
 
 		# channel filter, wfm_rcv_pll
 		chan_filt_coeffs = optfir.low_pass(

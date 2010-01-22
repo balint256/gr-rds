@@ -129,7 +129,7 @@ am__DEPENDENCIES_1 =
 _rds_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__rds_la_OBJECTS = rds.lo gr_rds_bpsk_demod.lo \
 	gr_rds_data_decoder.lo gr_rds_data_encoder.lo \
-	gr_rds_freq_statistics.lo gr_rds_freq_divider.lo
+	gr_rds_freq_divider.lo
 _rds_la_OBJECTS = $(am__rds_la_OBJECTS)
 _rds_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
@@ -337,7 +337,7 @@ SWIGCPPPYTHONARGS = -python $(PYTHON_CPPFLAGS) \
 	-I$(swigincludedir) -I$(grincludedir)
 
 ALL_IFILES = \
-	$(LOCAL_IFILES)				\
+	$(LOCAL_IFILES)			\
 	$(NON_LOCAL_IFILES)
 
 NON_LOCAL_IFILES = \
@@ -351,7 +351,7 @@ LOCAL_IFILES = \
 # The second is the python wrapper that loads the _howto shared library
 # and knows how to call our extensions.
 BUILT_SOURCES = \
-	rds.cc						\
+	rds.cc				\
 	rds.py
 
 
@@ -363,11 +363,10 @@ ourlib_LTLIBRARIES = _rds.la
 
 # These are the source files that go into the shared library
 _rds_la_SOURCES = \
-	rds.cc						\
+	rds.cc				\
 	gr_rds_bpsk_demod.cc		\
 	gr_rds_data_decoder.cc		\
 	gr_rds_data_encoder.cc		\
-	gr_rds_freq_statistics.cc	\
 	gr_rds_freq_divider.cc
 
 
@@ -378,17 +377,16 @@ _rds_la_LDFLAGS = -module -avoid-version
 # c++ standard library
 _rds_la_LIBADD = \
 	$(GNURADIO_CORE_LIBS)		\
-	$(PYTHON_LDFLAGS)			\
-	-lxml2						\
+	$(PYTHON_LDFLAGS)		\
+	-lxml2				\
 	-lstdc++
 
 
 # These headers get installed in ${prefix}/include/gnuradio
 grinclude_HEADERS = \
-	gr_rds_bpsk_demod.h			\
+	gr_rds_bpsk_demod.h		\
 	gr_rds_data_decoder.h		\
 	gr_rds_data_encoder.h		\
-	gr_rds_freq_statistics.h	\
 	gr_rds_freq_divider.h
 
 
@@ -476,7 +474,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gr_rds_data_decoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gr_rds_data_encoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gr_rds_freq_divider.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gr_rds_freq_statistics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rds.Plo@am__quote@
 
 .cc.o:

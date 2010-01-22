@@ -39,14 +39,15 @@ gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 
 gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
   : gr_sync_block ("gr_rds_data_encoder",
-			gr_make_io_signature (0, 0, 0),
-			gr_make_io_signature (1, 8, sizeof(char)))
+			gr_make_io_signature (1, 1, sizeof(float)),
+			gr_make_io_signature (1, 1, sizeof(float)))
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
 	reset_rds_data();
 	read_xml(xmlfile);
 	create_groups(0, false);
+	prepare_buffers();
 }
 
 gr_rds_data_encoder::~gr_rds_data_encoder () {
@@ -56,10 +57,14 @@ gr_rds_data_encoder::~gr_rds_data_encoder () {
 
 void gr_rds_data_encoder::reset_rds_data(){
 	int i=0;
-	for(i=0; i<4; i++) {group[i]=0; checkword[i]=0;}
-	for(i=0; i<13; i++) buffer[i]=0;
-	d_g0_counter=0;
+	for(i=0; i<4; i++) {infoword[i]=0; checkword[i]=0;}
+	for(i=0; i<104; i++) {buffer[i]=0; diff_enc_buffer[i]=0;}
 	d_buffer_bit_counter=0;
+	d_buffer_current=0;
+	d_sign_last=0;
+	d_zero_cross=0;
+	d_current_out=0;
+	d_g0_counter=0;
 
 	PI=0;
 	TP=false;
@@ -71,9 +76,7 @@ void gr_rds_data_encoder::reset_rds_data(){
 	compressed=false;
 	static_pty=false;
 	memset(PS,' ',sizeof(PS));
-	PS[8]='\0';
 	memset(radiotext,' ',sizeof(radiotext));
-	radiotext[64] = '\0';
 	radiotext_AB_flag=0;
 }
 
@@ -114,7 +117,7 @@ void gr_rds_data_encoder::assign_from_xml
 /* need to copy a char arrays here */
 	else if(!strcmp(field, "PS")){
 		if(length!=8) printf("invalid PS string length: %i\n", length);
-		else for(int i=0; i<length; i++)
+		else for(int i=0; i<8; i++)
 			PS[i]=value[i];
 	}
 	else if(!strcmp(field, "RadioText")){
@@ -137,13 +140,13 @@ void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
 			if(!strcmp(node_name, "rds")) ;		//move on
 			else if(!strcmp(node_name, "group")){
 				attribute=(char*)xmlGetProp(cur_node, (const xmlChar *)"type");
-				printf("group type: %s\n", attribute);
+				printf("\ngroup type: %s  ###  ", attribute);
 			}
 			else if(!strcmp(node_name, "field")){
 				attribute=(char*)xmlGetProp(cur_node, (const xmlChar *)"name");
 				value=(char*)xmlNodeGetContent(cur_node);
 				length=xmlUTF8Strlen(xmlNodeGetContent(cur_node));
-				printf("\t%s: %s (length: %i)\n", attribute, value, length);
+				printf("%s: %s # ", attribute, value);
 				assign_from_xml(attribute, value, length);
 			}
 			else printf("invalid node name: %s\n", node_name);
@@ -173,6 +176,7 @@ int gr_rds_data_encoder::read_xml (const char *xmlfile){
 		return 1;
 	}
 	print_element_names(root_element);
+	printf("\n");
 
 	xmlFreeDoc(doc);
 	return 0;
@@ -214,54 +218,70 @@ unsigned int gr_rds_data_encoder::encode_af(const double af){
 	return(af_code);
 }
 
-/* create the 4 datawords, according to group type.
- * then calculate checkwords and put everything in the buffer. */
+/* create the 4 infowords, according to group type.
+ * then calculate checkwords and put everything in the groups */
 void gr_rds_data_encoder::create_groups(const int group_type, const bool AB){
 	int i=0;
-	group[0]=PI;
-	group[1]=(((char)group_type)<<12)|(AB<<11)|(TP<<10)|(PTY<<5);
+	
+	infoword[0]=PI;
+	infoword[1]=(((char)group_type)<<12)|(AB<<11)|(TP<<10)|(PTY<<5);
+
+// FIXME make this prepare also group types !=0
 	if(group_type==0){
-		group[1]=group[1]|(TA<<4)|(MuSp<<3);
-/* d0=1 (stereo), d1-3=0 */
-		if(d_g0_counter==3) group[1]=group[1]|0x5;
-		group[1]=group[1]|(d_g0_counter&0x3);
+		infoword[1]=infoword[1]|(TA<<4)|(MuSp<<3);
+		if(d_g0_counter==3)
+			infoword[1]=infoword[1]|0x5;	// d0=1 (stereo), d1-3=0
+		infoword[1]=infoword[1]|(d_g0_counter&0x3);
 		if(!AB)
-			group[2]=((encode_af(AF1)&0xff)<<8)|(encode_af(AF2)&0xff);
+			infoword[2]=((encode_af(AF1)&0xff)<<8)|(encode_af(AF2)&0xff);
 		else
-			group[2]=PI;
-		group[3]=(PS[2*d_g0_counter]<<8)|PS[2*d_g0_counter+1];
+			infoword[2]=PI;
+		infoword[3]=(PS[2*d_g0_counter]<<8)|PS[2*d_g0_counter+1];
+		d_g0_counter++;
+		if (d_g0_counter>3) d_g0_counter=0;
 	}
-	printf("data: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
+	printf("data: %04X %04X %04X %04X\n",
+		infoword[0], infoword[1], infoword[2], infoword[3]);
 
 	for(i=0;i<4;i++){
-		checkword[i]=calc_syndrome(group[i],16,0x5b9,10);
-		group[i]=((group[i]&0xffff)<<10)|(checkword[i]&0x3ff);
+		checkword[i]=calc_syndrome(infoword[i],16,0x5b9,10);
+		block[i]=((infoword[i]&0xffff)<<10)|(checkword[i]&0x3ff);
 	}
-	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
-
-/* FIXME there's got to be a better way of doing this */
-	buffer[0]=group[0]&0xff;
-	buffer[1]=(group[0]>>8)&0xff;
-	buffer[2]=(group[0]>>16)&0xff;
-	buffer[3]=(group[0]>>24)&0x03;
-	buffer[3]=buffer[3]|((group[1]&0x3f)<<2);
-	buffer[4]=(group[1]>>6)&0xff;
-	buffer[5]=(group[1]>>14)&0xff;
-	buffer[6]=(group[1]>>22)&0x0f;
-	buffer[6]=buffer[6]|((group[2]&0x0f)<<4);
-	buffer[7]=(group[2]>>4)&0xff;
-	buffer[8]=(group[2]>>12)&0xff;
-	buffer[9]=(group[2]>>20)&0x3f;
-	buffer[9]=buffer[9]|((group[3]&0x03)<<6);
-	buffer[10]=(group[3]>>2)&0xff;
-	buffer[11]=(group[3]>>10)&0xff;
-	buffer[12]=(group[3]>>18)&0xff;
-
-	printf("buffer: ");
-	for(i=0;i<13;i++) printf("%X ", buffer[i]&0xff);
-	printf("\n");
-	if(++d_g0_counter>3) d_g0_counter=0;
+	printf("group: %04X %04X %04X %04X\n",
+		block[0], block[1], block[2], block[3]);
 }
+
+void gr_rds_data_encoder::prepare_buffers(){
+	int q=0, i=0, j=0, a=0, b=0;
+	unsigned char temp[13];	// 13*8=104
+	for(i=0; i<13; i++) temp[i]=0;
+	
+	for (q=0;q<104;q++){
+		a=floor(q/26); b=25-q%26;
+		buffer[q]=(block[a]>>b)&0x1;
+		i=floor(q/8); j=7-q%8;
+		temp[i]=temp[i]|(buffer[q]<<j);
+	}
+	printf("buffer: ");
+	for(i=0;i<13;i++) printf("%02X ", temp[i]);
+	printf("\n");
+	
+	for(i=0; i<13; i++) temp[i]=0;
+	diff_enc_buffer[0]=buffer[0];
+	temp[0]=buffer[0]<<7;
+	for (q=1;q<104;q++){
+		diff_enc_buffer[q]=(buffer[q]==buffer[q-1])?0:1;
+		i=floor(q/8); j=7-q%8;
+		temp[i]=temp[i]|(diff_enc_buffer[q]<<j);
+	}
+	printf("diff-encoded buffer: ");
+	for(i=0;i<13;i++) printf("%02X ", temp[i]);
+	printf("\n");
+}
+
+
+
+//////////////////////// WORK ////////////////////////////////////
 
 /* the plan for now is to do group0 (basic), group2 (radiotext),
  * group4a (clocktime), and group8a (tmc)... */
@@ -269,17 +289,25 @@ int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
-	bool *out = (bool *) output_items[0];
-	int a=0, b=0;
+	const float *in = (const float *) input_items[0];
+	float *out = (float *) output_items[0];
+	int sign_current=0;
+	
+	// initialize output buffer
+	d_current_out=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);
 
-/* FIXME make this output >1 groups */
-	for (int i = 0; i < noutput_items; i++){
-		d_buffer_bit_counter++;
-		if(d_buffer_bit_counter>103) d_buffer_bit_counter=0;
-		a=floor(d_buffer_bit_counter/8);
-		b=d_buffer_bit_counter%8;
-		out[i]=(buffer[a]>>b)&0x1;
-//		printf("out[%i]=%i ", d_buffer_bit_counter, (int)out[i]);
+	for(int i=0; i<noutput_items; i++){
+		sign_current=(in[i]>0?1:-1);
+		if(sign_current!=d_sign_last) d_zero_cross++;
+		if(d_zero_cross==2){		// double zero-cross; push next bit
+			d_buffer_bit_counter++;
+			/* FIXME make this output >1 groups */
+			if(d_buffer_bit_counter>103) d_buffer_bit_counter=0;
+			d_current_out=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);	// NRZ
+			d_zero_cross=0;
+		}
+		out[i]=(float)d_current_out;
+		d_sign_last=sign_current;
 	}
 
 	return noutput_items;

@@ -34,38 +34,37 @@ INCLUDES = $(STD_DEFINES_AND_INCLUDES) $(PYTHON_CPPFLAGS) \
 SWIGCPPPYTHONARGS = -python $(PYTHON_CPPFLAGS) \
 	-I$(swigincludedir) -I$(grincludedir)
 
-ALL_IFILES = 					\
-	$(LOCAL_IFILES)				\
+ALL_IFILES = 				\
+	$(LOCAL_IFILES)			\
 	$(NON_LOCAL_IFILES)
 
-NON_LOCAL_IFILES =				\
+NON_LOCAL_IFILES =			\
 	$(GNURADIO_I)
 
 
-LOCAL_IFILES = 					\
+LOCAL_IFILES = 				\
 	rds.i
 
 # These files are built by SWIG.  The first is the C++ glue.
 # The second is the python wrapper that loads the _howto shared library
 # and knows how to call our extensions.
 
-BUILT_SOURCES = 				\
-	rds.cc						\
+BUILT_SOURCES = 			\
+	rds.cc				\
 	rds.py
 
 # This gets howto.py installed in the right place
-ourpython_PYTHON =				\
+ourpython_PYTHON =			\
 	rds.py
 
 ourlib_LTLIBRARIES = _rds.la
 
 # These are the source files that go into the shared library
-_rds_la_SOURCES = 				\
-	rds.cc						\
+_rds_la_SOURCES = 			\
+	rds.cc				\
 	gr_rds_bpsk_demod.cc		\
 	gr_rds_data_decoder.cc		\
 	gr_rds_data_encoder.cc		\
-	gr_rds_freq_statistics.cc	\
 	gr_rds_freq_divider.cc
 
 # magic flags
@@ -73,21 +72,20 @@ _rds_la_LDFLAGS = -module -avoid-version
 
 # link the library against some comon swig runtime code and the 
 # c++ standard library
-_rds_la_LIBADD = 				\
+_rds_la_LIBADD = 			\
 	$(GNURADIO_CORE_LIBS)		\
-	$(PYTHON_LDFLAGS)			\
-	-lxml2						\
+	$(PYTHON_LDFLAGS)		\
+	-lxml2				\
 	-lstdc++
 
 rds.cc rds.py: rds.i $(ALL_IFILES)
 	$(SWIG) $(SWIGCPPPYTHONARGS) -module rds -o rds.cc $<
 
 # These headers get installed in ${prefix}/include/gnuradio
-grinclude_HEADERS =				\
-	gr_rds_bpsk_demod.h			\
+grinclude_HEADERS =			\
+	gr_rds_bpsk_demod.h		\
 	gr_rds_data_decoder.h		\
 	gr_rds_data_encoder.h		\
-	gr_rds_freq_statistics.h	\
 	gr_rds_freq_divider.h
 
 # These swig headers get installed in ${prefix}/include/gnuradio/swig

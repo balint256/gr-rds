@@ -48,16 +48,21 @@ class gr_rds_data_encoder;
  * As a convention, the _sptr suffix indicates a boost::shared_ptr
  */
 typedef boost::shared_ptr<gr_rds_data_encoder> gr_rds_data_encoder_sptr;
-gr_rds_data_encoder_sptr 
-gr_rds_make_data_encoder (const char *xmlfile);
+/*!
+ * \ingroup RDS
+ */
+gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
 
 
 class gr_rds_data_encoder : public gr_sync_block
 {
 private:
-	unsigned int group[4];
+	unsigned int infoword[4];
 	unsigned int checkword[4];
-	char buffer[13];		// 13*8=104
+	unsigned int block[4];
+	bool buffer[104];
+	bool diff_enc_buffer[104];
+	
 	unsigned int PI;
 	bool TP;
 	unsigned char PTY;
@@ -69,11 +74,16 @@ private:
 	bool static_pty;
 	double AF1;
 	double AF2;
-	char PS[9];
-	char radiotext[65];
+	char PS[8];
+	char radiotext[64];
 	bool radiotext_AB_flag;
+	
 	int d_g0_counter;
 	int d_buffer_bit_counter;
+	int d_buffer_current;
+	int d_sign_last;
+	int d_zero_cross;
+	int d_current_out;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
@@ -83,6 +93,7 @@ private:
 	void assign_from_xml(const char *field, const char *value, const int length);
 	void reset_rds_data();
 	void create_groups(const int group_type, const bool AB);
+	void prepare_buffers();
 	unsigned int encode_af(double af);
 	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,
 			unsigned long poly, unsigned char plen);

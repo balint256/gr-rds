@@ -106,17 +106,6 @@ void gr_rds_data_decoder::printbin(unsigned long number,unsigned char bits) {
 	putchar('\n');
 }
 
-/* this doesn't seem to be used anywhere... (???) */
-unsigned long gr_rds_data_decoder::bin2dec(char *string) {
-	unsigned int i;
-	unsigned long reg=0;
-
-	for (i=0;i<strlen(string);i++) {
-		reg=(reg<<1) | ((string[i]=='0')?0:1);
-	}
-	return reg;
-}
-
 /*		type 0 = PI
 		type 1 = PS
 		type 2 = PTY

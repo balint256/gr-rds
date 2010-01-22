@@ -52,12 +52,6 @@ class gr_rds_freq_divider;
 typedef boost::shared_ptr<gr_rds_freq_divider> gr_rds_freq_divider_sptr;
 
 /*!
- * \brief Return a shared_ptr to a new instance of gr_rds_freq_divider.
- *
- * To avoid accidental use of raw pointers, gr_rds_freq_divider's
- * constructor is private. make_square_ff is the public
- * interface for creating new instances.
- *
  * \ingroup RDS
  */
 gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);

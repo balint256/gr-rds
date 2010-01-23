@@ -83,6 +83,10 @@ dnl Define where to find boost includes
 dnl defines BOOST_CFLAGS
 GR_REQUIRE_BOOST_INCLUDES
 
+dnl Check if libxml2-dev is installed
+AC_CHECK_LIB([xml2], [xmlParseFile])
+PKG_CHECK_MODULES(XML2, "libxml-2.0")
+
 STD_DEFINES_AND_INCLUDES="$GNURADIO_CORE_CFLAGS $BOOST_CFLAGS"
 AC_SUBST(STD_DEFINES_AND_INCLUDES)
  

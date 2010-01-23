@@ -23,8 +23,10 @@
 		<vlen>gr.sizeof_char</vlen>
 	</sink>
 	<doc>
-This is a sink block. It receives a bitstream of RDS data (after DBPSK-demodulation)\
-and does the framing, checksumming, and decoding of the data, which it then sends\
-to a message gueue.
+This block is the RDS data decoder.
+
+It takes as input a bitstream of RDS data after DBPSK-demodulation, in
+bytes containing single bits [0, 1]. It then does the framing, checksumming, 
+and decoding of the data, which it then sends to a message gueue.
 	</doc>
 </block>

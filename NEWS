@@ -1,6 +1,7 @@
 23.01.2010
 - finalized the rds panel layout
-- added/fixed grc blocks
+- added/fixed grc blocks, added documentation
+- the RDS clock signal looks cleaner after a bandpass rather than lowpass
 
 22.01.2010
 - completely changed the logic of the rds_encoder, to already output data at the correct rate, thus removing the need for the rational resampler.

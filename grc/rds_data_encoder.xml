@@ -27,8 +27,11 @@
 		<type>float</type>
 	</source>
 	<doc>
-It reads its configuration from an XML file, takes as an input a stream \
-at the desired sampling rate carrying a signal at 1187.5 Hz, and outputs \
-a bitstream of RDS data at 1187.5bps sampled at the same sampling rate.
+This block creates the baseband (NRZ, i.e. [-1, 1]) RDS signal.
+
+It reads its configuration from an XML file, takes as input a (float) stream
+at the desired sampling rate carrying a signal of 1187.5 Hz (19kHz/16, use
+the rds.freq_divider block to create it), and outputs a bitstream of RDS
+data at 1187.5bps at the same sampling rate.
 	</doc>
 </block>

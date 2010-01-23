@@ -123,11 +123,12 @@ class rds_rx_graph (stdgui2.std_top_block):
 
 		# 1187.5bps = 19kHz/16
 		self.rds_clock = rds.freq_divider(16)
-		clock_taps = gr.firdes.low_pass(
+		clock_taps = gr.firdes.band_pass(
 			1,				# gain
 			usrp_rate,		# sampling rate
-			1.2e3,			# passband cutoff
-			1.5e3,			# transition width
+			1e3,			# low cutoff
+			1.5e3,			# high cutoff
+			200,			# transition width
 			gr.firdes.WIN_HANN)
 		self.clock_filter = gr.fir_filter_fff (1, clock_taps)
 		self.connect(self.pilot_filter, self.rds_clock, self.clock_filter)

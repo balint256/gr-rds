@@ -83,7 +83,7 @@ private:
 	int d_buffer_current;
 	int d_sign_last;
 	int d_zero_cross;
-	int d_current_out;
+	float d_current_out;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);

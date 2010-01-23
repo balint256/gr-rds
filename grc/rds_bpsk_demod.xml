@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##RDS BPSK Demodulator
+###################################################
+ -->
+<block>
+	<name>RDS BPSK Demodulator</name>
+	<key>gr_rds_bpsk_demod</key>
+	<category>RDS</category>
+	<import>from gnuradio import gr, rds</import>
+	<make>rds.bpsk_demod($sampling_rate)</make>
+	<callback></callback>
+	<param>
+		<name>Sampling Rate</name>
+		<key>sampling_rate</key>
+		<value>256000</value>
+		<type>real</type>
+	</param>
+	<check>$sampling_rate &gt; 0</check>
+	<sink>
+		<name>in</name>
+		<type>float</type>
+	</sink>
+	<sink>
+		<name>clock</name>
+		<type>float</type>
+	</sink>
+	<source>
+		<name>out</name>
+		<type>byte</type>
+	</source>
+	<doc>
+This is a BPSK demodulator and RDS sync'er.
+
+It takes as inputs an RDS clock (1187.5 Hz) and the baseband RDS signal, \
+syncs them, does the BPSK-demodulatoin and outputs the bits of the \
+RDS data stream (still diff-encoded).
+	</doc>
+</block>

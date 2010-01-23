@@ -14,7 +14,7 @@
 	<param>
 		<name>Message Queue</name>
 		<key>msgq</key>
-		<value>0</value>
+		<value>gr.msg_queue()</value>
 		<type>raw</type>
 	</param>
 	<sink>

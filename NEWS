@@ -1,3 +1,7 @@
+23.01.2010
+- finalized the rds panel layout
+- added/fixed grc blocks
+
 22.01.2010
 - completely changed the logic of the rds_encoder, to already output data at the correct rate, thus removing the need for the rational resampler.
 - fixed the buffer preparation in the rds_encoder

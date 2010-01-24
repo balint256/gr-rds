@@ -53,6 +53,8 @@ typedef boost::shared_ptr<gr_rds_data_encoder> gr_rds_data_encoder_sptr;
  */
 gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
 
+/* offset words A, B, C, D, C'*/
+static const unsigned int offset_word[5]={252,408,360,436,848};
 
 class gr_rds_data_encoder : public gr_sync_block
 {

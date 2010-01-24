@@ -229,6 +229,9 @@ void gr_rds_data_encoder::create_groups(const int group_type, const bool AB){
 	for(i=0;i<4;i++){
 		checkword[i]=calc_syndrome(infoword[i],16,0x5b9,10);
 		block[i]=((infoword[i]&0xffff)<<10)|(checkword[i]&0x3ff);
+		// add the offset word
+		if((i==2)&&AB) block[2]^=offset_word[4];
+		else block[i]^=offset_word[i];
 	}
 	printf("group: %04X %04X %04X %04X\n",
 		block[0], block[1], block[2], block[3]);

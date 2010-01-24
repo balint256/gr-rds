@@ -1,3 +1,8 @@
+24.01.2010
+- added offset word to syndrome.py
+- added offset word to rds encoder
+- small correction in offset word order
+
 23.01.2010
 - finalized the rds panel layout
 - added/fixed grc blocks, added documentation

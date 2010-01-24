@@ -122,6 +122,7 @@ void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext) {
 }
 
 /* see Annex B, page 64 of the standard */
+// note that poly is always 0x5B9 and plen is always 10
 unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message, 
 			unsigned char mlen, unsigned long poly, unsigned char plen) {
 	unsigned long reg=0;
@@ -135,7 +136,7 @@ unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message,
 		reg=reg<<1;
 		if (reg & (1<<plen)) reg=reg^poly;
 	}
-	return (reg & ((1<<plen)-1));
+	return (reg & ((1<<plen)-1));	// select the bottom plen bits of reg
 }
 
 
@@ -575,7 +576,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 
 /* the synchronization process is described in Annex C, page 66 of the standard */
 	while (i<noutput_items) {
-		reg=(reg<<1)|in[i];		// convert from byte to bit
+		reg=(reg<<1)|in[i];		// reg contains the last 26 rds bits
 		switch (d_state) {
 			case ST_NO_SYNC:
 				reg_syndrome = calc_syndrome(reg,26,0x5b9,10);

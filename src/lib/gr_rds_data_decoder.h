@@ -62,9 +62,9 @@ static const unsigned int syndrome[5]={383,14,303,748,663};
 
 /* offset word C' has been put at the end
    see Annex A, page 59 of the standard */
-static const unsigned int offset_pos[5]={0,1,2,2,3};
+static const unsigned int offset_pos[5]={0,1,2,3,2};
 static const unsigned int offset_word[5]={252,408,360,436,848};
-static const char * const offset_name[]={"A","B","C","C1","D"};
+static const char * const offset_name[]={"A","B","C","D","C'"};
 
 /* page 77, Annex F in the standard */
 static const char * const pty_table[32]={"None",

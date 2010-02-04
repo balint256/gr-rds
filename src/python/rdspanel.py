@@ -47,10 +47,10 @@ class rdsPanel(wx.Panel):
 		self.label_4 = wx.StaticText(self, -1, "PI")
 		self.label_5 = wx.StaticText(self, -1, "Radio Text")
 		self.label_6 = wx.StaticText(self, -1, "Clock Time")
-		self.label_7 = wx.StaticText(self, -1, "Alternative Frequencies")
+		self.label_7 = wx.StaticText(self, -1, "Alt. Frequencies")
 		self.frequency = wx.StaticText(self, -1, "xxx.xx")
 		self.station_name = wx.StaticText(self, -1, "xxxxxxxx")
-		self.program_type = wx.StaticText(self, -1, "xxxxxxxx")
+		self.program_type = wx.StaticText(self, -1, "xxxxxxxxxxx")
 		self.program_information = wx.StaticText(self, -1, "xxxx")
 		self.tp_flag = wx.StaticText(self, -1, "TP")
 		self.ta_flag = wx.StaticText(self, -1, "TA")
@@ -59,9 +59,9 @@ class rdsPanel(wx.Panel):
 		self.artificialhead_flag = wx.StaticText(self, -1, "AH")
 		self.compressed_flag = wx.StaticText(self, -1, "CMP")
 		self.staticpty_flag = wx.StaticText(self, -1, "stPTY")
-		self.radiotext = wx.StaticText(self, -1, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+		self.radiotext = wx.StaticText(self, -1, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 		self.clocktime = wx.StaticText(self, -1, "xxxxxxxxxxxxxxxxxxxxx")
-		self.alt_freq = wx.StaticText(self, -1, "xxxxxxxxxx")
+		self.alt_freq = wx.StaticText(self, -1, "xxxxxxxxxxxxxxx")
 
 		self.__set_properties()
 		self.__do_layout()
@@ -69,20 +69,24 @@ class rdsPanel(wx.Panel):
 		watcher=queue_watcher_thread(msgq,self)
 
 	def __set_properties(self):
-		self.frequency.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-		self.station_name.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-		self.program_type.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-		self.program_information.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-		self.tp_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.ta_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.musicspeech_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.monostereo_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.artificialhead_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.compressed_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.staticpty_flag.SetFont(wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-		self.radiotext.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-		self.clocktime.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
-		self.alt_freq.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
+		font_bold = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, "")
+		font_normal = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, "")
+		font_small = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, "")
+		
+		self.frequency.SetFont(font_bold)
+		self.station_name.SetFont(font_bold)
+		self.program_type.SetFont(font_bold)
+		self.program_information.SetFont(font_bold)
+		self.tp_flag.SetFont(font_normal)
+		self.ta_flag.SetFont(font_normal)
+		self.musicspeech_flag.SetFont(font_normal)
+		self.monostereo_flag.SetFont(font_normal)
+		self.artificialhead_flag.SetFont(font_normal)
+		self.compressed_flag.SetFont(font_normal)
+		self.staticpty_flag.SetFont(font_normal)
+		self.radiotext.SetFont(font_small)
+		self.clocktime.SetFont(font_small)
+		self.alt_freq.SetFont(font_small)
 
 	def __do_layout(self):
 		sizer_0 = wx.BoxSizer(wx.VERTICAL)
@@ -92,6 +96,7 @@ class rdsPanel(wx.Panel):
 		
 		flag = wx.ALIGN_CENTER_VERTICAL|wx.LEFT
 		
+		# arguments: window, proportion, flag, border
 		sizer_1.Add(self.label_1, 0, flag)
 		sizer_1.Add(self.frequency, 0, flag, 20)
 		sizer_1.Add(self.label_2, 0, flag, 20)
@@ -173,7 +178,7 @@ class rdsPanel(wx.Panel):
 	def clear_data(self):
 		self.program_information.SetLabel("xxxx")
 		self.station_name.SetLabel("xxxxxxxx")
-		self.program_type.SetLabel("xxxxx")
+		self.program_type.SetLabel("xxxxxxxxxxx")
 		self.ta_flag.SetForegroundColour(wx.BLACK)
 		self.tp_flag.SetForegroundColour(wx.BLACK)
 		self.musicspeech_flag.SetLabel("MUS/SPE")
@@ -183,7 +188,7 @@ class rdsPanel(wx.Panel):
 		self.artificialhead_flag.SetForegroundColour(wx.BLACK)
 		self.compressed_flag.SetForegroundColour(wx.BLACK)
 		self.staticpty_flag.SetForegroundColour(wx.BLACK)
-		self.radiotext.SetLabel("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+		self.radiotext.SetLabel("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 		self.clocktime.SetLabel("xxxxxxxxxxxx")
-		self.alt_freq.SetLabel("xxxxxxxxxxxx")
+		self.alt_freq.SetLabel("xxxxxxxxxxxxxxxxx")
 # end of class rdsPanel

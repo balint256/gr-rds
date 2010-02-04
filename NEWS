@@ -1,3 +1,8 @@
+03.02.2010
+- more fixes in rds_encoder
+- reinstated some copyright assignments I shouldn't have removed
+- expanded blks2.wfm_rcv_pll in usrp_rds_rx to avoid duplications
+
 24.01.2010
 - added offset word to syndrome.py
 - added offset word to rds encoder

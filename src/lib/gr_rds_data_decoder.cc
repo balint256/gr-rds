@@ -381,11 +381,10 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group) {
 	F = (X>>3)&0x01;		// 0 = multi-group, 1 = single-group
 	dp = X&0x07;			// duration & persistence
 	D = (Y>>15)&0x01;		// 1 = diversion recommended
-	sign = (Y>>14)&0x01;	// 0 = +, 1 = -
-	extent = (Y>>11)&0x07;	// number of  segments affected
-/* the list of these 2^11=2048 messages is defined in ENV 13106 */
-	event = Y&0x07ff; //how to select 11 bits???
-	location = Z;
+	sign = (Y>>14)&0x01;	// event direction, 0 = +, 1 = -
+	extent = (Y>>11)&0x07;	// number of segments affected
+	event = Y&0x07ff; 		// event code, defined in ISO 14819-2
+	location = Z;			// location code, defined in ISO 14819-3
 
 /* let's print out what we've got so far */
 	std::cout << "TMC - duration:" << dp << " extent:" << extent;

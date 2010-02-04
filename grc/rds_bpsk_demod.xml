@@ -34,7 +34,7 @@
 This is a BPSK demodulator and RDS sync'er.
 
 It takes as inputs an RDS clock (1187.5 Hz) and the baseband RDS signal, \
-syncs them, does the BPSK-demodulatoin and outputs the bits of the \
+syncs them, does the BPSK-demodulation and outputs the bits of the \
 RDS data stream (still diff-encoded).
 	</doc>
 </block>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, optfir, blks2, rds, audio
+from gnuradio import gr, usrp, optfir, rds, audio
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2, constsink_gl
 from optparse import OptionParser
@@ -61,77 +61,131 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if abs(self.freq) < 1e6:
 			self.freq *= 1e6
 
-		# channel filter, wfm_rcv_pll
+		# channel filter
 		chan_filt_coeffs = optfir.low_pass(
-			1,				# gain
+			1.0,			# gain
 			usrp_rate,		# rate
-			100e3,			# passband cutoff
+			90e3,			# passband cutoff
 			120e3,			# stopband cutoff
 			0.1,			# passband ripple
 			60)				# stopband attenuation
-		self.chan_filt = gr.fir_filter_ccf (1, chan_filt_coeffs)
-		self.guts = blks2.wfm_rcv_pll (usrp_rate, audio_decim)
-		self.connect(self.u, self.chan_filt, self.guts)
+		self.chan_filt = gr.fir_filter_ccf(1, chan_filt_coeffs)
+		print "# channel filter:", len(chan_filt_coeffs), "taps"
 
-		# volume control, audio sink
+		# PLL-based WFM demod
+		fm_alpha = 0.25 * 250e3 * math.pi / usrp_rate
+		fm_beta = fm_alpha * fm_alpha / 4.0
+		fm_max_freq = 2.0 * math.pi * 90e3 / usrp_rate
+		self.fm_demod = gr.pll_freqdet_cf(
+			fm_alpha,			# phase gain
+			fm_beta,			# freq gain
+			fm_max_freq,		# in radians/sample
+			-fm_max_freq)
+		self.connect(self.u, self.chan_filt, self.fm_demod)
+
+		# L+R, pilot, L-R, RDS filters
+		lpr_filter_coeffs = gr.firdes.low_pass (
+			1.0,			# gain
+			usrp_rate,		# sampling rate
+			15e3,			# passband cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
+		self.lpr_filter = gr.fir_filter_fff(audio_decim, lpr_filter_coeffs)
+		pilot_filter_coeffs = gr.firdes.band_pass(
+			1.0,			# gain
+			usrp_rate,		# sampling rate
+			19e3-20,		# low cutoff
+			19e3+20,		# high cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
+		self.pilot_filter = gr.fir_filter_fcc(audio_decim, pilot_filter_coeffs)
+		lmr_filter_coeffs = gr.firdes.band_pass(
+			1.0,			# gain
+			usrp_rate,		# sampling rate
+			38e3-15e3/2,	# low cutoff
+			38e3+15e3/2,	# high cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
+		self.lmr_filter = gr.fir_filter_fff(audio_decim, lmr_filter_coeffs)
+		rds_filter_coeffs = gr.firdes.band_pass(
+			1.0,			# gain
+			usrp_rate,		# sampling rate
+			57e3-1.5e3,		# low cutoff
+			57e3+1.5e3,		# high cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
+		self.rds_filter = gr.fir_filter_fff(1, rds_filter_coeffs)
+		print "# lpr filter:", len(lpr_filter_coeffs), "taps"
+		print "# pilot filter:", len(pilot_filter_coeffs), "taps"
+		print "# lpr filter:", len(lmr_filter_coeffs), "taps"
+		print "# rds filter:", len(rds_filter_coeffs), "taps"
+		self.connect(self.fm_demod, self.lpr_filter)
+		self.connect(self.fm_demod, self.pilot_filter)
+		self.connect(self.fm_demod, self.lmr_filter)
+		self.connect(self.fm_demod, self.rds_filter)
+
+		# PLL-based pilot tone recovery
+		pilot_alpha = 0.25 * 5 * math.pi / audio_rate
+		pilot_beta = pilot_alpha * pilot_alpha / 4.0
+		pilot_max_freq = -2.0*math.pi*18990/audio_rate;
+		pilot_min_freq = -2.0*math.pi*19010/audio_rate;
+		self.pilot_recovery = gr.pll_refout_cc(
+			pilot_alpha,
+			pilot_beta,
+			pilot_max_freq,
+			pilot_min_freq);
+		self.c2f = gr.complex_to_float()
+		self.connect(self.pilot_filter, self.pilot_recovery, self.c2f)
+
+		# down-convert L-R, RDS
+		self.stereo_baseband = gr.multiply_ff()
+		self.connect(self.c2f, (self.stereo_baseband, 0))
+		self.connect(self.c2f, (self.stereo_baseband, 1))
+		self.connect(self.lmr_filter, (self.stereo_baseband, 2))
+		self.rds_baseband = gr.multiply_ff()
+		self.connect(self.c2f, (self.rds_baseband, 0))
+		self.connect(self.c2f, (self.rds_baseband, 1))
+		self.connect(self.c2f, (self.rds_baseband, 2))
+		self.connect(self.rds_filter, (self.rds_baseband, 3))
+
+		# create L, R from L-R, L+R
+		self.left = gr.add_ff()
+		self.right = gr.sub_ff()
+		self.connect(self.lpr_filter, (self.left, 0))
+		self.connect(self.stereo_baseband, (self.left, 1))
+		self.connect(self.lpr_filter, (self.right, 0))
+		self.connect(self.stereo_baseband, (self.right, 1))
+
+		# volume control, complex2flot, audio sink
 		self.volume_control_l = gr.multiply_const_ff(self.vol)
 		self.volume_control_r = gr.multiply_const_ff(self.vol)
 		self.audio_sink = audio.sink(int(audio_rate),
 							options.audio_output, False)
-		self.connect ((self.guts, 0), self.volume_control_l, (self.audio_sink, 0))
-		self.connect ((self.guts, 1), self.volume_control_r, (self.audio_sink, 1))
-
-		# pilot channel filter (band-pass, 18.5-19.5kHz)
-		pilot_filter_coeffs = gr.firdes.band_pass(
-			1,				# gain
-			usrp_rate,		# sampling rate
-			18.5e3,			# low cutoff
-			19.5e3,			# high cutoff
-			1e3,			# transition width
-			gr.firdes.WIN_HAMMING)
-		self.pilot_filter = gr.fir_filter_fff(1, pilot_filter_coeffs)
-		self.connect(self.guts.fm_demod, self.pilot_filter)
-
-		# RDS channel filter (band-pass, 54-60kHz)
-		rds_filter_coeffs = gr.firdes.band_pass(
-			1,				# gain
-			usrp_rate,		# sampling rate
-			54e3,			# low cutoff
-			60e3,			# high cutoff
-			3e3,			# transition width
-			gr.firdes.WIN_HAMMING)
-		self.rds_filter = gr.fir_filter_fff (1, rds_filter_coeffs)
-		self.connect(self.guts.fm_demod, self.rds_filter)
-
-		# create 57kHz subcarrier from 19kHz pilot, downconvert RDS channel
-		self.mixer = gr.multiply_ff()
-		self.connect(self.pilot_filter, (self.mixer, 0))
-		self.connect(self.pilot_filter, (self.mixer, 1))
-		self.connect(self.pilot_filter, (self.mixer, 2))
-		self.connect(self.rds_filter, (self.mixer, 3))
+		self.connect(self.left, self.volume_control_l, (self.audio_sink, 0))
+		self.connect(self.right, self.volume_control_r, (self.audio_sink, 1))
 
 		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass(
 			1,				# gain
 			usrp_rate,		# sampling rate
-			1.5e3,			# passband cutoff
+			1.2e3,			# passband cutoff
 			2e3,			# transition width
 			gr.firdes.WIN_HAMMING)
-		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_coeffs)
-		self.connect(self.mixer, self.rds_bb_filter)
-
+		self.rds_bb_filter = gr.fir_filter_fff(1, rds_bb_filter_coeffs)
+		print "# rds bb filter:", len(rds_bb_filter_coeffs), "taps"
+		self.connect(self.rds_baseband, self.rds_bb_filter)
 
 		# 1187.5bps = 19kHz/16
-		self.rds_clock = rds.freq_divider(16)
-		clock_taps = gr.firdes.band_pass(
+		self.clock_divider = rds.freq_divider(16)
+		rds_clock_taps = gr.firdes.low_pass(
 			1,				# gain
 			usrp_rate,		# sampling rate
-			1e3,			# low cutoff
-			1.5e3,			# high cutoff
+			1.2e3,			# passband cutoff
 			200,			# transition width
-			gr.firdes.WIN_HANN)
-		self.clock_filter = gr.fir_filter_fff (1, clock_taps)
-		self.connect(self.pilot_filter, self.rds_clock, self.clock_filter)
+			gr.firdes.WIN_HAMMING)
+		self.rds_clock = gr.fir_filter_fff(1, rds_clock_taps)
+		print "# rds clock filter:", len(rds_clock_taps), "taps"
+		self.connect(self.c2f, self.clock_divider, self.rds_clock)
 
 		# bpsk_demod, diff_decoder, rds_decoder
 		self.bpsk_demod = rds.bpsk_demod(usrp_rate)
@@ -139,7 +193,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.msgq = gr.msg_queue()
 		self.rds_decoder = rds.data_decoder(self.msgq)
 		self.connect(self.rds_bb_filter, (self.bpsk_demod, 0))
-		self.connect(self.clock_filter, (self.bpsk_demod, 1))
+		self.connect(self.rds_clock, (self.bpsk_demod, 1))
 		self.connect(self.bpsk_demod, self.differential_decoder)
 		self.connect(self.differential_decoder, self.rds_decoder)
 
@@ -166,7 +220,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		if 1:
 			self.fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
-			self.connect (self.guts.fm_demod, self.fft)
+			self.connect (self.fm_demod, self.fft)
 			vbox.Add (self.fft.win, 4, wx.EXPAND)
 		if 0:
 			self.scope = scopesink2.scope_sink_f(self.panel, title="RDS timedomain",

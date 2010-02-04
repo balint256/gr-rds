@@ -58,12 +58,10 @@ gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
 			gr_make_io_signature (1, 8, sizeof(bool)))
 {
 	SYMBOL_LENGTH = (int)(input_sampling_rate/1187.5);
-	printf("SYMBOL_LENGTH= %d\n", SYMBOL_LENGTH);
 
-/* set approximate output-per-input relative rate
-   for the buffer allocator and the scheduler */
-	set_relative_rate(input_sampling_rate/57e3/48);
-/* shouldn't the relative_rate be (1/SYMBOL_LENGTH) ? */
+/* set approximate output_rate/input_rate
+ * for the buffer allocator and the scheduler */
+	set_relative_rate(1/SYMBOL_LENGTH);
 	reset();
 }
 

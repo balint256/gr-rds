@@ -2,7 +2,7 @@
 import sys, math
 
 # 0x5B9 = 10110111001, g(x)=x^10+x^8+x^7+x^5+x^4+x^3+1
-POLY = int('5B9', 16)
+POLY = 0x5B9
 PLEN = 10
 OFFSET=[252, 408, 360, 436, 848]
 OFFSET_NAME=['A', 'B', 'C', 'D', 'C\'']

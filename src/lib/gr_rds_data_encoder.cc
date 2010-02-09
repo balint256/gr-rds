@@ -22,12 +22,12 @@
 
 
 /*
- * This block creates the baseband (NRZ, i.e. [-1, 1]) RDS signal.
+ * This source block creates the baseband (NRZ, i.e. [-1, 1]) RDS signal.
  * 
- * It reads its configuration from an XML file, takes as input a stream 
- * at the desired sampling rate carrying a signal of 1187.5 Hz (19kHz/16, use
- * the rds.freq_divider block to create it), and outputs a bitstream of RDS
- * data at 1187.5bps at the same sampling rate.
+ * It reads its configuration from an XML file; composes the infowords;
+ * calculates checkwords; merges the two into blocks and then groups;
+ * differentially encodes the groups; maps [0, 1] to [-1, 1]; and
+ * streams out the resulting buffer.
  */
 
 
@@ -58,7 +58,7 @@ gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 
 gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
   : gr_sync_block ("gr_rds_data_encoder",
-			gr_make_io_signature (1, 1, sizeof(float)),
+			gr_make_io_signature (0, 0, 0),
 			gr_make_io_signature (1, 1, sizeof(float)))
 {
 // initializes the library, checks for potential ABI mismatches
@@ -79,10 +79,6 @@ void gr_rds_data_encoder::reset_rds_data(){
 	for(i=0; i<4; i++) {infoword[i]=0; checkword[i]=0;}
 	for(i=0; i<104; i++) {buffer[i]=0; diff_enc_buffer[i]=0;}
 	d_buffer_bit_counter=0;
-	d_buffer_current=0;
-	d_sign_last=0;
-	d_zero_cross=0;
-	d_current_out=0;
 	d_g0_counter=0;
 
 	PI=0;
@@ -317,28 +313,12 @@ int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
-	const float *in = (const float *) input_items[0];
 	float *out = (float *) output_items[0];
-	int sign_current=0;
-	static int symlen=0;	// symbol length
 	
-	// initialize output buffer
-	d_current_out=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);
-
 	for(int i=0; i<noutput_items; i++){
-		symlen++;
-		sign_current=(in[i]>0?1:-1);
-		if(sign_current!=d_sign_last){
-			if(++d_zero_cross==32){		// push next bit
-				if(++d_buffer_bit_counter>103) d_buffer_bit_counter=0;
-				d_current_out=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);	// NRZ
-				DBG(printf("%f (len=%i)", d_current_out, symlen);)
-				d_zero_cross=symlen=0;
-			}
-		}
-		out[i]=d_current_out;
-		d_sign_last=sign_current;
+		if(++d_buffer_bit_counter>103) d_buffer_bit_counter=0;
+		out[i]=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);	// NRZ
 	}
-
+	
 	return noutput_items;
 }

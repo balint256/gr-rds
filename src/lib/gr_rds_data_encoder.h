@@ -61,7 +61,8 @@ private:
 	unsigned int block[4];
 	bool buffer[104];
 	bool diff_enc_buffer[104];
-	
+
+// FIXME make this a struct (or a class)
 	unsigned int PI;
 	bool TP;
 	unsigned char PTY;
@@ -79,10 +80,6 @@ private:
 	
 	int d_g0_counter;
 	int d_buffer_bit_counter;
-	int d_buffer_current;
-	int d_sign_last;
-	int d_zero_cross;
-	float d_current_out;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);

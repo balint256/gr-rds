@@ -1,7 +1,8 @@
 09.02.2010
 - matched the filters in tx with those in rx
 - removed freq_divider from tx
-- updated the .png flowgraphs
+- separated rds encoder from rate enforcer in tx
+- updated .png, added .odg of the flowgraphs
 
 03.02.2010
 - more fixes in rds_encoder

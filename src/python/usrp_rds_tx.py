@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, optfir, blks2, rds
+from gnuradio import gr, usrp, blks2, rds
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import stdgui2, fftsink2, scopesink2
 from optparse import OptionParser
@@ -104,11 +104,15 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.pilot, (self.mix_stereo, 2))
 		self.connect (self.mix_stereo, self.audio_lmr_filter)
 
-		# create NRZ diff-encoded RDS signal
+		# create NRZ diff-encoded RDS bitstream
+		# enforce the 1187.5bps rate
 		# mix with 57kHz carrier (equivalent to BPSK)
 		self.rds_enc = rds.data_encoder('rds_data.xml')
+		self.rate_enforcer = rds.rate_enforcer(usrp_rate)
 		self.bpsk_mod = gr.multiply_ff()
-		self.connect (self.pilot, self.rds_enc, (self.bpsk_mod, 0))
+		self.connect (self.rds_enc, (self.rate_enforcer, 0))
+		self.connect (self.pilot, (self.rate_enforcer, 1))
+		self.connect (self.rate_enforcer, (self.bpsk_mod, 0))
 		self.connect (self.pilot, (self.bpsk_mod, 1))
 		self.connect (self.pilot, (self.bpsk_mod, 2))
 		self.connect (self.pilot, (self.bpsk_mod, 3))

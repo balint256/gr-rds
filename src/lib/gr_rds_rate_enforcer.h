@@ -20,24 +20,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/*	HSR - MOBKOM LABOR
- *	Semesterarbeit GnuRadio Contributions
- *	U. Schaufelberger and R. Gaensli
- *
- * 	Written by : Ronnie Gaensli
- * 	Created: 2005/05
- * 
- */
 
+#ifndef INCLUDED_gr_rds_rate_enforcer_H
+#define INCLUDED_gr_rds_rate_enforcer_H
 
-#ifndef INCLUDED_gr_rds_bpsk_demod_H
-#define INCLUDED_gr_rds_bpsk_demod_H
-
-#include <gr_block.h>
+#include <gr_sync_block.h>
+#include <vector>
 #include <iostream>
-#include <fstream>
 
-class gr_rds_bpsk_demod;
+class gr_rds_rate_enforcer;
 
 /*
  * We use boost::shared_ptr's instead of raw pointers for all access
@@ -51,47 +42,25 @@ class gr_rds_bpsk_demod;
  *
  * As a convention, the _sptr suffix indicates a boost::shared_ptr
  */
-typedef boost::shared_ptr<gr_rds_bpsk_demod> gr_rds_bpsk_demod_sptr;
-
+typedef boost::shared_ptr<gr_rds_rate_enforcer> gr_rds_rate_enforcer_sptr;
 /*!
- * \brief Return a shared_ptr to a new instance of gr_rds_bpsk_demod.
- *
- * To avoid accidental use of raw pointers, gr_rds_bpsk_demod's
- * constructor is private. gr_rds_make_bpsk_demod is the public
- * interface for creating new instances.
- */
-gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);
-
-/*!
- * \brief Decodes a biphase or manchester coded signal to 1, 0 as bool
  * \ingroup RDS
  */
-class gr_rds_bpsk_demod : public gr_block
+gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate);
+
+class gr_rds_rate_enforcer : public gr_block
 {
 private:
-	enum state_t { ST_LOOKING, ST_LOCKED };
-	state_t d_state;
-	int SYMBOL_LENGTH;
-	int d_zc;				// Zero crosses in clk
-	int d_last_zc;
-	int d_sign_last;
-	float d_symbol_integrator;
-	unsigned int synccounter;
-
-// The friend declaration allows gr_rds_make_bpsk_demod to
-// access the private constructor.
-	friend gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);
-	gr_rds_bpsk_demod (double input_samping_rate);	// private constructor
-	void enter_looking();
-	void enter_locked();
+// Functions
+	friend gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate);
+	gr_rds_rate_enforcer (double samp_rate);	// private constructor
 
 public:
-	~gr_rds_bpsk_demod ();
+	~gr_rds_rate_enforcer();		// public destructor
 	int general_work (int noutput_items,
 		gr_vector_int &ninput_items,
 		gr_vector_const_void_star &input_items,
 		gr_vector_void_star &output_items);
-	void reset();
 };
 
-#endif /* INCLUDED_gr_rds_bpsk_demod_H */
+#endif /* INCLUDED_gr_rds_rate_enforcer_H */

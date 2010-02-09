@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##RDS Rate Enforcer
+###################################################
+ -->
+<block>
+	<name>RDS Rate Enforcer</name>
+	<key>gr_rds_rate_enforcer</key>
+	<category>RDS</category>
+	<import>from gnuradio import gr, rds</import>
+	<make>rds.rate_enforcer($sampling_rate)</make>
+	<callback></callback>
+	<param>
+		<name>Sampling Rate</name>
+		<key>sampling_rate</key>
+		<value>256000</value>
+		<type>real</type>
+	</param>
+	<check>$sampling_rate &gt; 0</check>
+	<sink>
+		<name>data</name>
+		<type>float</type>
+	</sink>
+	<sink>
+		<name>clock</name>
+		<type>float</type>
+	</sink>
+	<source>
+		<name>out</name>
+		<type>float</type>
+	</source>
+	<doc>
+This block enforces the RDS data rate of 1187.5bps
+
+Input "Data" is an RDS bitstream (1 sample per symbol); Input "Clock"
+is a 19kHz sampled at the desired sampling rate. The output runs at
+the Clock's sampling rate carrying the same RDS bitstream ("Data")
+with a data rate of 1187.5bps.
+
+This is done by pushing the next RDS bit after 32 zero-crossings in the
+clock.
+	</doc>
+</block>

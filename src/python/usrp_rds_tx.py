@@ -77,8 +77,8 @@ class rds_tx_block(stdgui2.std_top_block):
 			1,				# gain
 			usrp_rate,		# sampling rate
 			15e3,			# passband cutoff
-			2e3,			# transition width
-			gr.firdes.WIN_HANN)
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
 		self.audio_lpr_filter = gr.fir_filter_fff (1, audio_lpr_taps)
 		self.connect (self.audio_lpr, self.audio_lpr_filter)
 
@@ -89,49 +89,26 @@ class rds_tx_block(stdgui2.std_top_block):
 			19e3,				# frequency
 			5e-2)				# amplitude
 
-		# create the L-R signal carrier at 38 kHz, high-pass to remove 0Hz tone
-		self.stereo_carrier = gr.multiply_ff()
-		self.connect (self.pilot, (self.stereo_carrier, 0))
-		self.connect (self.pilot, (self.stereo_carrier, 1))
-		stereo_carrier_taps = gr.firdes.high_pass(
-			1,				# gain
-			usrp_rate,		# sampling rate
-			1e4,			# cutoff freq
-			2e3,			# transition width
-			gr.firdes.WIN_HANN)
-		self.stereo_carrier_filter = gr.fir_filter_fff(1, stereo_carrier_taps)
-		self.connect (self.stereo_carrier, self.stereo_carrier_filter)
-
-		# upconvert L-R to 23-53 kHz and band-pass
+		# upconvert L-R to 38 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
 		audio_lmr_taps = gr.firdes.band_pass(
 			2e2,			# gain
 			usrp_rate,		# sampling rate
-			23e3,			# low cutoff
-			53e3,			# high cutoff
-			2e3,			# transition width
-			gr.firdes.WIN_HANN)
+			38e3-15e3,		# low cutoff
+			38e3+15e3,		# high cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
 		self.audio_lmr_filter = gr.fir_filter_fff (1, audio_lmr_taps)
 		self.connect (self.audio_lmr, (self.mix_stereo, 0))
-		self.connect (self.stereo_carrier_filter, (self.mix_stereo, 1))
+		self.connect (self.pilot, (self.mix_stereo, 1))
+		self.connect (self.pilot, (self.mix_stereo, 2))
 		self.connect (self.mix_stereo, self.audio_lmr_filter)
 
-		# rds_encoder
-		self.freq_div = rds.freq_divider(16)
+		# create NRZ diff-encoded RDS signal
+		# mix with 57kHz carrier (equivalent to BPSK)
 		self.rds_enc = rds.data_encoder('rds_data.xml')
-		rds_bb_filter_taps = gr.firdes.band_pass(
-			1e2,			# gain
-			usrp_rate,		# sampling rate
-			1e3,			# low cutoff
-			2e3,			# high cutoff
-			3e2,			# transition width
-			gr.firdes.WIN_HANN)
-		self.rds_bb_filter = gr.fir_filter_fff (1, rds_bb_filter_taps)
-		self.connect (self.pilot, self.freq_div, self.rds_enc, self.rds_bb_filter)
-
-		# mutliply RDS signal with 57kHz carrier (equivalent to BPSK)
 		self.bpsk_mod = gr.multiply_ff()
-		self.connect (self.rds_bb_filter, (self.bpsk_mod, 0))
+		self.connect (self.pilot, self.rds_enc, (self.bpsk_mod, 0))
 		self.connect (self.pilot, (self.bpsk_mod, 1))
 		self.connect (self.pilot, (self.bpsk_mod, 2))
 		self.connect (self.pilot, (self.bpsk_mod, 3))
@@ -140,10 +117,10 @@ class rds_tx_block(stdgui2.std_top_block):
 		rds_filter_taps = gr.firdes.band_pass(
 			50,				# gain
 			usrp_rate,		# sampling rate
-			55e3,			# low cutoff
-			59e3,			# high cutoff
-			2e3,			# transition width
-			gr.firdes.WIN_HANN)
+			57e3-3e3,		# low cutoff
+			57e3+3e3,		# high cutoff
+			1e3,			# transition width
+			gr.firdes.WIN_HAMMING)
 		self.rds_filter = gr.fir_filter_fff (1, rds_filter_taps)
 		self.connect (self.bpsk_mod, self.rds_filter)
 

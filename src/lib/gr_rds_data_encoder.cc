@@ -40,6 +40,14 @@
 #include "config.h"
 #endif
 
+//#define DEBUG
+
+#ifdef DEBUG
+#define DBG(x) x
+#else
+#define DBG(x)
+#endif
+
 #include <gr_rds_data_encoder.h>
 #include <gr_io_signature.h>
 #include <math.h>
@@ -312,17 +320,20 @@ int gr_rds_data_encoder::work (int noutput_items,
 	const float *in = (const float *) input_items[0];
 	float *out = (float *) output_items[0];
 	int sign_current=0;
+	static int symlen=0;	// symbol length
 	
 	// initialize output buffer
 	d_current_out=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);
 
 	for(int i=0; i<noutput_items; i++){
+		symlen++;
 		sign_current=(in[i]>0?1:-1);
 		if(sign_current!=d_sign_last){
 			if(++d_zero_cross==32){		// push next bit
-				d_zero_cross=0;
 				if(++d_buffer_bit_counter>103) d_buffer_bit_counter=0;
 				d_current_out=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);	// NRZ
+				DBG(printf("%f (len=%i)", d_current_out, symlen);)
+				d_zero_cross=symlen=0;
 			}
 		}
 		out[i]=d_current_out;

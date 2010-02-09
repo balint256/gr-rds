@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, optfir, rds, audio
+from gnuradio import gr, usrp, rds, audio
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2, constsink_gl
 from optparse import OptionParser
@@ -22,6 +22,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 						  help="set frequency to FREQ", metavar="FREQ")
 		parser.add_option("-g", "--gain", type="eng_float", default=None,
 						  help="set gain in dB")
+# FIXME add squelch
 		parser.add_option("-s", "--squelch", type="eng_float", default=0,
 						  help="set squelch level (default is 0)")
 		parser.add_option("-V", "--volume", type="eng_float", default=None,
@@ -63,26 +64,25 @@ class rds_rx_graph (stdgui2.std_top_block):
 		print "Volume:%r, Gain:%r, Freq:%3.1f MHz" % (self.vol, self.gain, self.freq/1e6)
 
 		# channel filter
-		chan_filt_coeffs = optfir.low_pass(
+		chan_filter_coeffs = gr.firdes.low_pass(
 			1.0,			# gain
-			usrp_rate,		# rate
+			usrp_rate,		# sampling rate
 			80e3,			# passband cutoff
-			115e3,			# stopband cutoff
-			0.1,			# passband ripple
-			60)				# stopband attenuation
-		self.chan_filt = gr.fir_filter_ccf(1, chan_filt_coeffs)
-		print "# channel filter:", len(chan_filt_coeffs), "taps"
+			35e3,			# transition width
+			gr.firdes.WIN_HAMMING)
+		self.chan_filter = gr.fir_filter_ccf(1, chan_filter_coeffs)
+		print "# channel filter:", len(chan_filter_coeffs), "taps"
 
 		# PLL-based WFM demod
-		fm_alpha = 0.25 * 250e3 * math.pi / usrp_rate
-		fm_beta = fm_alpha * fm_alpha / 4.0
-		fm_max_freq = 2.0 * math.pi * 90e3 / usrp_rate
+		fm_alpha = 0.25 * 250e3 * math.pi / usrp_rate		# 0.767
+		fm_beta = fm_alpha * fm_alpha / 4.0					# 0.147
+		fm_max_freq = 2.0 * math.pi * 90e3 / usrp_rate		# 2.209
 		self.fm_demod = gr.pll_freqdet_cf(
 			fm_alpha,			# phase gain
 			fm_beta,			# freq gain
 			fm_max_freq,		# in radians/sample
 			-fm_max_freq)
-		self.connect(self.u, self.chan_filt, self.fm_demod)
+		self.connect(self.u, self.chan_filter, self.fm_demod)
 
 		# L+R, pilot, L-R, RDS filters
 		lpr_filter_coeffs = gr.firdes.low_pass(
@@ -268,11 +268,9 @@ class rds_rx_graph (stdgui2.std_top_block):
 ########################### EVENTS ############################
 
 	def set_vol (self, vol):
-		g = self.volume_range()
-		self.vol = max(g[0], min(g[1], vol))		# clever trick
-		self.volume_control_l.set_k(10**(self.vol/10))
-		self.volume_control_r.set_k(10**(self.vol/10))
-		self.myform['volume'].set_value(self.vol)
+		self.volume_control_l.set_k(10**(vol/10))
+		self.volume_control_r.set_k(10**(vol/10))
+		self.myform['volume'].set_value(vol)
 		self.update_status_bar ()
 
 	def set_freq(self, target_freq):

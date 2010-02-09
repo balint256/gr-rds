@@ -150,10 +150,8 @@ class rds_rx_graph (gr.top_block):
 		return (-20.0, 0.0, 0.5)		# hardcoded values
 
 	def set_vol (self, vol):
-		g = self.volume_range()
-		self.vol = max(g[0], min(g[1], vol))
-		self.volume_control_l.set_k(10**(self.vol/10))
-		self.volume_control_r.set_k(10**(self.vol/10))
+		self.volume_control_l.set_k(10**(vol/10))
+		self.volume_control_r.set_k(10**(vol/10))
 
 	def set_freq(self, target_freq):
 		r = usrp.tune(self.u, 0, self.subdev, target_freq)

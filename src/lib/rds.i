@@ -10,6 +10,7 @@
 #include "gr_rds_bpsk_demod.h"
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_data_encoder.h"
+#include "gr_rds_rate_enforcer.h"
 #include "gr_rds_freq_divider.h"
 #include <stdexcept>
 %}
@@ -40,6 +41,17 @@ private:
 	gr_rds_data_encoder(const char *xmlfile);
 };
 
+//------------------------------------------------------------------
+
+GR_SWIG_BLOCK_MAGIC (gr_rds, rate_enforcer);
+
+gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer(double samp_rate);
+
+class gr_rds_rate_enforcer: public gr_block
+{
+private:
+	gr_rds_rate_enforcer(double samp_rate);
+};
 
 // ------------------------------------------------------------------
 

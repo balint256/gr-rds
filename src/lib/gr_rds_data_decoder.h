@@ -58,7 +58,7 @@ typedef boost::shared_ptr<gr_rds_data_decoder> gr_rds_data_decoder_sptr;
 gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);
 
 
-static const unsigned int syndrome[5]={383,14,303,748,663};
+static const unsigned int syndrome[5]={383,14,303,663,748};
 
 /* offset word C' has been put at the end
    see Annex A, page 59 of the standard */

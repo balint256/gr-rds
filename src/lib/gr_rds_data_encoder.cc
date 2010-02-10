@@ -286,7 +286,7 @@ void gr_rds_data_encoder::prepare_buffers(){
 		temp[i]=temp[i]|(buffer[q]<<j);
 	}
 	printf("buffer: ");
-	for(i=0;i<13;i++) printf("%02X ", temp[i]);
+	for(i=0;i<13;i++) printf("%02X", temp[i]);
 	printf("\n");
 	
 	for(i=0; i<13; i++) temp[i]=0;
@@ -298,7 +298,7 @@ void gr_rds_data_encoder::prepare_buffers(){
 		temp[i]=temp[i]|(diff_enc_buffer[q]<<j);
 	}
 	printf("diff-encoded buffer: ");
-	for(i=0;i<13;i++) printf("%02X ", temp[i]);
+	for(i=0;i<13;i++) printf("%02X", temp[i]);
 	printf("\n");
 }
 

@@ -20,14 +20,13 @@
 	<check>len($xmlfile) &gt; 0</check>
 	<source>
 		<name>out</name>
-		<type>float</type>
+		<type>byte</type>
 	</source>
 	<doc>
-This source block creates the baseband (NRZ, i.e. [-1, 1]) RDS signal.
+This source block creates the baseband RDS signal.
 
 It reads its configuration from an XML file; composes the infowords;
 calculates checkwords; merges the two into blocks and then groups;
-differentially encodes the groups; maps [0, 1] to [-1, 1]; and
-streams out the resulting buffer.
+and streams out the resulting buffer.
 	</doc>
 </block>

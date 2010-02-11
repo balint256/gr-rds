@@ -1,3 +1,7 @@
+11.02.2010
+- diff-encoding, nrz are again separate from rds-encoder
+- fixed grc blocks install script
+
 10.02.2010
 - worked on rds_syndrome.py
 - fixed the order of syndromes, now the receiver loses sync much much less

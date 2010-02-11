@@ -60,7 +60,6 @@ private:
 	unsigned int checkword[4];
 	unsigned int block[4];
 	bool buffer[104];
-	bool diff_enc_buffer[104];
 
 // FIXME make this a struct (or a class)
 	unsigned int PI;

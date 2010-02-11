@@ -22,12 +22,11 @@
 
 
 /*
- * This source block creates the baseband (NRZ, i.e. [-1, 1]) RDS signal.
+ * This source block creates the baseband RDS signal.
  * 
  * It reads its configuration from an XML file; composes the infowords;
  * calculates checkwords; merges the two into blocks and then groups;
- * differentially encodes the groups; maps [0, 1] to [-1, 1]; and
- * streams out the resulting buffer.
+ * and streams out the resulting buffer.
  */
 
 
@@ -59,7 +58,7 @@ gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
   : gr_sync_block ("gr_rds_data_encoder",
 			gr_make_io_signature (0, 0, 0),
-			gr_make_io_signature (1, 1, sizeof(float)))
+			gr_make_io_signature (1, 1, sizeof(unsigned char)))
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
@@ -77,7 +76,7 @@ gr_rds_data_encoder::~gr_rds_data_encoder () {
 void gr_rds_data_encoder::reset_rds_data(){
 	int i=0;
 	for(i=0; i<4; i++) {infoword[i]=0; checkword[i]=0;}
-	for(i=0; i<104; i++) {buffer[i]=0; diff_enc_buffer[i]=0;}
+	for(i=0; i<104; i++) buffer[i]=0;
 	d_buffer_bit_counter=0;
 	d_g0_counter=0;
 
@@ -288,18 +287,6 @@ void gr_rds_data_encoder::prepare_buffers(){
 	printf("buffer: ");
 	for(i=0;i<13;i++) printf("%02X", temp[i]);
 	printf("\n");
-	
-	for(i=0; i<13; i++) temp[i]=0;
-	diff_enc_buffer[0]=buffer[0];
-	temp[0]=buffer[0]<<7;
-	for (q=1;q<104;q++){
-		diff_enc_buffer[q]=(buffer[q]==buffer[q-1])?0:1;
-		i=floor(q/8); j=7-q%8;
-		temp[i]=temp[i]|(diff_enc_buffer[q]<<j);
-	}
-	printf("diff-encoded buffer: ");
-	for(i=0;i<13;i++) printf("%02X", temp[i]);
-	printf("\n");
 }
 
 
@@ -313,11 +300,11 @@ int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
-	float *out = (float *) output_items[0];
+	unsigned char *out = (unsigned char *) output_items[0];
 	
 	for(int i=0; i<noutput_items; i++){
 		if(++d_buffer_bit_counter>103) d_buffer_bit_counter=0;
-		out[i]=(diff_enc_buffer[d_buffer_bit_counter]?1:-1);	// NRZ
+		out[i]=(unsigned char)buffer[d_buffer_bit_counter];
 	}
 	
 	return noutput_items;

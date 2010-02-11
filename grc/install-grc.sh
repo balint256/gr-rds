@@ -1,3 +1,3 @@
 #!/bin/bash
-mkdir ~/.grc_gnuradio
+[ -a ~/.grc_gnuradio ] || mkdir ~/.grc_gnuradio
 install *.xml -t ~/.grc_gnuradio

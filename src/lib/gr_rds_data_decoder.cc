@@ -598,7 +598,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 								enter_sync(j);
 							}
 						}
-					j=5; //syndrome found, no more cycles
+					break; //syndrome found, no more cycles
 					}
 				}
 			break;

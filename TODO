@@ -1,6 +1,5 @@
 - Complete TMC implementation
 - Add scanning for stations
-- Fix too common "lost sync"
-- Fix preemph in blks2.fm_emph
-- Exploit blks2.wfm_rcv_pll in usrp_rds_rx.py
-- Replace freq_divider, bpsk_demod
+- Replace bpsk_demod
+- Implement in GRC
+- Add error correction, not only detection

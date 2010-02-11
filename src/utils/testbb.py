@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 ##################################################
 # Gnuradio Python Flow Graph
-# Title: Test
-# Generated: Thu Feb 11 14:28:16 2010
+# Title: Testbb
+# Generated: Thu Feb 11 14:50:34 2010
 ##################################################
 
 from gnuradio import audio
@@ -13,10 +13,10 @@ from gnuradio.eng_option import eng_option
 from gnuradio.gr import firdes
 from optparse import OptionParser
 
-class test(gr.top_block):
+class testbb(gr.top_block):
 
 	def __init__(self):
-		gr.top_block.__init__(self, "Test")
+		gr.top_block.__init__(self, "Testbb")
 
 		##################################################
 		# Variables
@@ -58,7 +58,7 @@ class test(gr.top_block):
 if __name__ == '__main__':
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
 	(options, args) = parser.parse_args()
-	tb = test()
+	tb = testbb()
 	tb.start()
 	raw_input('Press Enter to quit: ')
 	tb.stop()

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Thu Feb 11 11:33:33 2010</timestamp>
+  <timestamp>Thu Feb 11 14:50:34 2010</timestamp>
   <block>
     <key>variable</key>
     <param>
@@ -293,7 +293,7 @@
     <key>options</key>
     <param>
       <key>id</key>
-      <value>test</value>
+      <value>testbb</value>
     </param>
     <param>
       <key>_enabled</key>

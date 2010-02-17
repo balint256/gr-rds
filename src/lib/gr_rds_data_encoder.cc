@@ -303,8 +303,8 @@ int gr_rds_data_encoder::work (int noutput_items,
 	unsigned char *out = (unsigned char *) output_items[0];
 	
 	for(int i=0; i<noutput_items; i++){
-		if(++d_buffer_bit_counter>103) d_buffer_bit_counter=0;
 		out[i]=(unsigned char)buffer[d_buffer_bit_counter];
+		if(++d_buffer_bit_counter>103) d_buffer_bit_counter=0;
 	}
 	
 	return noutput_items;

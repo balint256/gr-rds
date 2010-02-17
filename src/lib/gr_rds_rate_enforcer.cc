@@ -66,8 +66,6 @@ gr_rds_rate_enforcer::~gr_rds_rate_enforcer () {
 
 }
 
-
-//////////////////////// WORK ////////////////////////////////////
 int gr_rds_rate_enforcer::general_work (int noutput_items,
 		gr_vector_int &ninput_items,
 		gr_vector_const_void_star &input_items,
@@ -88,7 +86,7 @@ int gr_rds_rate_enforcer::general_work (int noutput_items,
 		symlen++;
 		sign_current=(clock[i]>0?1:-1);
 		if(sign_current!=sign_last){
-			if(++zero_cross>31){		// push next bit
+			if(++zero_cross>15){		// push next bit
 				current_out++;
 				DBG(printf("%f (len=%i)", data[current_out], symlen);)
 				zero_cross=symlen=0;

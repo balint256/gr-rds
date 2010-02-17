@@ -1,3 +1,7 @@
+17.02.2010
+- added Manchester encoding to the transmitter
+- added a few more utils
+
 11.02.2010
 - diff-encoding, nrz are again separate from rds-encoder
 - fixed grc blocks install script

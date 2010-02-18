@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Thu Feb 18 10:58:37 2010</timestamp>
+  <timestamp>Thu Feb 18 11:21:59 2010</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -142,7 +142,7 @@
     </param>
     <param>
       <key>_rotation</key>
-      <value>0</value>
+      <value>180</value>
     </param>
   </block>
   <block>
@@ -153,7 +153,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>False</value>
     </param>
     <param>
       <key>type</key>
@@ -172,8 +172,16 @@
       <value>(462, 28)</value>
     </param>
     <param>
+      <key>num_ports</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(258, 198)</value>
+    </param>
+    <param>
       <key>_rotation</key>
-      <value>180</value>
+      <value>0</value>
     </param>
   </block>
   <block>
@@ -246,32 +254,9 @@
       <value>0</value>
     </param>
   </block>
-  <block>
-    <key>gr_rds_data_decoder</key>
-    <param>
-      <key>id</key>
-      <value>gr_rds_data_decoder_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>False</value>
-    </param>
-    <param>
-      <key>msgq</key>
-      <value>gr.msg_queue()</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(484, 206)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
   <connection>
-    <source_block_id>gr_unpacked_to_packed_xx_0</source_block_id>
-    <sink_block_id>gr_head_0</sink_block_id>
+    <source_block_id>gr_head_0</source_block_id>
+    <sink_block_id>gr_file_sink_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
@@ -288,8 +273,8 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>gr_packed_to_unpacked_xx_0</source_block_id>
-    <sink_block_id>gr_rds_data_decoder_0</sink_block_id>
+    <source_block_id>gr_unpacked_to_packed_xx_0</source_block_id>
+    <sink_block_id>gr_head_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

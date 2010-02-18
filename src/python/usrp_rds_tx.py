@@ -104,8 +104,10 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.connect (self.pilot, (self.mix_stereo, 2))
 		self.connect (self.mix_stereo, self.audio_lmr_filter)
 
-		# create NRZ diff-encoded RDS bitstream
+		# create RDS bitstream
+		# diff-encode, manchester-emcode, NRZ
 		# enforce the 1187.5bps rate
+		# pulse shaping filter (matched with receiver)
 		# mix with 57kHz carrier (equivalent to BPSK)
 		self.rds_enc = rds.data_encoder('rds_data.xml')
 		self.diff_enc = gr.diff_encoder_bb(2)
@@ -114,6 +116,13 @@ class rds_tx_block(stdgui2.std_top_block):
 		self.nrz = gr.map_bb([-1,1])
 		self.c2f = gr.char_to_float()
 		self.rate_enforcer = rds.rate_enforcer(usrp_rate)
+		pulse_shaping_taps = gr.firdes.low_pass(
+			1,				# gain
+			usrp_rate,		# sampling rate
+			1.5e3,			# passband cutoff
+			2e3,			# transition width
+			gr.firdes.WIN_HAMMING)
+		self.pulse_shaping = gr.fir_filter_fff(1, pulse_shaping_taps)
 		self.bpsk_mod = gr.multiply_ff()
 		self.connect (self.rds_enc, self.diff_enc, self.manchester1, \
 			self.manchester2, self.nrz, self.c2f)

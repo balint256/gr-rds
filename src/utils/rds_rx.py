@@ -2,17 +2,15 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Rds Rx
-# Generated: Wed Feb 17 14:07:59 2010
+# Generated: Thu Feb 18 11:41:59 2010
 ##################################################
 
 from gnuradio import audio
 from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio import gr, rds
-from gnuradio import window
 from gnuradio.eng_option import eng_option
 from gnuradio.gr import firdes
-from gnuradio.wxgui import fftsink2
 from grc_gnuradio import usrp as grc_usrp
 from grc_gnuradio import wxgui as grc_wxgui
 from optparse import OptionParser
@@ -22,7 +20,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 
 	def __init__(self):
 		grc_wxgui.top_block_gui.__init__(self, title="Rds Rx")
-		_icon_path = "/home/azimout/.local/share/icons/hicolor/32x32/apps/gnuradio-grc.png"
+		_icon_path = "/home/sdr/.local/share/icons/hicolor/32x32/apps/gnuradio-grc.png"
 		self.SetIcon(wx.Icon(_icon_path, wx.BITMAP_TYPE_ANY))
 
 		##################################################
@@ -68,22 +66,6 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.usrp_simple_source_x_0.set_gain(20)
 		self.vol_left = gr.multiply_const_vff((volume, ))
 		self.vol_right = gr.multiply_const_vff((volume, ))
-		self.wxgui_fftsink2_0 = fftsink2.fft_sink_f(
-			self.GetWin(),
-			baseband_freq=0,
-			y_per_div=10,
-			y_divs=10,
-			ref_level=50,
-			ref_scale=2.0,
-			sample_rate=audio_rate,
-			fft_size=1024,
-			fft_rate=30,
-			average=False,
-			avg_alpha=None,
-			title="FFT Plot",
-			peak_hold=False,
-		)
-		self.Add(self.wxgui_fftsink2_0.win)
 
 		##################################################
 		# Connections
@@ -117,7 +99,6 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.connect((self.gr_rds_bpsk_demod_0, 0), (self.gr_diff_decoder_bb_0, 0))
 		self.connect((self.rds_clk_filter, 0), (self.gr_rds_bpsk_demod_0, 1))
 		self.connect((self.rds_bb_filter, 0), (self.gr_rds_bpsk_demod_0, 0))
-		self.connect((self.rds_bb_filter, 0), (self.wxgui_fftsink2_0, 0))
 
 	def set_usrp_rate(self, usrp_rate):
 		self.usrp_rate = usrp_rate
@@ -142,7 +123,6 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.audio_rate = audio_rate
 		self.rds_bb_filter.set_taps(firdes.low_pass(1e3, self.audio_rate, 1.5e3, 2e3, firdes.WIN_HAMMING, 6.76))
 		self.rds_clk_filter.set_taps(firdes.low_pass(1, self.audio_rate, 1.2e3, 1.5e3, firdes.WIN_HAMMING, 6.76))
-		self.wxgui_fftsink2_0.set_sample_rate(self.audio_rate)
 
 if __name__ == '__main__':
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")

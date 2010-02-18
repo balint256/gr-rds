@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Thu Feb 18 10:58:06 2010</timestamp>
+  <timestamp>Thu Feb 18 11:34:02 2010</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -29,7 +29,7 @@
     </param>
     <param>
       <key>generate_options</key>
-      <value>no_gui</value>
+      <value>wx_gui</value>
     </param>
     <param>
       <key>category</key>
@@ -123,41 +123,6 @@
     <param>
       <key>_rotation</key>
       <value>180</value>
-    </param>
-  </block>
-  <block>
-    <key>audio_source</key>
-    <param>
-      <key>id</key>
-      <value>audio_source_0_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>samp_rate</key>
-      <value>32000</value>
-    </param>
-    <param>
-      <key>device_name</key>
-      <value>plughw:0,0</value>
-    </param>
-    <param>
-      <key>ok_to_block</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>num_outputs</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(330, 10)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
     </param>
   </block>
   <block>
@@ -299,29 +264,6 @@
     </param>
   </block>
   <block>
-    <key>gr_rds_data_encoder</key>
-    <param>
-      <key>id</key>
-      <value>gr_rds_data_encoder_1</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>xmlfile</key>
-      <value>/media/dimitris/sandbox/rdstest/rds_data.xml</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(-1, 155)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
     <key>gr_diff_encoder_bb</key>
     <param>
       <key>id</key>
@@ -338,6 +280,64 @@
     <param>
       <key>_coordinate</key>
       <value>(324, 193)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>audio_source</key>
+    <param>
+      <key>id</key>
+      <value>audio_source_0_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>samp_rate</key>
+      <value>32000</value>
+    </param>
+    <param>
+      <key>device_name</key>
+      <value>hw:0,0</value>
+    </param>
+    <param>
+      <key>ok_to_block</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>num_outputs</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(330, 10)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_rds_data_encoder</key>
+    <param>
+      <key>id</key>
+      <value>gr_rds_data_encoder_1</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>xmlfile</key>
+      <value>/media/dimitris/mywork/gr/dimitris/rds/trunk/src/utils/rds_data.xml</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(-1, 155)</value>
     </param>
     <param>
       <key>_rotation</key>

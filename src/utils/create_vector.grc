@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Wed Feb 17 17:05:00 2010</timestamp>
+  <timestamp>Thu Feb 18 10:58:37 2010</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -57,22 +57,22 @@
     </param>
   </block>
   <block>
-    <key>gr_head</key>
+    <key>gr_file_sink</key>
     <param>
       <key>id</key>
-      <value>gr_head_0</value>
+      <value>gr_file_sink_0</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>False</value>
+      <value>True</value>
+    </param>
+    <param>
+      <key>file</key>
+      <value>/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_vector.dat</value>
     </param>
     <param>
       <key>type</key>
       <value>byte</value>
-    </param>
-    <param>
-      <key>num_items</key>
-      <value>13</value>
     </param>
     <param>
       <key>vlen</key>
@@ -80,11 +80,34 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(462, 28)</value>
+      <value>(207, 27)</value>
     </param>
     <param>
       <key>_rotation</key>
       <value>180</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_rds_data_encoder</key>
+    <param>
+      <key>id</key>
+      <value>gr_rds_data_encoder_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>xmlfile</key>
+      <value>/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_data.xml</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(204, 112)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
     </param>
   </block>
   <block>
@@ -95,7 +118,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>False</value>
+      <value>True</value>
     </param>
     <param>
       <key>type</key>
@@ -123,45 +146,22 @@
     </param>
   </block>
   <block>
-    <key>gr_rds_data_encoder</key>
+    <key>gr_head</key>
     <param>
       <key>id</key>
-      <value>gr_rds_data_encoder_0</value>
+      <value>gr_head_0</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>False</value>
-    </param>
-    <param>
-      <key>xmlfile</key>
-      <value>/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_data.xml</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(204, 112)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>gr_file_sink</key>
-    <param>
-      <key>id</key>
-      <value>gr_file_sink_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>False</value>
-    </param>
-    <param>
-      <key>file</key>
-      <value>/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_vector.dat</value>
+      <value>True</value>
     </param>
     <param>
       <key>type</key>
       <value>byte</value>
+    </param>
+    <param>
+      <key>num_items</key>
+      <value>13</value>
     </param>
     <param>
       <key>vlen</key>
@@ -169,7 +169,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(207, 27)</value>
+      <value>(462, 28)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -177,22 +177,34 @@
     </param>
   </block>
   <block>
-    <key>gr_rds_data_decoder</key>
+    <key>gr_packed_to_unpacked_xx</key>
     <param>
       <key>id</key>
-      <value>gr_rds_data_decoder_0</value>
+      <value>gr_packed_to_unpacked_xx_0</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>False</value>
     </param>
     <param>
-      <key>msgq</key>
-      <value>gr.msg_queue()</value>
+      <key>type</key>
+      <value>byte</value>
+    </param>
+    <param>
+      <key>bits_per_chunk</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>endianness</key>
+      <value>gr.GR_MSB_FIRST</value>
+    </param>
+    <param>
+      <key>num_ports</key>
+      <value>1</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(484, 206)</value>
+      <value>(258, 198)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -207,7 +219,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>False</value>
     </param>
     <param>
       <key>file</key>
@@ -235,34 +247,22 @@
     </param>
   </block>
   <block>
-    <key>gr_packed_to_unpacked_xx</key>
+    <key>gr_rds_data_decoder</key>
     <param>
       <key>id</key>
-      <value>gr_packed_to_unpacked_xx_0</value>
+      <value>gr_rds_data_decoder_0</value>
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>False</value>
     </param>
     <param>
-      <key>type</key>
-      <value>byte</value>
-    </param>
-    <param>
-      <key>bits_per_chunk</key>
-      <value>1</value>
-    </param>
-    <param>
-      <key>endianness</key>
-      <value>gr.GR_MSB_FIRST</value>
-    </param>
-    <param>
-      <key>num_ports</key>
-      <value>1</value>
+      <key>msgq</key>
+      <value>gr.msg_queue()</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(258, 198)</value>
+      <value>(484, 206)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -276,26 +276,26 @@
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>gr_rds_data_encoder_0</source_block_id>
-    <sink_block_id>gr_unpacked_to_packed_xx_0</sink_block_id>
-    <source_key>0</source_key>
-    <sink_key>0</sink_key>
-  </connection>
-  <connection>
     <source_block_id>gr_head_0</source_block_id>
     <sink_block_id>gr_file_sink_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
   <connection>
-    <source_block_id>gr_file_source_0</source_block_id>
-    <sink_block_id>gr_packed_to_unpacked_xx_0</sink_block_id>
+    <source_block_id>gr_rds_data_encoder_0</source_block_id>
+    <sink_block_id>gr_unpacked_to_packed_xx_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>
   <connection>
     <source_block_id>gr_packed_to_unpacked_xx_0</source_block_id>
     <sink_block_id>gr_rds_data_decoder_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>gr_file_source_0</source_block_id>
+    <sink_block_id>gr_packed_to_unpacked_xx_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

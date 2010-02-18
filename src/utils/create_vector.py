@@ -2,7 +2,7 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Create Vector
-# Generated: Wed Feb 17 17:04:49 2010
+# Generated: Thu Feb 18 10:58:37 2010
 ##################################################
 
 from gnuradio import eng_notation
@@ -20,15 +20,17 @@ class create_vector(gr.top_block):
 		##################################################
 		# Blocks
 		##################################################
-		self.gr_file_source_0 = gr.file_source(gr.sizeof_char*1, "/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_vector.dat", True)
-		self.gr_packed_to_unpacked_xx_0 = gr.packed_to_unpacked_bb(1, gr.GR_MSB_FIRST)
-		self.gr_rds_data_decoder_0 = rds.data_decoder(gr.msg_queue())
+		self.gr_file_sink_0 = gr.file_sink(gr.sizeof_char*1, "/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_vector.dat")
+		self.gr_head_0 = gr.head(gr.sizeof_char*1, 13)
+		self.gr_rds_data_encoder_0 = rds.data_encoder("/media/dimitris/mywork/gr/dimitris/rds/trunk/src/test/rds_data.xml")
+		self.gr_unpacked_to_packed_xx_0 = gr.unpacked_to_packed_bb(1, gr.GR_MSB_FIRST)
 
 		##################################################
 		# Connections
 		##################################################
-		self.connect((self.gr_file_source_0, 0), (self.gr_packed_to_unpacked_xx_0, 0))
-		self.connect((self.gr_packed_to_unpacked_xx_0, 0), (self.gr_rds_data_decoder_0, 0))
+		self.connect((self.gr_unpacked_to_packed_xx_0, 0), (self.gr_head_0, 0))
+		self.connect((self.gr_head_0, 0), (self.gr_file_sink_0, 0))
+		self.connect((self.gr_rds_data_encoder_0, 0), (self.gr_unpacked_to_packed_xx_0, 0))
 
 if __name__ == '__main__':
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")

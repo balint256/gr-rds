@@ -9,4 +9,5 @@ echo /usr/local/lib | sudo tee -a /etc/ld.so.conf
 sudo ldconfig
 
 sudo chmod u+s /usr/local/bin/usrp2_socket_opener
+[ -a /etc/security/limits.d ] || sudo mkdir /etc/security/limits.d
 echo '@usrp  - rtprio 50' | sudo tee /etc/security/limits.d/usrp.conf

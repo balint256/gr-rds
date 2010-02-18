@@ -1,6 +1,61 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Thu Feb 11 14:50:34 2010</timestamp>
+  <timestamp>Thu Feb 18 10:58:06 2010</timestamp>
+  <block>
+    <key>options</key>
+    <param>
+      <key>id</key>
+      <value>testbb</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>title</key>
+      <value></value>
+    </param>
+    <param>
+      <key>author</key>
+      <value></value>
+    </param>
+    <param>
+      <key>description</key>
+      <value></value>
+    </param>
+    <param>
+      <key>window_size</key>
+      <value>1280, 1024</value>
+    </param>
+    <param>
+      <key>generate_options</key>
+      <value>no_gui</value>
+    </param>
+    <param>
+      <key>category</key>
+      <value>Custom</value>
+    </param>
+    <param>
+      <key>run_options</key>
+      <value>prompt</value>
+    </param>
+    <param>
+      <key>run</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>realtime_scheduling</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(10, 10)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
   <block>
     <key>variable</key>
     <param>
@@ -18,29 +73,6 @@
     <param>
       <key>_coordinate</key>
       <value>(215, 11)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>gr_rds_data_encoder</key>
-    <param>
-      <key>id</key>
-      <value>gr_rds_data_encoder_1</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>xmlfile</key>
-      <value>/media/dimitris/sandbox/rdstest/rds_data.xml</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(0, 154)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -129,29 +161,6 @@
     </param>
   </block>
   <block>
-    <key>gr_diff_encoder_bb</key>
-    <param>
-      <key>id</key>
-      <value>gr_diff_encoder_bb_1</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>modulus</key>
-      <value>2</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(324, 193)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
     <key>gr_rds_data_decoder</key>
     <param>
       <key>id</key>
@@ -198,67 +207,6 @@
     </param>
   </block>
   <block>
-    <key>gr_binary_slicer_fb</key>
-    <param>
-      <key>id</key>
-      <value>gr_binary_slicer_fb_1</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(323, 261)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>180</value>
-    </param>
-  </block>
-  <block>
-    <key>gr_char_to_float</key>
-    <param>
-      <key>id</key>
-      <value>gr_char_to_float_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(527, 267)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>180</value>
-    </param>
-  </block>
-  <block>
-    <key>gr_map_bb</key>
-    <param>
-      <key>id</key>
-      <value>gr_map_bb_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>map</key>
-      <value>[-1,1]</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(553, 175)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
     <key>gr_add_xx</key>
     <param>
       <key>id</key>
@@ -290,54 +238,106 @@
     </param>
   </block>
   <block>
-    <key>options</key>
+    <key>gr_char_to_float</key>
     <param>
       <key>id</key>
-      <value>testbb</value>
+      <value>gr_char_to_float_0</value>
     </param>
     <param>
       <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>title</key>
-      <value></value>
+      <key>_coordinate</key>
+      <value>(562, 266)</value>
     </param>
     <param>
-      <key>author</key>
-      <value></value>
+      <key>_rotation</key>
+      <value>180</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_binary_slicer_fb</key>
+    <param>
+      <key>id</key>
+      <value>gr_binary_slicer_fb_1</value>
     </param>
     <param>
-      <key>description</key>
-      <value></value>
-    </param>
-    <param>
-      <key>window_size</key>
-      <value>1280, 1024</value>
-    </param>
-    <param>
-      <key>generate_options</key>
-      <value>no_gui</value>
-    </param>
-    <param>
-      <key>category</key>
-      <value>Custom</value>
-    </param>
-    <param>
-      <key>run_options</key>
-      <value>prompt</value>
-    </param>
-    <param>
-      <key>run</key>
+      <key>_enabled</key>
       <value>True</value>
     </param>
     <param>
-      <key>realtime_scheduling</key>
-      <value></value>
+      <key>_coordinate</key>
+      <value>(350, 263)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>180</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_map_bb</key>
+    <param>
+      <key>id</key>
+      <value>gr_map_bb_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>map</key>
+      <value>[-1,1]</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(10, 10)</value>
+      <value>(562, 191)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_rds_data_encoder</key>
+    <param>
+      <key>id</key>
+      <value>gr_rds_data_encoder_1</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>xmlfile</key>
+      <value>/media/dimitris/sandbox/rdstest/rds_data.xml</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(-1, 155)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_diff_encoder_bb</key>
+    <param>
+      <key>id</key>
+      <value>gr_diff_encoder_bb_1</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>modulus</key>
+      <value>2</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(324, 193)</value>
     </param>
     <param>
       <key>_rotation</key>

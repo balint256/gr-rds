@@ -2,7 +2,7 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Rds Rx
-# Generated: Thu Feb 18 11:41:59 2010
+# Generated: Thu Feb 18 13:51:40 2010
 ##################################################
 
 from gnuradio import audio
@@ -12,16 +12,12 @@ from gnuradio import gr, rds
 from gnuradio.eng_option import eng_option
 from gnuradio.gr import firdes
 from grc_gnuradio import usrp as grc_usrp
-from grc_gnuradio import wxgui as grc_wxgui
 from optparse import OptionParser
-import wx
 
-class rds_rx(grc_wxgui.top_block_gui):
+class rds_rx(gr.top_block):
 
 	def __init__(self):
-		grc_wxgui.top_block_gui.__init__(self, title="Rds Rx")
-		_icon_path = "/home/sdr/.local/share/icons/hicolor/32x32/apps/gnuradio-grc.png"
-		self.SetIcon(wx.Icon(_icon_path, wx.BITMAP_TYPE_ANY))
+		gr.top_block.__init__(self, "Rds Rx")
 
 		##################################################
 		# Variables
@@ -128,5 +124,7 @@ if __name__ == '__main__':
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
 	(options, args) = parser.parse_args()
 	tb = rds_rx()
-	tb.Run(True)
+	tb.start()
+	raw_input('Press Enter to quit: ')
+	tb.stop()
 

@@ -1,3 +1,7 @@
+18.02.2010
+- added pulse shaping filter
+- added rds_tx grc flowgraph
+
 17.02.2010
 - added Manchester encoding to the transmitter
 - added a few more utils

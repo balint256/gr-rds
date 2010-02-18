@@ -11,6 +11,6 @@
 		<field name="PS" type="string">AZIMOUT.</field>
 	</group>
 	<group type="2A">
-		<field name="RadioText" type="string">JRCRadio</field>
+		<field name="RadioText" type="string">JRCRadio-building72-USRP-GNURadio-GR-RDS</field>
 	</group>
 </rds>

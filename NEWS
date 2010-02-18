@@ -1,6 +1,8 @@
 18.02.2010
 - added pulse shaping filter
 - added rds_tx grc flowgraph
+- changed encoder structure to output >1 groups
+- added group type 2, 4 transmission
 
 17.02.2010
 - added Manchester encoding to the transmitter

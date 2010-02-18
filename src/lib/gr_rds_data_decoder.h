@@ -98,7 +98,7 @@ static const char * const pty_table[32]={"None",
 								"Folk Music",
 								"Documentary",
 								"Alarm Test",
-								"Alarm - Alarm !"};
+								"Alarm-Alarm!"};
 
 /* pages 71-72, Annex D, tables D.1-2 in the standard */
 static const char * const pi_country_codes[15][5]={

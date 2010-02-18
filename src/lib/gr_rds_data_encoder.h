@@ -59,7 +59,7 @@ private:
 	unsigned int infoword[4];
 	unsigned int checkword[4];
 	unsigned int block[4];
-	bool buffer[104];
+	unsigned char **buffer;
 
 // FIXME make this a struct (or a class)
 	unsigned int PI;
@@ -74,11 +74,27 @@ private:
 	double AF1;
 	double AF2;
 	char PS[8];
-	char radiotext[64];
-	bool radiotext_AB_flag;
-	
+	unsigned char radiotext[64];
+	unsigned char timedata[5];
+
+/* each type 0 group contains 2 out of 8 PS characters;
+ * this is used to count 0..3 and send all PS characters */
 	int d_g0_counter;
+/* each type 2A group contains 4 out of 64 RadioText characters;
+ * each type 2B group contains 2 out of 32 RadioText characters;
+ * this is used to count 0..15 and send all RadioText characters */
+	int d_g2_counter;
+/* points to the current buffer being prepared/streamed
+ * used in create_group() and in work() */
+	int d_current_buffer;
+/* loops through the buffer, pushing out the symbols */
 	int d_buffer_bit_counter;
+/* 0..16+A/B = 32 groups. 0A is groups[0], 0B is groups[16]. use %16.
+ * ==0 means group not present, ==1 means group present */
+	int ngroups;
+	int groups[32];
+/* nbuffers might be != ngroups, e.g. group 0A needs 4 buffers */
+	int nbuffers;
 
 // Functions
 	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
@@ -87,8 +103,10 @@ private:
 	void print_element_names(xmlNode * a_node);
 	void assign_from_xml(const char *field, const char *value, const int length);
 	void reset_rds_data();
-	void create_groups(const int group_type, const bool AB);
-	void prepare_buffers();
+	void count_groups();
+	void get_current_time();
+	void create_group(const int group_type, const bool AB);
+	void prepare_buffer(int which);
 	unsigned int encode_af(double af);
 	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,
 			unsigned long poly, unsigned char plen);

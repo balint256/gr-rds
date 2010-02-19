@@ -215,7 +215,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		def _form_set_freq(kv):
 			return self.set_freq(kv['freq'])
 
-		if 0:
+		if 1:
 			self.fft = fftsink2.fft_sink_f (self.panel, title="Post FM Demod",
 				fft_size=512, sample_rate=usrp_rate, y_per_div=10, ref_level=0)
 			self.connect (self.fm_demod, self.fft)

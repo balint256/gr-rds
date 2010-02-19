@@ -369,24 +369,24 @@ void gr_rds_data_encoder::get_current_time(void){
 	tm *utc;
 	
 	time(&rightnow);
-	printf("%s\n", asctime(localtime(&rightnow)));
+	printf("%s", asctime(localtime(&rightnow)));
 	
-	utc=gmtime(&rightnow);
+	utc=localtime(&rightnow);
 	int m=utc->tm_min;
 	int h=utc->tm_hour;
 	int D=utc->tm_mday;
-	int M=utc->tm_mon;
+	int M=utc->tm_mon+1;	// January: M=0
 	int Y=utc->tm_year;
-	int toffset=1;
+	double toffset=h-gmtime(&rightnow)->tm_hour;
 	
 	int L=((M==1)||(M==2))?1:0;
 	int mjd=14956+D+int((Y-L)*365.25)+int((M+1+L*12)*30.6001);
 	
 	timedata[0]=0|((mjd>>15)&0x3);
 	timedata[1]=(mjd>>7)&0xff;
-	timedata[2]=(mjd&0x7f)|((h>>4)&0x1);
-	timedata[3]=(h&0xf)|((m>>2)&0xf);
-	timedata[4]=(m&0x3)|toffset;
+	timedata[2]=((mjd&0x7f)<<1)|((h>>4)&0x1);
+	timedata[3]=((h&0xf)<<4)|((m>>2)&0xf);
+	timedata[4]=((m&0x3)<<6)|((toffset>0?0:1)<<5)|((abs(toffset*2))&0x1f);
 }
 
 

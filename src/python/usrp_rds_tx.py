@@ -74,7 +74,7 @@ class rds_tx_block(stdgui2.std_top_block):
 
 		# low-pass filter for L+R
 		audio_lpr_taps = gr.firdes.low_pass(
-			1,				# gain
+			0.5,				# gain
 			usrp_rate,		# sampling rate
 			15e3,			# passband cutoff
 			1e3,			# transition width
@@ -92,7 +92,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		# upconvert L-R to 38 kHz and band-pass
 		self.mix_stereo = gr.multiply_ff()
 		audio_lmr_taps = gr.firdes.band_pass(
-			2e2,			# gain
+			80,			# gain
 			usrp_rate,		# sampling rate
 			38e3-15e3,		# low cutoff
 			38e3+15e3,		# high cutoff
@@ -155,7 +155,7 @@ class rds_tx_block(stdgui2.std_top_block):
 		max_dev = 75e3
 		k = 2*math.pi*max_dev/usrp_rate		# modulator sensitivity
 		self.modulator = gr.frequency_modulator_fc (k)
-		self.gain = gr.multiply_const_cc (1e4)
+		self.gain = gr.multiply_const_cc (5e3)
 		self.connect (self.mixer, self.modulator, self.gain, self.u)
 
 		# plot an FFT to verify we are sending what we want

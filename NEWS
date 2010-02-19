@@ -1,3 +1,6 @@
+19.02.2010
+- fixed clocktime generation (and a few bugs in reception)
+
 18.02.2010
 - added pulse shaping filter
 - added rds_tx grc flowgraph

@@ -1,5 +1,4 @@
 - Complete TMC implementation
 - Add scanning for stations
-- Replace bpsk_demod
-- Implement in GRC
+- Replace bpsk_demod???
 - Add error correction, not only detection

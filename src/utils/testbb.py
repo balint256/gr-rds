@@ -2,10 +2,9 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Testbb
-# Generated: Thu Feb 18 17:20:30 2010
+# Generated: Fri Feb 19 11:42:56 2010
 ##################################################
 
-from gnuradio import audio
 from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio import gr, rds
@@ -26,21 +25,15 @@ class testbb(gr.top_block):
 		##################################################
 		# Blocks
 		##################################################
-		self.audio_source_0_0 = audio.source(16000, "plughw:0,0", True)
-		self.gr_add_xx_0_0 = gr.add_vff(1)
-		self.gr_char_to_float_1 = gr.char_to_float()
-		self.gr_null_sink_0_0 = gr.null_sink(gr.sizeof_float*1)
+		self.gr_head_0 = gr.head(gr.sizeof_char*1, 1040)
 		self.gr_rds_data_decoder_0_0 = rds.data_decoder(gr.msg_queue())
 		self.gr_rds_data_encoder_1 = rds.data_encoder("/media/dimitris/mywork/gr/dimitris/rds/trunk/src/utils/rds_data.xml")
 
 		##################################################
 		# Connections
 		##################################################
-		self.connect((self.gr_rds_data_encoder_1, 0), (self.gr_char_to_float_1, 0))
-		self.connect((self.gr_rds_data_encoder_1, 0), (self.gr_rds_data_decoder_0_0, 0))
-		self.connect((self.gr_add_xx_0_0, 0), (self.gr_null_sink_0_0, 0))
-		self.connect((self.gr_char_to_float_1, 0), (self.gr_add_xx_0_0, 0))
-		self.connect((self.audio_source_0_0, 0), (self.gr_add_xx_0_0, 1))
+		self.connect((self.gr_rds_data_encoder_1, 0), (self.gr_head_0, 0))
+		self.connect((self.gr_head_0, 0), (self.gr_rds_data_decoder_0_0, 0))
 
 	def set_samp_rate(self, samp_rate):
 		self.samp_rate = samp_rate

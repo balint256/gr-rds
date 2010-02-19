@@ -337,13 +337,13 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
 void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
 	unsigned int hours, minutes, year, month, day_of_month=0;
 	double modified_julian_date=0;
-	signed int local_time_offset=0;		// multiples of half hours
+	double local_time_offset=0;
 	bool K=0;
 
-	hours=((group[2]&0x01)<<4)|((group[3]>>12)&0x0f);
+	hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
 	minutes=(group[3]>>6)&0x3f;
-	local_time_offset=group[3]&0x1f;
-	if((group[3]>>5)&0x01) local_time_offset *= -1;
+	local_time_offset=((double)(group[3]&0x1f))/2;
+	if((group[3]>>5)&0x1) local_time_offset *= -1;
 	modified_julian_date=((group[1]&0x03)<<15)|((group[2]>>1)&0x7fff);
 
 /* MJD -> Y-M-D */
@@ -357,9 +357,9 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
 // concatenate into a string, print and send message
 	for (int i=0; i<32; i++) clocktime_string[i]=' ';
 	clocktime_string[32]='\0';
-	sprintf(clocktime_string, "%02i.%02i.%4i, %02i:%02i (%c%i)", (int)day_of_month, month, 
-		(1900+year), hours, minutes, (local_time_offset>=0?'+':'-'), local_time_offset);
-	std::cout << "Clocktime - " << clocktime_string << std::endl;
+	sprintf(clocktime_string, "%02i.%02i.%4i, %02i:%02i (%+.1fh)",
+		(int)day_of_month, month, (1900+year), hours, minutes, local_time_offset);
+	std::cout << "Clocktime: " << clocktime_string << std::endl;
 	send_message(5,clocktime_string);
 }
 

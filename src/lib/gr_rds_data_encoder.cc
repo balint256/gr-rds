@@ -67,8 +67,9 @@ gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
 	int i=0, j=0;
 	reset_rds_data();
 	read_xml(xmlfile);
-	get_current_time(); groups[4]=1;		// group 4a: clocktime
+	groups[4]=1;		// group 4a: clocktime
 	count_groups();
+
 // allocate memory for nbuffers buffers of 104 unsigned chars each
 	buffer = (unsigned char **)malloc(nbuffers*sizeof(unsigned char *));
 	for(i=0;i<nbuffers;i++){
@@ -76,6 +77,7 @@ gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
 		for(int j=0; j<104; j++) buffer[i][j]=0;
 	}
 	printf("%i buffers allocated\n", nbuffers);
+
 // prepare each of the groups
 	for(i=0; i<32; i++){
 		if(groups[i]==1){
@@ -100,7 +102,6 @@ void gr_rds_data_encoder::reset_rds_data(){
 	int i=0;
 	for(i=0; i<4; i++) {infoword[i]=0; checkword[i]=0;}
 	for(i=0; i<32; i++) groups[i]=0;
-	for(i=0; i<5; i++) timedata[i]=0;
 	ngroups=0;
 	nbuffers=0;
 	d_g0_counter=0;
@@ -299,37 +300,10 @@ void gr_rds_data_encoder::create_group(const int group_type, const bool AB){
 	infoword[0]=PI;
 	infoword[1]=(((group_type&0xf)<<12)|(AB<<11)|(TP<<10)|(PTY<<5));
 
-	if(group_type==0){
-		infoword[1]=infoword[1]|(TA<<4)|(MuSp<<3);
-		if(d_g0_counter==3)
-			infoword[1]=infoword[1]|0x5;	// d0=1 (stereo), d1-3=0
-		infoword[1]=infoword[1]|(d_g0_counter&0x3);
-		if(!AB)
-			infoword[2]=((encode_af(AF1)&0xff)<<8)|(encode_af(AF2)&0xff);
-		else
-			infoword[2]=PI;
-		infoword[3]=(PS[2*d_g0_counter]<<8)|PS[2*d_g0_counter+1];
-		d_g0_counter++;
-		if(d_g0_counter>3) d_g0_counter=0;
-	}
-	else if(group_type==2){
-		infoword[1]=infoword[1]|((AB<<4)|(d_g2_counter&0xf));
-		if(!AB){
-			infoword[2]=(radiotext[d_g2_counter*4]<<8|radiotext[d_g2_counter*4+1]);
-			infoword[3]=(radiotext[d_g2_counter*4+2]<<8|radiotext[d_g2_counter*4+3]);
-		}
-		else{
-			infoword[2]=PI;
-			infoword[3]=(radiotext[d_g2_counter*2]<<8|radiotext[d_g2_counter*2+1]);
-		}
-		d_g2_counter++;
-		if(d_g2_counter>15) d_g2_counter=0;
-	}
-	else if(group_type==4){
-		infoword[1]=infoword[1]|((0<<2)&0x7)|(timedata[0]&0x3);
-		infoword[2]=(timedata[1]<<8)|timedata[2];
-		infoword[3]=(timedata[3]<<8)|timedata[4];
-	}
+	if(group_type==0) prepare_group0(AB);
+	else if(group_type==2) prepare_group2(AB);
+	else if(group_type==4) prepare_group4();
+	else printf("preparation of group %i not yet supported\n", group_type);
 	printf("data: %04X %04X %04X %04X, ",
 		infoword[0], infoword[1], infoword[2], infoword[3]);
 
@@ -345,6 +319,63 @@ void gr_rds_data_encoder::create_group(const int group_type, const bool AB){
 
 	prepare_buffer(d_current_buffer);
 	d_current_buffer++;
+}
+
+void gr_rds_data_encoder::prepare_group0(const bool AB){
+	infoword[1]=infoword[1]|(TA<<4)|(MuSp<<3);
+	if(d_g0_counter==3)
+		infoword[1]=infoword[1]|0x5;	// d0=1 (stereo), d1-3=0
+	infoword[1]=infoword[1]|(d_g0_counter&0x3);
+	if(!AB)
+		infoword[2]=((encode_af(AF1)&0xff)<<8)|(encode_af(AF2)&0xff);
+	else
+		infoword[2]=PI;
+	infoword[3]=(PS[2*d_g0_counter]<<8)|PS[2*d_g0_counter+1];
+	d_g0_counter++;
+	if(d_g0_counter>3) d_g0_counter=0;
+}
+
+void gr_rds_data_encoder::prepare_group2(const bool AB){
+	infoword[1]=infoword[1]|((AB<<4)|(d_g2_counter&0xf));
+	if(!AB){
+		infoword[2]=(radiotext[d_g2_counter*4]<<8|radiotext[d_g2_counter*4+1]);
+		infoword[3]=(radiotext[d_g2_counter*4+2]<<8|radiotext[d_g2_counter*4+3]);
+	}
+	else{
+		infoword[2]=PI;
+		infoword[3]=(radiotext[d_g2_counter*2]<<8|radiotext[d_g2_counter*2+1]);
+	}
+	d_g2_counter++;
+	if(d_g2_counter>15) d_g2_counter=0;
+}
+
+/* see page 28 and Annex G, page 81 in the standard */
+/* FIXME this is supposed to be transmitted only once per minute, when 
+ * the minute changes */
+void gr_rds_data_encoder::prepare_group4(void){
+	time_t rightnow;
+	tm *utc;
+	
+	time(&rightnow);
+	printf("%s", asctime(localtime(&rightnow)));
+
+/* we're supposed to send UTC time; the receiver should then add the
+ * local timezone offset */
+	utc=gmtime(&rightnow);
+	int m=utc->tm_min;
+	int h=utc->tm_hour;
+	int D=utc->tm_mday;
+	int M=utc->tm_mon+1;	// January: M=0
+	int Y=utc->tm_year;
+	double toffset=localtime(&rightnow)->tm_hour-h;
+	
+	int L=((M==1)||(M==2))?1:0;
+	int mjd=14956+D+int((Y-L)*365.25)+int((M+1+L*12)*30.6001);
+	
+	infoword[1]=infoword[1]|((0<<2)&0x7)|((mjd>>15)&0x3);
+	infoword[2]=(((mjd>>7)&0xff)<<8)|((mjd&0x7f)<<1)|((h>>4)&0x1);
+	infoword[3]=((h&0xf)<<12)|(((m>>2)&0xf)<<8)|((m&0x3)<<6)|
+		((toffset>0?0:1)<<5)|((abs(toffset*2))&0x1f);
 }
 
 void gr_rds_data_encoder::prepare_buffer(int which){
@@ -363,37 +394,7 @@ void gr_rds_data_encoder::prepare_buffer(int which){
 	printf("\n");
 }
 
-/* see page 28 and Annex G, page 81 in the standard */
-void gr_rds_data_encoder::get_current_time(void){
-	time_t rightnow;
-	tm *utc;
-	
-	time(&rightnow);
-	printf("%s", asctime(localtime(&rightnow)));
-	
-	utc=localtime(&rightnow);
-	int m=utc->tm_min;
-	int h=utc->tm_hour;
-	int D=utc->tm_mday;
-	int M=utc->tm_mon+1;	// January: M=0
-	int Y=utc->tm_year;
-	double toffset=h-gmtime(&rightnow)->tm_hour;
-	
-	int L=((M==1)||(M==2))?1:0;
-	int mjd=14956+D+int((Y-L)*365.25)+int((M+1+L*12)*30.6001);
-	
-	timedata[0]=0|((mjd>>15)&0x3);
-	timedata[1]=(mjd>>7)&0xff;
-	timedata[2]=((mjd&0x7f)<<1)|((h>>4)&0x1);
-	timedata[3]=((h&0xf)<<4)|((m>>2)&0xf);
-	timedata[4]=((m&0x3)<<6)|((toffset>0?0:1)<<5)|((abs(toffset*2))&0x1f);
-}
-
-
 //////////////////////// WORK ////////////////////////////////////
-
-/* the plan for now is to do group0 (basic), group2 (radiotext),
- * group4a (clocktime), and group8a (tmc)... */
 int gr_rds_data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)

@@ -75,7 +75,6 @@ private:
 	double AF2;
 	char PS[8];
 	unsigned char radiotext[64];
-	unsigned char timedata[5];
 
 /* each type 0 group contains 2 out of 8 PS characters;
  * this is used to count 0..3 and send all PS characters */
@@ -104,8 +103,10 @@ private:
 	void assign_from_xml(const char *field, const char *value, const int length);
 	void reset_rds_data();
 	void count_groups();
-	void get_current_time();
 	void create_group(const int group_type, const bool AB);
+	void prepare_group0(const bool AB);
+	void prepare_group2(const bool AB);
+	void prepare_group4();
 	void prepare_buffer(int which);
 	unsigned int encode_af(double af);
 	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,

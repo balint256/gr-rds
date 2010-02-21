@@ -1,3 +1,7 @@
+21.02.2010
+- separate functions in rds_encoder for preparing each group
+- fixed udev rule in install_usrp.sh
+
 19.02.2010
 - fixed clocktime generation (and a few bugs in reception)
 

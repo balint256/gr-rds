@@ -23,10 +23,8 @@
 /*	HSR - MOBKOM LABOR
  *	Semesterarbeit GnuRadio Contributions
  *	U. Schaufelberger and R. Gaensli
- *
- * 	Written by : WRITTEN_BY
- * 	Created: CREATED_DATE
  * 
+ * 	Heavily modified by Dimitrios Symeonidis
  */
 
 
@@ -39,6 +37,7 @@
 #include <vector>
 #include <iostream>
 #include <stdio.h>
+
 
 class gr_rds_data_decoder;
 
@@ -56,132 +55,6 @@ class gr_rds_data_decoder;
  */
 typedef boost::shared_ptr<gr_rds_data_decoder> gr_rds_data_decoder_sptr;
 gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);
-
-
-static const unsigned int syndrome[5]={383,14,303,663,748};
-
-/* offset word C' has been put at the end
-   see Annex A, page 59 of the standard */
-static const unsigned int offset_pos[5]={0,1,2,3,2};
-static const unsigned int offset_word[5]={252,408,360,436,848};
-static const char * const offset_name[]={"A","B","C","D","C'"};
-
-/* page 77, Annex F in the standard */
-static const char * const pty_table[32]={"None",
-								"News",
-								"Current Affairs",
-								"Information",
-								"Sport",
-								"Education",
-								"Drama",
-								"Cultures",
-								"Science",
-								"Varied Speech",
-								"Pop Music",
-								"Rock Music",
-								"Easy Listening",
-								"Light Classics M",
-								"Serious Classics",
-								"Other Music",
-								"Weather & Metr",
-								"Finance",
-								"Children’s Progs",
-								"Social Affairs",
-								"Religion",
-								"Phone In",
-								"Travel & Touring",
-								"Leisure & Hobby",
-								"Jazz Music",
-								"Country Music",
-								"National Music",
-								"Oldies Music",
-								"Folk Music",
-								"Documentary",
-								"Alarm Test",
-								"Alarm-Alarm!"};
-
-/* pages 71-72, Annex D, tables D.1-2 in the standard */
-static const char * const pi_country_codes[15][5]={
-										{"DE","GR","MA","  ","MD"},
-										{"DZ","CY","CZ","IE","EE"},
-										{"AD","SM","PL","TR","  "},
-										{"IL","CH","VA","MK","  "},
-										{"IT","JO","SK","  ","  "},
-										{"BE","FI","SY","  ","UA"},
-										{"RU","LU","TN","  ","  "},
-										{"PS","BG","  ","NL","PT"},
-										{"AL","DK","LI","LV","SI"},
-										{"AT","GI","IS","LB","  "},
-										{"HU","IQ","MC","  ","  "},
-										{"MT","GB","LT","HR","  "},
-										{"DE","LY","YU","  ","  "},
-										{"  ","RO","ES","SE","  "},
-										{"EG","FR","NO","BY","BA"}};
-static const char * const coverage_area_codes[16]={"Local",
-											"International",
-											"National",
-											"Supra-regional",
-											"Regional 1",
-											"Regional 2",
-											"Regional 3",
-											"Regional 4",
-											"Regional 5",
-											"Regional 6",
-											"Regional 7",
-											"Regional 8",
-											"Regional 9",
-											"Regional 10",
-											"Regional 11",
-											"Regional 12"};
-
-/* page 74, Annex E, table E.1 in the standard 
- * that table is the ASCII table */
-
-/* see page 84, Annex J in the standard */
-static const char * const language_codes[44]={"Unkown/not applicable",
-										"Albanian",
-										"Breton",
-										"Catalan",
-										"Croatian",
-										"Welsh",
-										"Czech",
-										"Danish",
-										"German",
-										"English",
-										"Spanish",
-										"Esperanto",
-										"Estonian",
-										"Basque",
-										"Faroese",
-										"French",
-										"Frisian",
-										"Irish",
-										"Gaelic",
-										"Galician",
-										"Icelandic",
-										"Italian",
-										"Lappish",
-										"Latin",
-										"Latvian",
-										"Luxembourgian",
-										"Lithuanian",
-										"Hungarian",
-										"Maltese",
-										"Dutch",
-										"Norwegian",
-										"Occitan",
-										"Polish",
-										"Portuguese",
-										"Romanian",
-										"Romansh",
-										"Serbian",
-										"Slovak",
-										"Slovene",
-										"Finnish",
-										"Swedish",
-										"Turkish",
-										"Flemish",
-										"Walloon"};
 
 class gr_rds_data_decoder : public gr_sync_block
 {
@@ -212,7 +85,7 @@ private:
 	unsigned char pi_area_coverage;
 	unsigned char pi_program_reference_number;
 	char program_service_name[9];
-	gr_msg_queue_sptr	d_msgq;
+	gr_msg_queue_sptr d_msgq;
 
 // Functions
 	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);

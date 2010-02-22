@@ -1,3 +1,7 @@
+22.02.2010
+- corrections in rds_decoder (all group types)
+- separate gr_rds_constants.h file
+
 21.02.2010
 - separate functions in rds_encoder for preparing each group
 - fixed udev rule in install_usrp.sh

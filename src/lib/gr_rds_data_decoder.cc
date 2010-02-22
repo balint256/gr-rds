@@ -35,7 +35,8 @@
 #define DBG(x)
 #endif
 
-#include <gr_rds_data_decoder.h>
+#include "gr_rds_data_decoder.h"
+#include "gr_rds_constants.h"
 #include <gr_io_signature.h>
 #include <math.h>
 
@@ -60,14 +61,14 @@ gr_rds_data_decoder::~gr_rds_data_decoder () {
 
 ////////////////////////// HELPER FUNTIONS /////////////////////////
 
-void gr_rds_data_decoder::reset() {
+void gr_rds_data_decoder::reset(){
 	bit_counter=0;
 	reg=0;
 	reset_rds_data();
 	enter_no_sync();
 }
 
-void gr_rds_data_decoder::reset_rds_data() {
+void gr_rds_data_decoder::reset_rds_data(){
 	memset(radiotext,' ',sizeof(radiotext));
 	radiotext[64] = '\0';
 	radiotext_AB_flag=0;
@@ -86,12 +87,12 @@ void gr_rds_data_decoder::reset_rds_data() {
 	static_pty=false;
 }
 
-void gr_rds_data_decoder::enter_no_sync() {
+void gr_rds_data_decoder::enter_no_sync(){
 	presync=false;
 	d_state = ST_NO_SYNC;
 }
 
-void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number) {
+void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number){
 	wrong_blocks_counter=0;
 	blocks_counter=0;
 	block_bit_counter=0;
@@ -100,20 +101,20 @@ void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number) {
 	d_state = ST_SYNC;
 }
 
-void gr_rds_data_decoder::printbin(unsigned long number,unsigned char bits) {
-	unsigned int i;
-	for (i=bits;i>0;i--) putchar((number & (1L<<(i-1)))?'1':'0');
+// currently not used anywhere
+void gr_rds_data_decoder::printbin(unsigned long number,unsigned char bits){
+	for(unsigned int i=bits;i>0;i--) putchar((number & (1L<<(i-1)))?'1':'0');
 	putchar('\n');
 }
 
-/*		type 0 = PI
-		type 1 = PS
-		type 2 = PTY
-		type 3 = flagstring: TP, TA, MuSp, MoSt, AH, CMP, stPTY
-		type 4 = RadioText 
-		type 5 = ClockTime
-		type 6 = Alternative Frequencies */
-void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext) {
+/* type 0 = PI
+ * type 1 = PS
+ * type 2 = PTY
+ * type 3 = flagstring: TP, TA, MuSp, MoSt, AH, CMP, stPTY
+ * type 4 = RadioText 
+ * type 5 = ClockTime
+ * type 6 = Alternative Frequencies */
+void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext){
 	if (!d_msgq->full_p()) {
 		gr_message_sptr msg = gr_make_message_from_string(msgtext,msgtype,0,0);
 		d_msgq->insert_tail(msg);
@@ -124,7 +125,7 @@ void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext) {
 /* see Annex B, page 64 of the standard */
 // note that poly is always 0x5B9 and plen is always 10
 unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message, 
-			unsigned char mlen, unsigned long poly, unsigned char plen) {
+			unsigned char mlen, unsigned long poly, unsigned char plen){
 	unsigned long reg=0;
 	unsigned int i;
 
@@ -152,8 +153,8 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	traffic_program=(group[1]>>10) & 0x01;				// "TP"
 	traffic_announcement=(group[1]>>4) & 0x01;			// "TA"
 	music_speech=(group[1]>>3) & 0x01;					// "MuSp"
-	bool decoder_control_bit = (group[1]>>2) & 0x01;	// "DI"
-	unsigned char segment_address = group[1] & 0x03;	// "DI segment"
+	bool decoder_control_bit=(group[1]>>2) & 0x01;	// "DI"
+	unsigned char segment_address=group[1] & 0x03;	// "DI segment"
 	program_service_name[segment_address*2]=(group[3]>>8)&0xff;
 	program_service_name[segment_address*2+1]=group[3]&0xff;
 /* see page 41, table 9 of the standard */
@@ -206,10 +207,9 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	}
 
 /* let's print out what we've got so far */
-	std::cout << "==>" << program_service_name << "<== ";
-	std::cout << '-' << (traffic_program?"TP":"  ") << '-' << (traffic_announcement?"TA":"  ");
-	std::cout << '-' << (music_speech?"Music":"Speech") << '-' << (mono_stereo?"MONO":"STEREO");
-	std::cout << " - AF:" << af_string << std::endl;
+	std::cout << "==>" << program_service_name << "<== -" << (traffic_program?"TP":"  ") 
+		<< '-' << (traffic_announcement?"TA":"  ") << '-' << (music_speech?"Music":"Speech") 
+		<< '-' << (mono_stereo?"MONO":"STEREO") << " - AF:" << af_string << std::endl;
 
 /* sending the messages to the queue */
 	send_message(1,program_service_name);
@@ -259,50 +259,52 @@ double gr_rds_data_decoder::decode_af(unsigned int af_code) {
 }
 
 /* SLOW LABELLING: see page 23 in the standard 
-   for paging see page 90, Annex M in the standard (THIS WAS NOT IMPLEMENTED)
-   for extended country codes see page 69, Annex D.2 in the standard
-   for language codes see page 84, Annex J in the standard
-   for emergency warning systems (EWS) see page 53 in the standard */
+ * for paging see page 90, Annex M in the standard (NOT IMPLEMENTED)
+ * for extended country codes see page 69, Annex D.2 in the standard
+ * for language codes see page 84, Annex J in the standard
+ * for emergency warning systems (EWS) see page 53 in the standard */
 void gr_rds_data_decoder::decode_type1(unsigned int *group, bool version_code){
-	int variant_code=0, ecc=0, paging=0;
-	unsigned int slow_labelling=0;
-	bool linkage_actuator=0;
-	char day=(group[3]>>11)&0x1f;
-	char hour=(group[3]>>6)&0x1f;
-	char minute=group[3]&0x3f;
-	char radio_paging_codes=group[1]&0x1f;
-	char country_code=(group[0]>>12)&0x0f;
+	int ecc=0, paging=0;
 
-/* printing in this function is dispersed due to the multitude of cases */
+	char country_code=(group[0]>>12)&0x0f;
+	char radio_paging_codes=group[1]&0x1f;
+	//bool linkage_actuator=(group[2]>>15)&0x1;
+	int variant_code=(group[2]>>12)&0x7;
+	unsigned int slow_labelling=group[2]&0xfff;
+	int day=(int)((group[3]>>11)&0x1f);
+	int hour=(int)((group[3]>>6)&0x1f);
+	int minute=(int)(group[3]&0x3f);
+
 	if (radio_paging_codes)
-		std::cout << "paging codes:" << (int)radio_paging_codes << ' ';
-	if (day||hour||minute){
-		std::cout << "program item:" << (int)day << 'd';
-		std::cout << (int)hour << ':' << (int)minute << ' ';
-	}
+		printf("paging codes: %i ", (int)radio_paging_codes);
+	if (day||hour||minute)
+		printf("program item: %id, %i:%i ", day, hour, minute);
 
 	if(!version_code){
-		slow_labelling=group[2]&0xfff;
-		variant_code=(group[2]>>12)&0x07;
-		linkage_actuator=(group[2]>>15)&0x01;
-		switch (variant_code){
+		switch(variant_code){
 			case 0:			// paging + ecc
 				paging=(slow_labelling>>8)&0x0f;
 				ecc=slow_labelling&0xff;
-				if (paging) printf("paging:%x ", paging);
-				if ((ecc>223)&&(ecc<229))
-					printf("extended country code:%s\n", 
-						pi_country_codes[country_code-1][ecc-224]);
+				if(paging) printf("paging:%x ", paging);
+				if((ecc>223)&&(ecc<229))
+					std::cout << "extended country code:" << 
+						pi_country_codes[country_code-1][ecc-224] << std::endl;
 				else printf("invalid extended country code:%i\n", ecc);
-			break;
+				break;
+			case 1:			// TMC identification
+				printf("TMC identification code received\n");
+				break;
+			case 2:			// Paging identification
+				printf("Paging identification code received\n");
+				break;
 			case 3:			// language codes
 				if (slow_labelling<44)
-					printf("language: %s\n", language_codes[slow_labelling]);
+					std::cout << "language: " << language_codes[slow_labelling] << std::endl;
 				else
 					printf("language: invalid language code (%i)\n", slow_labelling);
-			break;
+				break;
 			default:
-			break;
+				break;
 		}
 	}
 }
@@ -329,7 +331,7 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
 		radiotext[text_segment_address_code*2]=(group[3]>>8)&0xff;
 		radiotext[text_segment_address_code*2+1]=group[3]&0xff;
 	}
-	printf("Radio Text %c: %s\n", (radiotext_AB_flag?'A':'B'), radiotext);
+	printf("Radio Text %c: %s\n", (radiotext_AB_flag?'B':'A'), radiotext);
 	send_message(4,radiotext);
 }
 
@@ -366,62 +368,37 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
 /* TMC: see page 32 of the standard
    initially defined in CEN standard ENV 12313-1
    superseded by ISO standard 14819:2003 */
-void gr_rds_data_decoder::decode_type8a(unsigned int *group) {
-	unsigned int X, Y, Z = 0;
-	bool T, F, D, sign = 0;
-	unsigned int dp, extent, event, location;
-
-/* page 34 of the standard */
-	X = group[1]&0x1f;
-	Y = group[2];
-	Z = group[3];
-
-/* page 35 of the standard */
-	T = (X>>4)&0x01;		// 0 = user message, 1 = tuning info
-	F = (X>>3)&0x01;		// 0 = multi-group, 1 = single-group
-	dp = X&0x07;			// duration & persistence
-	D = (Y>>15)&0x01;		// 1 = diversion recommended
-	sign = (Y>>14)&0x01;	// event direction, 0 = +, 1 = -
-	extent = (Y>>11)&0x07;	// number of segments affected
-	event = Y&0x07ff; 		// event code, defined in ISO 14819-2
-	location = Z;			// location code, defined in ISO 14819-3
+void gr_rds_data_decoder::decode_type8a(unsigned int *group){
+	bool T=(group[1]>>4)&0x1;				// 0 = user message, 1 = tuning info
+	bool F=(group[1]>>3)&0x1;				// 0 = multi-group, 1 = single-group
+	unsigned int dp=group[1]&0x7;			// duration & persistence
+	bool D=(group[2]>15)&0x1;				// 1 = diversion recommended
+	bool sign=(group[2]>>14)&0x1;			// event direction, 0 = +, 1 = -
+	unsigned int extent=(group[2]>>11)&0x7;	// number of segments affected
+	unsigned int event=group[2]&0x7ff; 		// event code, defined in ISO 14819-2
+	unsigned int location=group[3];			// location code, defined in ISO 14819-3
 
 /* let's print out what we've got so far */
-	std::cout << "TMC - duration:" << dp << " extent:" << extent;
-	std::cout << " event:" << event << " location:" << location << std::endl;
-
-// dynamic events with "information" or "forecast" nature
-/*		0 = no duration given
-		1 = 15 minutes
-		2 = 30 minutes
-		3 = 1 hour
-		4 = 2 hours
-		5 = 3 hours
-		6 = 4 hours
-		7 = rest of the day */
-
-// longer events
-/*		0 = no duration given
-		1 = next few hours
-		2 = rest of the day
-		3 = until tomorrow evening
-		4 = rest of the week
-		5 = end of next week
-		6 = end of the month
-		7 = long period */
+	std::cout << "duration:" << tmc_duration[dp][0] << ", extent:" <<
+		extent+1 << " segments, event:" << event << ", location:" <<
+		location << std::endl;
+/* FIXME need to somehow find/create a file with the codes in ISO 14819-2
+ * (event codes) and ISO 14819-3 (location codes) */
 }
 
 /* EON: see pages 38 and 46 in the standard */
 void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
+	
+	bool tp_on=(group[1]>>4)&0x01;
 	char variant_code=group[1]&0x0f;
 	unsigned int information=group[2];
 	unsigned int pi_on=group[3];
-	bool tp_on=(group[1]>>4)&0x01;
+	
 	char pty_on=0;
 	bool ta_on=0;
 	static char ps_on[9]={' ',' ',' ',' ',' ',' ',' ',' ','\0'};
 	double af_1=0, af_2=0;
-
+	
 	if (!version_code){
 		switch (variant_code){
 			case 0:			// PS(ON)
@@ -460,7 +437,7 @@ void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
 			case 13:		// PTY(ON), TA(ON)
 				ta_on=information&0x01;
 				pty_on=(information>>11)&0x1f;
-				printf("PTY(ON):%s", pty_table[(int)pty_on]);
+				std::cout << "PTY(ON):" << pty_table[(int)pty_on];
 				if (ta_on) printf(" - TA");
 			break;
 			case 14:		// PIN(ON)
@@ -488,15 +465,15 @@ void gr_rds_data_decoder::decode_type15b(unsigned int *group){
 
 /* See page 17 Table 3 in paragraph 3.1.3 of the standard. */
 void gr_rds_data_decoder::decode_group(unsigned int *group) {
-	unsigned char group_type_code=(group[1]>>12)&0x0f;
-	bool version_code=(group[1]>>11) & 0x01;
-//	printf("group: %04X %04X %04X %04X\n", group[0],group[1],group[2],group[3]);
-	printf("%i%c", (int)group_type_code, (version_code?'B':'A'));
+	unsigned int group_type=(unsigned int)((group[1]>>12)&0xf);
+	bool version_code=(group[1]>>11)&0x1;
+	printf("%i%c ", group_type, (version_code?'B':'A'));
+	std::cout << "(" << rds_group_acronyms[group_type] << ")";
 
 	program_identification=group[0];			// "PI"
-	program_type=(group[1]>>5) & 0x1F;			// "PTY"
-	int pi_country_identification=(program_identification>>12)&0x0f;
-	int pi_area_coverage=(program_identification>>8)&0x0f;
+	program_type=(group[1]>>5)&0x1f;			// "PTY"
+	int pi_country_identification=(program_identification>>12)&0xf;
+	int pi_area_coverage=(program_identification>>8)&0xf;
 	unsigned char pi_program_reference_number=program_identification&0xff;
 	char pistring[5];
 	sprintf(pistring,"%04X",program_identification);
@@ -504,17 +481,16 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	send_message(2,pty_table[program_type]);
 
 /* page 69, Annex D in the standard */
-	std::cout << " - PI:" << pistring << " - ";
-	std::cout << "PTY:" << pty_table[program_type] << " - ";
-	std::cout << "country:" << pi_country_codes[pi_country_identification-1][0];
+	std::cout << " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type];
+	std::cout << " (country:" << pi_country_codes[pi_country_identification-1][0];
 	std::cout << "/" << pi_country_codes[pi_country_identification-1][1];
 	std::cout << "/" << pi_country_codes[pi_country_identification-1][2];
 	std::cout << "/" << pi_country_codes[pi_country_identification-1][3];
 	std::cout << "/" << pi_country_codes[pi_country_identification-1][4];
-	std::cout << " - area:" << coverage_area_codes[pi_area_coverage];
-	std::cout << " - program:" << (int)pi_program_reference_number << std::endl;
+	std::cout << ", area:" << coverage_area_codes[pi_area_coverage];
+	std::cout << ", program:" << (int)pi_program_reference_number << ")" << std::endl;
 
-	switch (group_type_code) {
+	switch (group_type) {
 		case 0:
 			decode_type0(group, version_code);
 		break;
@@ -555,7 +531,7 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 			if(version_code) decode_type15b(group);
 		break;
 		default:
-			printf("DECODE ERROR!!! (group_type_code=%u)\n",group_type_code);
+			printf("DECODE ERROR!!! (group_type=%u)\n",group_type);
 		break;
 	}
 }

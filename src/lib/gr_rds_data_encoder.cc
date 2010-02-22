@@ -47,7 +47,8 @@
 #define DBG(x)
 #endif
 
-#include <gr_rds_data_encoder.h>
+#include "gr_rds_data_encoder.h"
+#include "gr_rds_constants.h"
 #include <gr_io_signature.h>
 #include <math.h>
 #include <ctype.h>
@@ -293,9 +294,6 @@ void gr_rds_data_encoder::count_groups(void){
  * then calculate checkwords and put everything in the groups */
 void gr_rds_data_encoder::create_group(const int group_type, const bool AB){
 	int i=0;
-	
-	/* offset words A, B, C, D, C'*/
-	const unsigned int offset_word[5]={252,408,360,436,848};
 	
 	infoword[0]=PI;
 	infoword[1]=(((group_type&0xf)<<12)|(AB<<11)|(TP<<10)|(PTY<<5));

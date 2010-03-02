@@ -310,7 +310,7 @@ void gr_rds_data_decoder::decode_type1(unsigned int *group, bool version_code){
 }
 
 /* RADIOTEXT: page 25 in the standard */
-void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
+void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code){
 	unsigned char text_segment_address_code=group[1]&0x0f;
 
 /* when the A/B flag is toggled, flush your current radiotext */
@@ -335,8 +335,19 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code) {
 	send_message(4,radiotext);
 }
 
+/* AID: page 27 in the standard */
+void gr_rds_data_decoder::decode_type3a(unsigned int *group){
+	int application_group=(group[1]>>1)&0xf;
+	int group_type=group[1]&0x1;
+	int message=group[2];
+	int aid=group[3];
+	
+	printf("aid group: %i%c - ", application_group, group_type?'B':'A');
+	printf("message: %04X - aid: %04X\n", message, aid);
+}
+
 /* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
-void gr_rds_data_decoder::decode_type4a(unsigned int *group) {
+void gr_rds_data_decoder::decode_type4a(unsigned int *group){
 	unsigned int hours, minutes, year, month, day_of_month=0;
 	double modified_julian_date=0;
 	double local_time_offset=0;
@@ -379,9 +390,11 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 	unsigned int location=group[3];			// location code, defined in ISO 14819-3
 
 /* let's print out what we've got so far */
-	std::cout << "duration:" << tmc_duration[dp][0] << ", extent:" <<
-		extent+1 << " segments, event:" << event << ", location:" <<
-		location << std::endl;
+	std::cout << (T?"tuning info, ":"user message, ")
+		<< (F?"single-group, ":"multi-group, ") << (D?"diversion recommended, ":"")
+		<< "duration:" << tmc_duration[dp][0]
+		<< ", extent:" << (sign?"-":"") << extent+1 << " segments"
+		<< ", event:" << event << ", location:" << location << std::endl;
 /* FIXME need to somehow find/create a file with the codes in ISO 14819-2
  * (event codes) and ISO 14819-3 (location codes) */
 }
@@ -467,7 +480,7 @@ void gr_rds_data_decoder::decode_type15b(unsigned int *group){
 void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	unsigned int group_type=(unsigned int)((group[1]>>12)&0xf);
 	bool version_code=(group[1]>>11)&0x1;
-	printf("%i%c ", group_type, (version_code?'B':'A'));
+	printf("%02i%c ", group_type, (version_code?'B':'A'));
 	std::cout << "(" << rds_group_acronyms[group_type] << ")";
 
 	program_identification=group[0];			// "PI"
@@ -501,6 +514,7 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 			decode_type2(group, version_code);
 		break;
 		case 3:
+			if(!version_code) decode_type3a(group);
 		break;
 		case 4:
 			if(!version_code) decode_type4a(group);

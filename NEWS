@@ -1,3 +1,7 @@
+02.03.2010
+- added decoding of 3A groups
+- added a few statistics utils
+
 22.02.2010
 - corrections in rds_decoder (all group types)
 - separate gr_rds_constants.h file

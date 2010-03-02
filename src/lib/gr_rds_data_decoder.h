@@ -103,6 +103,7 @@ private:
 	void decode_type0(unsigned int *group, bool version_code);
 	void decode_type1(unsigned int *group, bool version_code);
 	void decode_type2(unsigned int *group, bool version_code);
+	void decode_type3a(unsigned int *group);
 	void decode_type4a(unsigned int *group);
 	void decode_type8a(unsigned int *group);
 	void decode_type14(unsigned int *group, bool version_code);

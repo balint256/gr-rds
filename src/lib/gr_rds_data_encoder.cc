@@ -169,6 +169,14 @@ void gr_rds_data_encoder::assign_from_xml
 		if(length>64) printf("invalid RadioText string length: %i\n", length);
 		else for(int i=0; i<length; i++) radiotext[i]=value[i];
 	}
+	else if(!strcmp(field, "DP"))
+		DP=atol(value);
+	else if(!strcmp(field, "extent"))
+		extent=atol(value);
+	else if(!strcmp(field, "event"))
+		event=atol(value);
+	else if(!strcmp(field, "location"))
+		location=atol(value);
 	else printf("unrecognized field type: %s\n", field);
 }
 
@@ -242,9 +250,11 @@ int gr_rds_data_encoder::read_xml (const char *xmlfile){
 
 /* see Annex B, page 64 of the standard */
 unsigned int gr_rds_data_encoder::calc_syndrome(unsigned long message, 
-			unsigned char mlen, unsigned long poly, unsigned char plen) {
+			unsigned char mlen){
 	unsigned long reg=0;
 	unsigned int i;
+	const unsigned long poly=0x5B9;
+	const unsigned char plen=10;
 
 	for (i=mlen;i>0;i--)  {
 		reg=(reg<<1) | ((message>>(i-1)) & 0x01);
@@ -300,13 +310,14 @@ void gr_rds_data_encoder::create_group(const int group_type, const bool AB){
 
 	if(group_type==0) prepare_group0(AB);
 	else if(group_type==2) prepare_group2(AB);
-	else if(group_type==4) prepare_group4();
+	else if(group_type==4) prepare_group4a();
+	else if(group_type==8) prepare_group8a();
 	else printf("preparation of group %i not yet supported\n", group_type);
 	printf("data: %04X %04X %04X %04X, ",
 		infoword[0], infoword[1], infoword[2], infoword[3]);
 
 	for(i=0;i<4;i++){
-		checkword[i]=calc_syndrome(infoword[i],16,0x5b9,10);
+		checkword[i]=calc_syndrome(infoword[i], 16);
 		block[i]=((infoword[i]&0xffff)<<10)|(checkword[i]&0x3ff);
 		// add the offset word
 		if((i==2)&&AB) block[2]^=offset_word[4];
@@ -350,7 +361,7 @@ void gr_rds_data_encoder::prepare_group2(const bool AB){
 /* see page 28 and Annex G, page 81 in the standard */
 /* FIXME this is supposed to be transmitted only once per minute, when 
  * the minute changes */
-void gr_rds_data_encoder::prepare_group4(void){
+void gr_rds_data_encoder::prepare_group4a(void){
 	time_t rightnow;
 	tm *utc;
 	
@@ -370,10 +381,17 @@ void gr_rds_data_encoder::prepare_group4(void){
 	int L=((M==1)||(M==2))?1:0;
 	int mjd=14956+D+int((Y-L)*365.25)+int((M+1+L*12)*30.6001);
 	
-	infoword[1]=infoword[1]|((0<<2)&0x7)|((mjd>>15)&0x3);
+	infoword[1]=infoword[1]|((mjd>>15)&0x3);
 	infoword[2]=(((mjd>>7)&0xff)<<8)|((mjd&0x7f)<<1)|((h>>4)&0x1);
 	infoword[3]=((h&0xf)<<12)|(((m>>2)&0xf)<<8)|((m&0x3)<<6)|
 		((toffset>0?0:1)<<5)|((abs(toffset*2))&0x1f);
+}
+
+// for now single-group only
+void gr_rds_data_encoder::prepare_group8a(void){
+	infoword[1]=infoword[1]|(1<<3)|(DP&0x7);
+	infoword[2]=(1<<15)|((extent&0x7)<<11)|(event&0x7ff);
+	infoword[3]=location;
 }
 
 void gr_rds_data_encoder::prepare_buffer(int which){

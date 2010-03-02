@@ -1,3 +1,7 @@
+03.03.2010
+- improved decoding of 3A, 8A groups
+- simple 8a group tx
+
 02.03.2010
 - added decoding of 3A groups
 - added a few statistics utils

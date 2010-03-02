@@ -75,6 +75,10 @@ private:
 	double AF2;
 	char PS[8];
 	unsigned char radiotext[64];
+	int DP;
+	int extent;
+	int event;
+	int location;
 
 /* each type 0 group contains 2 out of 8 PS characters;
  * this is used to count 0..3 and send all PS characters */
@@ -96,21 +100,21 @@ private:
 	int nbuffers;
 
 // Functions
-	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
-	gr_rds_data_encoder (const char *xmlfile);	// private constructor
-	int read_xml(const char *xmlfile);
-	void print_element_names(xmlNode * a_node);
-	void assign_from_xml(const char *field, const char *value, const int length);
+	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char*);
+	gr_rds_data_encoder (const char*);	// private constructor
+	int read_xml(const char*);
+	void print_element_names(xmlNode*);
+	void assign_from_xml(const char*, const char*, const int);
 	void reset_rds_data();
 	void count_groups();
-	void create_group(const int group_type, const bool AB);
-	void prepare_group0(const bool AB);
-	void prepare_group2(const bool AB);
-	void prepare_group4();
-	void prepare_buffer(int which);
-	unsigned int encode_af(double af);
-	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,
-			unsigned long poly, unsigned char plen);
+	void create_group(const int, const bool);
+	void prepare_group0(const bool);
+	void prepare_group2(const bool);
+	void prepare_group4a();
+	void prepare_group8a();
+	void prepare_buffer(int);
+	unsigned int encode_af(double);
+	unsigned int calc_syndrome(unsigned long, unsigned char);
 
 public:
 	~gr_rds_data_encoder();		// public destructor

@@ -16,7 +16,7 @@ class rds_rx_graph (gr.top_block):
 		parser=OptionParser(option_class=eng_option)
 		parser.add_option("-R", "--rx-subdev-spec", type="subdev", default=None,
 						  help="select USRP Rx side A or B (default=A)")
-		parser.add_option("-f", "--freq", type="eng_float", default=102.2e6,
+		parser.add_option("-f", "--freq", type="eng_float", default=91.2e6,
 						  help="set frequency to FREQ", metavar="FREQ")
 		parser.add_option("-g", "--gain", type="eng_float", default=None,
 						  help="set gain in dB")

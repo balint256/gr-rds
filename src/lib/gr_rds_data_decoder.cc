@@ -101,12 +101,6 @@ void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number){
 	d_state = ST_SYNC;
 }
 
-// currently not used anywhere
-void gr_rds_data_decoder::printbin(unsigned long number,unsigned char bits){
-	for(unsigned int i=bits;i>0;i--) putchar((number & (1L<<(i-1)))?'1':'0');
-	putchar('\n');
-}
-
 /* type 0 = PI
  * type 1 = PS
  * type 2 = PTY
@@ -123,11 +117,12 @@ void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext){
 }
 
 /* see Annex B, page 64 of the standard */
-// note that poly is always 0x5B9 and plen is always 10
 unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message, 
-			unsigned char mlen, unsigned long poly, unsigned char plen){
+			unsigned char mlen){
 	unsigned long reg=0;
 	unsigned int i;
+	const unsigned long poly=0x5B9;
+	const unsigned char plen=10;
 
 	for (i=mlen;i>0;i--)  {
 		reg=(reg<<1) | ((message>>(i-1)) & 0x01);
@@ -343,27 +338,47 @@ void gr_rds_data_decoder::decode_type3a(unsigned int *group){
 	int aid=group[3];
 	
 	printf("aid group: %i%c - ", application_group, group_type?'B':'A');
-	printf("message: %04X - aid: %04X\n", message, aid);
+	if((application_group==8)&&(group_type==false)){	// 8A
+		int variant_code=(message>>14)&0x3;
+		if(variant_code==0){
+			int ltn=(message>>6)&0x3f;	// location table number
+			bool afi=(message>>5)&0x1;	// alternative freq. indicator
+			bool M=(message>>4)&0x1;	// mode of transmission
+			bool I=(message>>3)&0x1;	// international
+			bool N=(message>>2)&0x1;	// national
+			bool R=(message>>1)&0x1;	// regional
+			bool U=message&0x1;			// urban
+			std::cout << "location table" << ltn << " - "
+				<< (afi?"AFI-ON":"AFI-OFF") << " - "
+				<< (M?"enhanced mode":"basic mode") << " - "
+				<< (I?"international ":"")
+				<< (N?"national ":"")
+				<< (R?"regional ":"")
+				<< (U?"urban":"") << std::endl;
+		}
+		else if(variant_code==1){
+			int G=(message>>12)&0x3;	// gap
+			int sid=(message>>6)&0x3f;	// service identifier
+			int gap_no[4]={3,5,8,11};
+			printf("gap:%i groups, SID:%02X\n", gap_no[G], sid);
+		}
+	}
+	else printf("message: %04X - aid: %04X\n", message, aid);
 }
 
 /* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
 void gr_rds_data_decoder::decode_type4a(unsigned int *group){
-	unsigned int hours, minutes, year, month, day_of_month=0;
-	double modified_julian_date=0;
-	double local_time_offset=0;
-	bool K=0;
-
-	hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
-	minutes=(group[3]>>6)&0x3f;
-	local_time_offset=((double)(group[3]&0x1f))/2;
+	unsigned int hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
+	unsigned int minutes=(group[3]>>6)&0x3f;
+	double local_time_offset=((double)(group[3]&0x1f))/2;
 	if((group[3]>>5)&0x1) local_time_offset *= -1;
-	modified_julian_date=((group[1]&0x03)<<15)|((group[2]>>1)&0x7fff);
+	double modified_julian_date=((group[1]&0x03)<<15)|((group[2]>>1)&0x7fff);
 
 /* MJD -> Y-M-D */
-	year=(int)((modified_julian_date-15078.2)/365.25);
-	month=(int)((modified_julian_date-14956.1-(int)(year*365.25))/30.6001);
-	day_of_month=modified_julian_date-14956-(int)(year*365.25)-(int)(month*30.6001);
-	K=((month==14)||(month==15))?1:0;
+	unsigned int year=(int)((modified_julian_date-15078.2)/365.25);
+	unsigned int month=(int)((modified_julian_date-14956.1-(int)(year*365.25))/30.6001);
+	unsigned int day_of_month=modified_julian_date-14956-(int)(year*365.25)-(int)(month*30.6001);
+	bool K=((month==14)||(month==15))?1:0;
 	year+=K;
 	month-=1+K*12;
 
@@ -382,21 +397,39 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group){
 void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 	bool T=(group[1]>>4)&0x1;				// 0 = user message, 1 = tuning info
 	bool F=(group[1]>>3)&0x1;				// 0 = multi-group, 1 = single-group
-	unsigned int dp=group[1]&0x7;			// duration & persistence
 	bool D=(group[2]>15)&0x1;				// 1 = diversion recommended
-	bool sign=(group[2]>>14)&0x1;			// event direction, 0 = +, 1 = -
-	unsigned int extent=(group[2]>>11)&0x7;	// number of segments affected
-	unsigned int event=group[2]&0x7ff; 		// event code, defined in ISO 14819-2
-	unsigned int location=group[3];			// location code, defined in ISO 14819-3
 
-/* let's print out what we've got so far */
-	std::cout << (T?"tuning info, ":"user message, ")
-		<< (F?"single-group, ":"multi-group, ") << (D?"diversion recommended, ":"")
-		<< "duration:" << tmc_duration[dp][0]
-		<< ", extent:" << (sign?"-":"") << extent+1 << " segments"
-		<< ", event:" << event << ", location:" << location << std::endl;
-/* FIXME need to somehow find/create a file with the codes in ISO 14819-2
- * (event codes) and ISO 14819-3 (location codes) */
+	if(T==true){	// tuning info
+		printf("#tuning info# ");
+		int variant=group[1]&0xf;
+		if((variant>3)&&(variant<10)){
+			printf("variant: %i - ", variant);
+			printf("%04X %04X\n", group[2], group[3]);
+		}
+		else printf("invalid variant: %i\n", variant);
+	}
+	else if((F==true)||((F==false)&&(D==true))){	// single-group or 1st of multi-group
+		unsigned int dp_ci=group[1]&0x7;		// duration & persistence or continuity index
+		bool sign=(group[2]>>14)&0x1;			// event direction, 0 = +, 1 = -
+		unsigned int extent=(group[2]>>11)&0x7;	// number of segments affected
+		unsigned int event=group[2]&0x7ff; 		// event code, defined in ISO 14819-2
+		unsigned int location=group[3];			// location code, defined in ISO 14819-3
+		std::cout << "#user msg# " << (D?"diversion recommended, ":"");
+		if(F)
+			std::cout << "single-grp, duration:" << tmc_duration[dp_ci][0];
+		else
+			std::cout << "multi-grp, continuity index:" << dp_ci;
+		std::cout << ", extent:" << (sign?"-":"") << extent+1 << " segments"
+			<< ", event:" << event << ", location:" << location << std::endl;
+	}
+	else{	// 2nd or more of multi-group
+		unsigned int ci=group[1]&0x7;			// countinuity index
+		bool sg=(group[2]>>14)&0x1;				// second group
+		unsigned int gsi=(group[2]>>12)&0x3;	// group sequence
+		std::cout << "#user msg# multi-grp, continuity index:" << ci
+			<< (sg?", second group":"") << ", gsi:" << gsi;
+		printf(", free format: %03X %04X\n", (group[2]&0xfff), group[3]);
+	}
 }
 
 /* EON: see pages 38 and 46 in the standard */
@@ -568,7 +601,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 		reg=(reg<<1)|in[i];		// reg contains the last 26 rds bits
 		switch (d_state) {
 			case ST_NO_SYNC:
-				reg_syndrome = calc_syndrome(reg,26,0x5b9,10);
+				reg_syndrome = calc_syndrome(reg,26);
 				for (j=0;j<5;j++) {
 					if (reg_syndrome==syndrome[j]) {
 						if (!presync) {
@@ -598,7 +631,7 @@ int gr_rds_data_decoder::work (int noutput_items,
 				else {
 					good_block=false;
 					dataword=(reg>>10) & 0xffff;
-					block_calculated_crc=calc_syndrome(dataword,16,0x5b9,10);
+					block_calculated_crc=calc_syndrome(dataword,16);
 					checkword=reg & 0x3ff;
 /* manage special case of C or C' offset word */
 					if (block_number==2) {

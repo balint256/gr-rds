@@ -88,26 +88,24 @@ private:
 	gr_msg_queue_sptr d_msgq;
 
 // Functions
-	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);
-	gr_rds_data_decoder (gr_msg_queue_sptr msgq);		// private constructor
+	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr);
+	gr_rds_data_decoder (gr_msg_queue_sptr);		// private constructor
 	void enter_no_sync();
-	void enter_sync(unsigned int sync_block_number);
+	void enter_sync(unsigned int);
 	void reset_rds_data();
-	unsigned int calc_syndrome(unsigned long message, unsigned char mlen,
-			unsigned long poly, unsigned char plen);
-	void printbin(unsigned long number,unsigned char bits);
-	unsigned long bin2dec(char *string);
-	void send_message(long msgtype, std::string msgtext);
-	void decode_group(unsigned int *group);
-	double decode_af(unsigned int af_code);
-	void decode_type0(unsigned int *group, bool version_code);
-	void decode_type1(unsigned int *group, bool version_code);
-	void decode_type2(unsigned int *group, bool version_code);
-	void decode_type3a(unsigned int *group);
-	void decode_type4a(unsigned int *group);
-	void decode_type8a(unsigned int *group);
-	void decode_type14(unsigned int *group, bool version_code);
-	void decode_type15b(unsigned int *group);
+	unsigned int calc_syndrome(unsigned long, unsigned char);
+	unsigned long bin2dec(char*);
+	void send_message(long, std::string);
+	void decode_group(unsigned int*);
+	double decode_af(unsigned int);
+	void decode_type0(unsigned int*, bool);
+	void decode_type1(unsigned int*, bool);
+	void decode_type2(unsigned int*, bool);
+	void decode_type3a(unsigned int*);
+	void decode_type4a(unsigned int*);
+	void decode_type8a(unsigned int*);
+	void decode_type14(unsigned int*, bool);
+	void decode_type15b(unsigned int*);
 
 
 public:

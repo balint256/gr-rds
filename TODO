@@ -2,3 +2,4 @@
 - Add scanning for stations
 - Replace bpsk_demod???
 - Add error correction, not only detection
+- Integrate with OpenStreetMap???

@@ -355,7 +355,8 @@ void gr_rds_data_encoder::prepare_group2(const bool AB){
 		infoword[3]=(radiotext[d_g2_counter*2]<<8|radiotext[d_g2_counter*2+1]);
 	}
 	d_g2_counter++;
-	if(d_g2_counter>15) d_g2_counter=0;
+	//if(d_g2_counter>15) d_g2_counter=0;
+	d_g2_counter%=16;
 }
 
 /* see page 28 and Annex G, page 81 in the standard */

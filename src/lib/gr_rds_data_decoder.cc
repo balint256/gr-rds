@@ -37,6 +37,7 @@
 
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_constants.h"
+#include "gr_rds_tmc_event_table.h"
 #include <gr_io_signature.h>
 #include <math.h>
 
@@ -348,7 +349,7 @@ void gr_rds_data_decoder::decode_type3a(unsigned int *group){
 			bool N=(message>>2)&0x1;	// national
 			bool R=(message>>1)&0x1;	// regional
 			bool U=message&0x1;			// urban
-			std::cout << "location table" << ltn << " - "
+			std::cout << "location table: " << ltn << " - "
 				<< (afi?"AFI-ON":"AFI-OFF") << " - "
 				<< (M?"enhanced mode":"basic mode") << " - "
 				<< (I?"international ":"")
@@ -420,7 +421,8 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 		else
 			std::cout << "multi-grp, continuity index:" << dp_ci;
 		std::cout << ", extent:" << (sign?"-":"") << extent+1 << " segments"
-			<< ", event:" << event << ", location:" << location << std::endl;
+			<< ", event" << event << ":" << tmc_event[event][1]
+			<< ", location:" << location << std::endl;
 	}
 	else{	// 2nd or more of multi-group
 		unsigned int ci=group[1]&0x7;			// countinuity index

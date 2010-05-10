@@ -1,3 +1,6 @@
+10.05.2010
+- added TMC event table (ISO 14819-2, table 2)
+
 03.03.2010
 - improved decoding of 3A, 8A groups
 - simple 8a group tx

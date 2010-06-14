@@ -177,3 +177,25 @@ const std::string tmc_duration[8][2]={
 	{"3 hours", "end of next week"},
 	{"4 hours", "end of the month"},
 	{"rest of the day", "long period"}};
+
+/* optional message content, data field lengths and labels
+ * see page 15 in ISO 14819-1 */
+const int optional_content_lengths[16]={3,3,5,5,5,8,8,8,8,11,16,16,16,16,0,0};
+
+const std::string label_descriptions[16]={
+	"Duration",
+	"Control code",
+	"Length of route affected",
+	"Speed limit advice",
+	"Quantifier",
+	"Quantifier",
+	"Supplementary information code",
+	"Explicit start time",
+	"Explicit stop time",
+	"Additional event",
+	"Detailed diversion instructions",
+	"Destination",
+	"RFU (Reserved for future use)",
+	"Cross linkage to source of problem, or another route",
+	"Separator",
+	"RFU (Reserved for future use)"};

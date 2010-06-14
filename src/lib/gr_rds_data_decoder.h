@@ -98,6 +98,7 @@ private:
 	void send_message(long, std::string);
 	void decode_group(unsigned int*);
 	double decode_af(unsigned int);
+	void decode_optional_content(int, unsigned long int *);
 	void decode_type0(unsigned int*, bool);
 	void decode_type1(unsigned int*, bool);
 	void decode_type2(unsigned int*, bool);

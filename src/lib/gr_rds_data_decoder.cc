@@ -37,7 +37,7 @@
 
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_constants.h"
-#include "gr_rds_tmc_event_table.h"
+#include "gr_rds_tmc_events.h"
 #include <gr_io_signature.h>
 #include <math.h>
 
@@ -224,11 +224,11 @@ double gr_rds_data_decoder::decode_af(unsigned int af_code) {
  * that there are no alternative frequencies, or it indicates
  * the number of AF to follow, which is not relevant at this
  * stage, since we're not actually re-tuning */
-	if ((af_code == 0)||						// not to be used
-		(af_code == 205)||						// filler code
-		((af_code >= 206)&&(af_code <= 223))||	// not assigned
-		(af_code == 224)||					// No AF exists
-		(af_code >= 251)){					// not assigned
+	if ((af_code == 0)||					// not to be used
+		(af_code == 205)||				// filler code
+		((af_code >= 206)&&(af_code <= 223))||		// not assigned
+		(af_code == 224)||				// No AF exists
+		(af_code >= 251)){				// not assigned
 			number_of_freqs = 0;
 			alt_frequency=0;
 	}
@@ -247,11 +247,11 @@ double gr_rds_data_decoder::decode_af(unsigned int af_code) {
 	if ((af_code > 0) && (af_code < 205) && vhf_or_lfmf)
 		alt_frequency = (double)(af_code+875)*100;		// VHF (87.6-107.9MHz)
 	else if ((af_code > 0) && (af_code < 16) && !vhf_or_lfmf)
-		alt_frequency = (double)((af_code-1)*9 + 153);	// LF (153-279kHz)
+		alt_frequency = (double)((af_code-1)*9 + 153);		// LF (153-279kHz)
 	else if ((af_code > 15) && (af_code < 136) && !vhf_or_lfmf)
-		alt_frequency = (double)((af_code-16)*9 + 531);	// MF (531-1602kHz)
+		alt_frequency = (double)((af_code-16)*9 + 531);		// MF (531-1602kHz)
 
-	return alt_frequency;		// in kHz
+	return alt_frequency;						// in kHz
 }
 
 /* SLOW LABELLING: see page 23 in the standard 
@@ -396,9 +396,11 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group){
    initially defined in CEN standard ENV 12313-1
    superseded by ISO standard 14819:2003 */
 void gr_rds_data_decoder::decode_type8a(unsigned int *group){
-	bool T=(group[1]>>4)&0x1;				// 0 = user message, 1 = tuning info
-	bool F=(group[1]>>3)&0x1;				// 0 = multi-group, 1 = single-group
-	bool D=(group[2]>15)&0x1;				// 1 = diversion recommended
+	bool T=(group[1]>>4)&0x1;		// 0 = user message, 1 = tuning info
+	bool F=(group[1]>>3)&0x1;		// 0 = multi-group, 1 = single-group
+	bool D=(group[2]>15)&0x1;		// 1 = diversion recommended
+	static unsigned long int free_format[4];
+	static int no_groups=0;
 
 	if(T==true){	// tuning info
 		printf("#tuning info# ");
@@ -409,10 +411,10 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 		}
 		else printf("invalid variant: %i\n", variant);
 	}
-	else if((F==true)||((F==false)&&(D==true))){	// single-group or 1st of multi-group
+	else if((F==true)||((F==false)&&(D==true))){		// single-group or 1st of multi-group
 		unsigned int dp_ci=group[1]&0x7;		// duration & persistence or continuity index
 		bool sign=(group[2]>>14)&0x1;			// event direction, 0 = +, 1 = -
-		unsigned int extent=(group[2]>>11)&0x7;	// number of segments affected
+		unsigned int extent=(group[2]>>11)&0x7;		// number of segments affected
 		unsigned int event=group[2]&0x7ff; 		// event code, defined in ISO 14819-2
 		unsigned int location=group[3];			// location code, defined in ISO 14819-3
 		std::cout << "#user msg# " << (D?"diversion recommended, ":"");
@@ -421,16 +423,42 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 		else
 			std::cout << "multi-grp, continuity index:" << dp_ci;
 		std::cout << ", extent:" << (sign?"-":"") << extent+1 << " segments"
-			<< ", event" << event << ":" << tmc_event[event][1]
+			<< ", event" << event << ":" << tmc_events[event][1]
 			<< ", location:" << location << std::endl;
 	}
 	else{	// 2nd or more of multi-group
 		unsigned int ci=group[1]&0x7;			// countinuity index
-		bool sg=(group[2]>>14)&0x1;				// second group
-		unsigned int gsi=(group[2]>>12)&0x3;	// group sequence
+		bool sg=(group[2]>>14)&0x1;			// second group
+		unsigned int gsi=(group[2]>>12)&0x3;		// group sequence
 		std::cout << "#user msg# multi-grp, continuity index:" << ci
 			<< (sg?", second group":"") << ", gsi:" << gsi;
 		printf(", free format: %03X %04X\n", (group[2]&0xfff), group[3]);
+		// it's not clear if gsi=N-2 when gs=true
+		if(sg)
+			no_groups=gsi;
+		free_format[gsi]=((group[2]&0xfff)<<12)|group[3];
+		if (gsi==0)
+			decode_optional_content(no_groups, free_format);
+	}
+}
+
+void gr_rds_data_decoder::decode_optional_content(int no_groups, unsigned long int *free_format){
+	int label=0;
+	int content=0;
+	int content_length=0;
+	int ff_pointer;
+	
+	for (int i=no_groups;i==0;i--){
+		ff_pointer=12+16;
+		while(ff_pointer>0){
+			ff_pointer-=4;
+			label=(free_format[i]&&(0xf<<ff_pointer));
+			content_length=optional_content_lengths[label];
+			ff_pointer-=content_length;
+			content=(free_format[i]&&((int)(pow(2, content_length)-1)<<ff_pointer));
+			std::cout << "TMC optional content (" << label_descriptions[label]
+				<< "):" << content << std::endl;
+		}
 	}
 }
 

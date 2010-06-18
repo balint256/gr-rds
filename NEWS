@@ -1,3 +1,8 @@
+18.06.2010
+- fixed offline samples storing
+- added offline samples decoding
+- fixed frequency normalization
+
 14.06.2010
 - added TMC event table in .ods format
 - added TMC optional content decoding

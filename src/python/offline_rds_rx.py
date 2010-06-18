@@ -1,30 +1,21 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, rds, audio
+from gnuradio import gr, rds, audio
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2, constsink_gl
 from optparse import OptionParser
 from rdspanel import rdsPanel
-from usrpm import usrp_dbid
 import sys, math, wx, time
 
-dblist = (usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2,
-		usrp_dbid.TV_RX_REV_3, usrp_dbid.BASIC_RX)
+usrp_rate = 256e3
+audio_decim = 8
+audio_rate = usrp_rate / audio_decim			# 32 kS/s
 
 class rds_rx_graph (stdgui2.std_top_block):
 	def __init__(self,frame,panel,vbox,argv):
 		stdgui2.std_top_block.__init__ (self,frame,panel,vbox,argv)
 
 		parser=OptionParser(option_class=eng_option)
-		parser.add_option("-R", "--rx-subdev-spec", type="subdev", default=None,
-						  help="select USRP Rx side A or B (default=A)")
-		parser.add_option("-f", "--freq", type="eng_float", default=91.2e6,
-						  help="set frequency to FREQ", metavar="FREQ")
-		parser.add_option("-g", "--gain", type="eng_float", default=None,
-						  help="set gain in dB")
-# FIXME add squelch
-		parser.add_option("-s", "--squelch", type="eng_float", default=0,
-						  help="set squelch level (default is 0)")
 		parser.add_option("-V", "--volume", type="eng_float", default=None,
 						  help="set volume (default is midpoint)")
 		parser.add_option("-O", "--audio-output", type="string", default="plughw:0,0",
@@ -36,32 +27,8 @@ class rds_rx_graph (stdgui2.std_top_block):
 			parser.print_help()
 			sys.exit(1)
 
-		# connect to USRP
-		usrp_decim = 250
-		self.u = usrp.source_c(0, usrp_decim)
-		print "USRP Serial: ", self.u.serial_number()
-		usrp_rate = self.u.adc_rate() / usrp_decim		# 256 kS/s
-		audio_decim = 8
-		audio_rate = usrp_rate / audio_decim			# 32 kS/s
-		if options.rx_subdev_spec is None:
-			options.rx_subdev_spec = usrp.pick_subdev(self.u, dblist)
+		self.file_source = gr.file_source(gr.sizeof_gr_complex*1, "/home/azimout/rds_samples.dat", True)
 
-		self.u.set_mux(usrp.determine_rx_mux_value(self.u, options.rx_subdev_spec))
-		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
-		print "Using d'board", self.subdev.side_and_name()
-
-		# gain, volume, frequency
-		self.gain = options.gain
-		if options.gain is None:
-			self.gain = self.subdev.gain_range()[1]
-		self.vol = options.volume
-		if self.vol is None:
-			g = self.volume_range()
-			self.vol = float(g[0]+g[1])/2
-		self.freq = options.freq
-		print "Volume:%r, Gain:%r, Freq:%3.1f MHz" % (self.vol, self.gain, self.freq/1e6)
-
-		# channel filter
 		chan_filter_coeffs = gr.firdes.low_pass(
 			1.0,			# gain
 			usrp_rate,		# sampling rate
@@ -80,7 +47,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			fm_beta,			# freq gain
 			fm_max_freq,		# in radians/sample
 			-fm_max_freq)
-		self.connect(self.u, self.chan_filter, self.fm_demod)
+		self.connect(self.file_source, self.chan_filter, self.fm_demod)
 
 		# L+R, pilot, L-R, RDS filters
 		lpr_filter_coeffs = gr.firdes.low_pass(
@@ -153,12 +120,10 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.lmr_filter, (self.right, 1))
 
 		# volume control, complex2flot, audio sink
-		self.volume_control_l = gr.multiply_const_ff(self.vol)
-		self.volume_control_r = gr.multiply_const_ff(self.vol)
 		self.audio_sink = audio.sink(int(audio_rate),
 							options.audio_output, False)
-		self.connect(self.left, self.volume_control_l, (self.audio_sink, 0))
-		self.connect(self.right, self.volume_control_r, (self.audio_sink, 1))
+		self.connect(self.left, (self.audio_sink, 0))
+		self.connect(self.right, (self.audio_sink, 1))
 
 		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass(
@@ -197,10 +162,6 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.frame = frame
 		self.panel = panel
 		self._build_gui(vbox, usrp_rate, audio_rate)
-		self.set_gain(self.gain)
-		self.set_vol(self.vol)
-		if not(self.set_freq(self.freq)):
-			self._set_status_msg("Failed to set initial frequency")	
 
 
 ####################### GUI ################################
@@ -231,88 +192,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# control area form at bottom
 		self.myform = form.form()
 
-		# 1st line
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		self.myform.btn_down = wx.Button(self.panel, -1, "<<")
-		self.myform.btn_down.Bind(wx.EVT_BUTTON, self.Seek_Down)
-		hbox.Add(self.myform.btn_down, 0)
-		self.myform['freq'] = form.float_field(
-			parent=self.panel, sizer=hbox, label="Freq", weight=0,
-			callback=self.myform.check_input_and_call(_form_set_freq, self._set_status_msg))
-		hbox.Add((5,0), 0)
-		self.myform.btn_up = wx.Button(self.panel, -1, ">>")
-		self.myform.btn_up.Bind(wx.EVT_BUTTON, self.Seek_Up)
-		hbox.Add(self.myform.btn_up, 0)
-		self.myform['freq_slider'] = form.quantized_slider_field(
-			parent=self.panel, sizer=hbox, weight=3,
-			range=(87.5e6, 108e6, 0.1e6), callback=self.set_freq)
-		hbox.Add((5,0), 0)
-		vbox.Add(hbox, 0, wx.EXPAND)
 
-
-		# 2nd line
-		hbox = wx.BoxSizer(wx.HORIZONTAL)
-		hbox.Add((5,0), 0)
-		self.myform['volume'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
-			label="Volume", weight=3, range=self.volume_range(), callback=self.set_vol)
-		hbox.Add((5,0), 1)
-		self.myform['gain'] = form.quantized_slider_field(parent=self.panel, sizer=hbox,
-			label="Gain", weight=3, range=self.subdev.gain_range(), callback=self.set_gain)
-		hbox.Add((5,0), 0)
-		vbox.Add(hbox, 0, wx.EXPAND)
-
-
-
-########################### EVENTS ############################
-
-	def set_vol (self, vol):
-		self.volume_control_l.set_k(10**(vol/10))
-		self.volume_control_r.set_k(10**(vol/10))
-		self.myform['volume'].set_value(vol)
-		self.update_status_bar ()
-
-	def set_freq(self, target_freq):
-		if (88<target_freq<108): target_freq *= 1e6
-		elif (target_freq<88e6) or (target_freq>108e6): return False
-		r = usrp.tune(self.u, 0, self.subdev, target_freq)
-		if r:
-			self.freq = target_freq
-			self.myform['freq'].set_value(target_freq)
-			self.myform['freq_slider'].set_value(target_freq)
-			self.rdspanel.frequency.SetLabel('%3.2f' % (target_freq/1e6))
-			self.update_status_bar()
-			self.bpsk_demod.reset()
-			self.rds_decoder.reset()
-			self.rdspanel.clear_data()
-			self._set_status_msg("OK", 0)
-			return True
-		else:
-			self._set_status_msg("Failed", 0)
-			return False
-
-	def set_gain(self, gain):
-		self.myform['gain'].set_value(gain)
-		self.subdev.set_gain(gain)
-
-
-	def update_status_bar (self):
-		msg = "Volume:%r, Gain:%r, Freq:%3.1f MHz" % (self.vol, self.gain, self.freq/1e6)
-		self._set_status_msg(msg, 1)
-
-	def volume_range(self):
-		return (-20.0, 0.0, 0.5)		# hardcoded values
-
-	def Seek_Up(self, event):
-		new_freq = self.freq + 1e5
-		if new_freq > 108e6:
-			new_freq=88e6
-		self.set_freq(new_freq)
-
-	def Seek_Down(self, event):
-		new_freq = self.freq - 1e5
-		if new_freq < 88e6:
-			new_freq=108e6
-		self.set_freq(new_freq)
 
 
 if __name__ == '__main__':

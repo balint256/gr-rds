@@ -30,7 +30,7 @@
  * 2nd column: text (CEN-English)
  * 3rd column: event code (to be transmitted/received)
  * 4th column: quantifier type */
-const std::string tmc_events[TMC_EVENTS][4]={
+static const std::string tmc_events[TMC_EVENTS][4]={
 	{"0"," "," "," "},
 	{"1"," "," "," "},
 	{"2"," "," "," "},
@@ -1627,7 +1627,7 @@ const std::string tmc_events[TMC_EVENTS][4]={
 /* this is like an index key:
  * 1st column: tmc event code
  * 2nd column: row in tmc_events */
-const int tmc_event_code_index[TMC_EVENTS][2]={
+static const int tmc_event_code_index[TMC_EVENTS][2]={
 	{0,},
 	{1,5},
 	{2,48},

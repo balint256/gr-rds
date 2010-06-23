@@ -1,3 +1,7 @@
+23.06.2010
+- added tmc_locations_italy, in .ods and .h
+- bug fixes
+
 18.06.2010
 - fixed offline samples storing
 - added offline samples decoding

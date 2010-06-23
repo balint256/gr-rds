@@ -38,6 +38,7 @@
 #include "gr_rds_data_decoder.h"
 #include "gr_rds_constants.h"
 #include "gr_rds_tmc_events.h"
+//#include "gr_rds_tmc_locations_italy.h"
 #include <gr_io_signature.h>
 #include <math.h>
 
@@ -422,8 +423,9 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 			std::cout << "single-grp, duration:" << tmc_duration[dp_ci][0];
 		else
 			std::cout << "multi-grp, continuity index:" << dp_ci;
+		int event_line=tmc_event_code_index[event][1];
 		std::cout << ", extent:" << (sign?"-":"") << extent+1 << " segments"
-			<< ", event" << event << ":" << tmc_events[event][1]
+			<< ", event" << event << ":" << tmc_events[event_line][1]
 			<< ", location:" << location << std::endl;
 	}
 	else{	// 2nd or more of multi-group

@@ -90,7 +90,8 @@ grinclude_HEADERS =			\
 	gr_rds_rate_enforcer.h		\
 	gr_rds_freq_divider.h		\
 	gr_rds_constants.h		\
-	gr_rds_tmc_events.h
+	gr_rds_tmc_events.h		\
+	gr_rds_tmc_locations_italian.h
 
 # These swig headers get installed in ${prefix}/include/gnuradio/swig
 swiginclude_HEADERS = 			\

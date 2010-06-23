@@ -5,7 +5,7 @@ from usrpm import usrp_dbid
 import sys
 
 usrp_decim = 250
-freq = 102.2e6
+freq = 91.2e6
 dblist = (usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2, usrp_dbid.TV_RX_REV_3, usrp_dbid.BASIC_RX)
 
 class rds_rx_graph (gr.top_block):
@@ -38,7 +38,7 @@ class rds_rx_graph (gr.top_block):
 		self.chan_filter = gr.fir_filter_ccf(1, chan_filter_coeffs)
 		print "# channel filter:", len(chan_filter_coeffs), "taps"
 		
-		self.file_sink = gr.file_sink(gr.sizeof_gr_complex*1, "/home/azimout/rds_samples.dat")
+		self.file_sink = gr.file_sink(gr.sizeof_gr_complex*1, "/home/sdr/rds_samples.dat")
 		
 		self.connect(self.u, self.chan_filter, self.file_sink)
 

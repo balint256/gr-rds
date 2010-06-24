@@ -10,6 +10,7 @@ import sys, math, wx, time
 usrp_rate = 256e3
 audio_decim = 8
 audio_rate = usrp_rate / audio_decim			# 32 kS/s
+offline_samples = "/home/sdr/rds_samples.dat"
 
 class rds_rx_graph (stdgui2.std_top_block):
 	def __init__(self,frame,panel,vbox,argv):
@@ -27,7 +28,7 @@ class rds_rx_graph (stdgui2.std_top_block):
 			parser.print_help()
 			sys.exit(1)
 
-		self.file_source = gr.file_source(gr.sizeof_gr_complex*1, "/home/azimout/rds_samples.dat", True)
+		self.file_source = gr.file_source(gr.sizeof_gr_complex*1, offline_samples, True)
 
 		chan_filter_coeffs = gr.firdes.low_pass(
 			1.0,			# gain
@@ -119,11 +120,11 @@ class rds_rx_graph (stdgui2.std_top_block):
 		self.connect(self.lpr_filter, (self.right, 0))
 		self.connect(self.lmr_filter, (self.right, 1))
 
-		# volume control, complex2flot, audio sink
-		self.audio_sink = audio.sink(int(audio_rate),
-							options.audio_output, False)
-		self.connect(self.left, (self.audio_sink, 0))
-		self.connect(self.right, (self.audio_sink, 1))
+		# send audio to null sink
+		self.null0 = gr.null_sink(gr.sizeof_float)
+		self.null1 = gr.null_sink(gr.sizeof_float)
+		self.connect(self.left, self.null0)
+		self.connect(self.right, self.null1)
 
 		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass(

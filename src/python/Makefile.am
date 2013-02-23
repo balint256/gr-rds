@@ -23,10 +23,11 @@ include $(top_srcdir)/Makefile.common
 
 EXTRA_DIST = run_tests.in
 
-
-TESTS = 				\
+TESTS = \
 	run_tests
 
+modpython_PYTHON = \
+	rdspanel.py
 
 noinst_PYTHON = 
-		
+

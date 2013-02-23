@@ -22,7 +22,8 @@ dnl
 AC_INIT
 AC_PREREQ(2.57)
 AC_CONFIG_SRCDIR([src/lib/rds.i])
-AM_CONFIG_HEADER(config.h)
+dnl Commented out - taken care of by 'GR_STANDALONE' below
+dnl AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_TARGET([])
 AM_INIT_AUTOMAKE(gr-rds,3.0svn)
 
@@ -46,6 +47,9 @@ AC_PROG_LIBTOOL
 dnl Locate python, SWIG, etc
 GR_NO_UNDEFINED
 GR_SCRIPTING
+
+m4_include([config/gr_standalone.m4])
+GR_STANDALONE
 
 dnl Checks for libraries.
 
@@ -95,6 +99,7 @@ AC_CONFIG_FILES([\
 	  config/Makefile \
 	  src/Makefile \
 	  src/lib/Makefile \
+	  src/grc/Makefile \
 	  src/python/Makefile \
 	  src/python/run_tests \
 	])
@@ -103,3 +108,4 @@ dnl run_tests is created from run_tests.in.  Make it executable.
 AC_CONFIG_COMMANDS([run_tests], [chmod +x src/python/run_tests])
 
 AC_OUTPUT
+

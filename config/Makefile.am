@@ -37,12 +37,14 @@ m4macros = 			\
 	gr_doxygen.m4		\
 	gr_gprof.m4		\
 	gr_libgnuradio_core_extra_ldflags.m4 \
+	gr_lib64.m4 \
 	gr_no_undefined.m4	\
 	gr_pwin32.m4		\
 	gr_python.m4		\
 	gr_require_mc4020.m4	\
 	gr_scripting.m4		\
 	gr_set_md_cpu.m4	\
+	gr_standalone.m4 \
 	gr_swig.m4		\
 	gr_sysv_shm.m4		\
 	gr_x86_64.m4		\

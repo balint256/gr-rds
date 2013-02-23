@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-from gnuradio import gr, usrp, rds, audio
+from gnuradio import gr, usrp, rds, audio, blks2
 from gnuradio.eng_option import eng_option
 from gnuradio.wxgui import slider, form, stdgui2, fftsink2, scopesink2, constsink_gl
 from optparse import OptionParser
 from rdspanel import rdsPanel
-from usrpm import usrp_dbid
+#from usrpm import usrp_dbid
 import sys, math, wx, time
 
-dblist = (usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2,
-		usrp_dbid.TV_RX_REV_3, usrp_dbid.BASIC_RX)
+#dblist = (usrp_dbid.TV_RX, usrp_dbid.TV_RX_REV_2,
+#		usrp_dbid.TV_RX_REV_3, usrp_dbid.BASIC_RX)
 
 class rds_rx_graph (stdgui2.std_top_block):
 	def __init__(self,frame,panel,vbox,argv):
@@ -39,12 +39,14 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# connect to USRP
 		usrp_decim = 250
 		self.u = usrp.source_c(0, usrp_decim)
-		print "USRP Serial: ", self.u.serial_number()
+		print "USRP Serial:", self.u.serial_number()
 		usrp_rate = self.u.adc_rate() / usrp_decim		# 256 kS/s
+		print "usrp_rate =", usrp_rate
 		audio_decim = 8
 		audio_rate = usrp_rate / audio_decim			# 32 kS/s
-		if options.rx_subdev_spec is None:
-			options.rx_subdev_spec = usrp.pick_subdev(self.u, dblist)
+		print "audio_rate =", audio_rate
+		#if options.rx_subdev_spec is None:
+		#	options.rx_subdev_spec = usrp.pick_subdev(self.u, dblist)
 
 		self.u.set_mux(usrp.determine_rx_mux_value(self.u, options.rx_subdev_spec))
 		self.subdev = usrp.selected_subdev(self.u, options.rx_subdev_spec)
@@ -53,7 +55,8 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# gain, volume, frequency
 		self.gain = options.gain
 		if options.gain is None:
-			self.gain = self.subdev.gain_range()[1]
+			g = self.subdev.gain_range()
+			self.gain = float(g[0]+g[1])/2
 		self.vol = options.volume
 		if self.vol is None:
 			g = self.volume_range()
@@ -76,10 +79,13 @@ class rds_rx_graph (stdgui2.std_top_block):
 		fm_beta = fm_alpha * fm_alpha / 4.0					# 0.147
 		fm_max_freq = 2.0 * math.pi * 90e3 / usrp_rate		# 2.209
 		self.fm_demod = gr.pll_freqdet_cf(
-			fm_alpha,			# phase gain
-			fm_beta,			# freq gain
+			#fm_alpha,			# phase gain
+			#fm_beta,			# freq gain
+			1.0,				# Loop BW
 			fm_max_freq,		# in radians/sample
 			-fm_max_freq)
+		self.fm_demod.set_alpha(fm_alpha)
+		self.fm_demod.set_beta(fm_beta)
 		self.connect(self.u, self.chan_filter, self.fm_demod)
 
 		# L+R, pilot, L-R, RDS filters
@@ -155,10 +161,15 @@ class rds_rx_graph (stdgui2.std_top_block):
 		# volume control, complex2flot, audio sink
 		self.volume_control_l = gr.multiply_const_ff(self.vol)
 		self.volume_control_r = gr.multiply_const_ff(self.vol)
-		self.audio_sink = audio.sink(int(audio_rate),
+		output_audio_rate = 48000
+		self.audio_sink = audio.sink(int(output_audio_rate),
 							options.audio_output, False)
-		self.connect(self.left, self.volume_control_l, (self.audio_sink, 0))
-		self.connect(self.right, self.volume_control_r, (self.audio_sink, 1))
+		#self.connect(self.left, self.volume_control_l, (self.audio_sink, 0))
+		#self.connect(self.right, self.volume_control_r, (self.audio_sink, 1))
+		self.resamp_L = blks2.rational_resampler_fff(interpolation=output_audio_rate,decimation=audio_rate,taps=None,fractional_bw=None,)
+		self.resamp_R = blks2.rational_resampler_fff(interpolation=output_audio_rate,decimation=audio_rate,taps=None,fractional_bw=None,)
+		self.connect(self.left,  self.volume_control_l, self.resamp_L, (self.audio_sink, 0))
+		self.connect(self.right, self.volume_control_r, self.resamp_R, (self.audio_sink, 1))
 
 		# low-pass the baseband RDS signal at 1.5kHz
 		rds_bb_filter_coeffs = gr.firdes.low_pass(

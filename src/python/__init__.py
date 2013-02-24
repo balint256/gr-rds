@@ -29,4 +29,4 @@ from rds import *
 
 # import any pure python here
 #
-import rdspanel
+from rdspanel import *

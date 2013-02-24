@@ -9,9 +9,8 @@
 	<key>gr_rds_panel</key>
 	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
-	<import>import rdspanel</import><!-- FIXME -->
 	<make>#set $parent = $notebook() and 'self.%s.GetPage(%s)'%$notebook() or 'self'
-rdspanel.rdsPanel($(id)_msgq_in, $(parent).GetWin())
+rds.rdsPanel($(id)_msgq_in, $(parent).GetWin())
 #if not $grid_pos()
 $(parent).Add(self.$(id))
 #else

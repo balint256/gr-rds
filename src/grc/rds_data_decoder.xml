@@ -10,13 +10,20 @@
 	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
 	<make>rds.data_decoder($(id)_msgq_out)</make>
-	<callback></callback>
+	<callback>reset();$reset;</callback>
 	<!--<param>
 		<name>Message Queue</name>
 		<key>msgq</key>
 		<value>gr.msg_queue()</value>
 		<type>raw</type>
 	</param>-->
+	<param>
+		<name>Reset</name>
+		<key>reset</key>
+		<value>0</value>
+		<type>raw</type>
+		<hide>part</hide>
+	</param>
 	<sink>
 		<name>in</name>
 		<type>byte</type>

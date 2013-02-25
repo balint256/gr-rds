@@ -159,6 +159,6 @@ add_subdirectory(src)
 #add_subdirectory(swig)
 #add_subdirectory(python)
 #add_subdirectory(grc)
-#add_subdirectory(apps)
+add_subdirectory(apps)
 #add_subdirectory(docs)
 

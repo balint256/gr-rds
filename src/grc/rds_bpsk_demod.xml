@@ -10,12 +10,19 @@
 	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
 	<make>rds.bpsk_demod($sampling_rate)</make>
-	<callback></callback>
+	<callback>reset();$reset;</callback>
 	<param>
 		<name>Sampling Rate</name>
 		<key>sampling_rate</key>
 		<value>256000</value>
 		<type>real</type>
+	</param>
+	<param>
+		<name>Reset</name>
+		<key>reset</key>
+		<value>0</value>
+		<type>raw</type>
+		<hide>part</hide>
 	</param>
 	<check>$sampling_rate &gt; 0</check>
 	<sink>

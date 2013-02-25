@@ -16,7 +16,15 @@ $(parent).Add(self.$(id))
 #else
 $(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
 #end if</make>
-	<callback></callback>
+	<callback>clear_data();$reset;</callback>
+	
+	<param>
+		<name>Reset</name>
+		<key>reset</key>
+		<value>0</value>
+		<type>raw</type>
+		<hide>part</hide>
+	</param>
 	
 	<!--<param>
 		<name>Window Size</name>

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 ##################################################
 # Gnuradio Python Flow Graph
-# Title: Rds Rx
-# Generated: Sun Feb 24 16:53:16 2013
+# Title: Stereo FM receiver and RDS Decoder
+# Generated: Sun Feb 24 18:16:38 2013
 ##################################################
 
 from gnuradio import audio
@@ -29,7 +29,7 @@ import wx
 class rds_rx(grc_wxgui.top_block_gui):
 
 	def __init__(self):
-		grc_wxgui.top_block_gui.__init__(self, title="Rds Rx")
+		grc_wxgui.top_block_gui.__init__(self, title="Stereo FM receiver and RDS Decoder")
 
 		##################################################
 		# Variables
@@ -41,7 +41,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.baseband_rate = baseband_rate = samp_rate/xlate_decim
 		self.audio_decim = audio_decim = 4
 		self.xlate_bandwidth = xlate_bandwidth = 250e3
-		self.volume = volume = -10
+		self.volume = volume = -5
 		self.gain = gain = 10
 		self.freq_tune = freq_tune = freq - freq_offset
 		self.audio_rate = audio_rate = 48000
@@ -244,7 +244,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			baseband_freq=0,
 			y_per_div=10,
 			y_divs=10,
-			ref_level=0,
+			ref_level=-30,
 			ref_scale=2.0,
 			sample_rate=baseband_rate,
 			fft_size=1024,

@@ -21,7 +21,7 @@ include(GrPython)
 
 GR_PYTHON_INSTALL(
     PROGRAMS
-    rds_rx
+    rds_rx.py
     DESTINATION bin
 )
 

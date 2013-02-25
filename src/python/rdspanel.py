@@ -38,7 +38,7 @@ class queue_watcher_thread(_threading.Thread):
 			del de
 
 class rdsPanel(wx.Panel):
-	def __init__(self, msgq, *args, **kwds):
+	def __init__(self, msgq, freq=None, *args, **kwds):
 		kwds["style"] = wx.TAB_TRAVERSAL
 		wx.Panel.__init__(self, *args, **kwds)
 		self.label_1 = wx.StaticText(self, -1, "Frequency")
@@ -65,6 +65,8 @@ class rdsPanel(wx.Panel):
 
 		self.__set_properties()
 		self.__do_layout()
+		if freq is not None:
+			self.set_frequency(freq)
 		EVT_DATA_EVENT (self, self.display_data)
 		watcher=queue_watcher_thread(msgq,self)
 
@@ -191,4 +193,12 @@ class rdsPanel(wx.Panel):
 		self.radiotext.SetLabel("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 		self.clocktime.SetLabel("xxxxxxxxxxxx")
 		self.alt_freq.SetLabel("xxxxxxxxxxxxxxxxx")
-# end of class rdsPanel
+	
+	def set_frequency(self, freq=None):
+		freq_str = "xxx.xx"
+		if freq is not None:
+			if isinstance(freq, float) or isinstance(freq, int):
+				freq_str = "%.2f" % (float(freq) / 1e6)
+			else:
+				freq_str = str(freq)
+		self.frequency.SetLabel(freq_str)

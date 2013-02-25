@@ -10,13 +10,22 @@
 	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
 	<make>#set $parent = $notebook() and 'self.%s.GetPage(%s)'%$notebook() or 'self'
-rds.rdsPanel($(id)_msgq_in, $(parent).GetWin())
+rds.rdsPanel($(id)_msgq_in, $freq, $(parent).GetWin())
 #if not $grid_pos()
 $(parent).Add(self.$(id))
 #else
 $(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
 #end if</make>
 	<callback>clear_data();$reset;</callback>
+	<callback>set_frequency($freq);</callback>
+	
+	<param>
+		<name>Frequency</name>
+		<key>freq</key>
+		<value>0</value>
+		<type>real</type>
+		<hide>part</hide>
+	</param>
 	
 	<param>
 		<name>Reset</name>
@@ -54,5 +63,6 @@ $(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
 		<name>in</name>
 		<type>msg</type>
 	</sink>
-	<doc></doc>
+	<doc>Any change in Reset parameter will trigger clearing of panel data.
+Frequency will manually set corresponding text on panel.</doc>
 </block>

@@ -2,7 +2,7 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Stereo FM receiver and RDS Decoder
-# Generated: Mon Feb 25 12:23:03 2013
+# Generated: Wed Apr 24 12:46:07 2013
 ##################################################
 
 from gnuradio import audio
@@ -41,7 +41,8 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.baseband_rate = baseband_rate = samp_rate/xlate_decim
 		self.audio_decim = audio_decim = 4
 		self.xlate_bandwidth = xlate_bandwidth = 250e3
-		self.volume = volume = -5
+		self.volume = volume = 0
+		self.loop_bw = loop_bw = 16e3*0 + 18e3*1
 		self.gain = gain = 10
 		self.freq_tune = freq_tune = freq - freq_offset
 		self.audio_rate = audio_rate = 48000
@@ -72,8 +73,8 @@ class rds_rx(grc_wxgui.top_block_gui):
 			value=self.volume,
 			callback=self.set_volume,
 			minimum=-20,
-			maximum=0,
-			num_steps=200,
+			maximum=10,
+			num_steps=300,
 			style=wx.SL_HORIZONTAL,
 			cast=float,
 			proportion=1,
@@ -89,6 +90,29 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.nb.AddPage(grc_wxgui.Panel(self.nb), "L-R")
 		self.nb.AddPage(grc_wxgui.Panel(self.nb), "RDS")
 		self.Add(self.nb)
+		_loop_bw_sizer = wx.BoxSizer(wx.VERTICAL)
+		self._loop_bw_text_box = forms.text_box(
+			parent=self.GetWin(),
+			sizer=_loop_bw_sizer,
+			value=self.loop_bw,
+			callback=self.set_loop_bw,
+			label="Loop BW",
+			converter=forms.float_converter(),
+			proportion=0,
+		)
+		self._loop_bw_slider = forms.slider(
+			parent=self.GetWin(),
+			sizer=_loop_bw_sizer,
+			value=self.loop_bw,
+			callback=self.set_loop_bw,
+			minimum=0,
+			maximum=baseband_rate,
+			num_steps=1000,
+			style=wx.SL_HORIZONTAL,
+			cast=float,
+			proportion=1,
+		)
+		self.Add(_loop_bw_sizer)
 		_gain_sizer = wx.BoxSizer(wx.VERTICAL)
 		self._gain_text_box = forms.text_box(
 			parent=self.GetWin(),
@@ -179,8 +203,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			average=False,
 			avg_alpha=None,
 			title="RDS",
-			peak_hold=False,
-		)
+			peak_hold=False,)
 		self.nb.GetPage(7).Add(self.wxgui_fftsink2_0_0_0_1_0_1.win)
 		self.wxgui_fftsink2_0_0_0_1_0_0 = fftsink2.fft_sink_f(
 			self.nb.GetPage(6).GetWin(),
@@ -195,8 +218,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			average=False,
 			avg_alpha=None,
 			title="L-R",
-			peak_hold=False,
-		)
+			peak_hold=False,)
 		self.nb.GetPage(6).Add(self.wxgui_fftsink2_0_0_0_1_0_0.win)
 		self.wxgui_fftsink2_0_0_0_1_0 = fftsink2.fft_sink_f(
 			self.nb.GetPage(5).GetWin(),
@@ -211,8 +233,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			average=False,
 			avg_alpha=None,
 			title="RDS",
-			peak_hold=False,
-		)
+			peak_hold=False,)
 		self.nb.GetPage(5).Add(self.wxgui_fftsink2_0_0_0_1_0.win)
 		self.wxgui_fftsink2_0_0_0_1 = fftsink2.fft_sink_f(
 			self.nb.GetPage(4).GetWin(),
@@ -226,9 +247,8 @@ class rds_rx(grc_wxgui.top_block_gui):
 			fft_rate=15,
 			average=False,
 			avg_alpha=None,
-			title="DSBSC",
-			peak_hold=False,
-		)
+			title="DSBSC Sub-carrier",
+			peak_hold=False,)
 		self.nb.GetPage(4).Add(self.wxgui_fftsink2_0_0_0_1.win)
 		self.wxgui_fftsink2_0_0_0 = fftsink2.fft_sink_f(
 			self.nb.GetPage(2).GetWin(),
@@ -243,8 +263,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			average=False,
 			avg_alpha=None,
 			title="L+R",
-			peak_hold=False,
-		)
+			peak_hold=False,)
 		self.nb.GetPage(2).Add(self.wxgui_fftsink2_0_0_0.win)
 		self.wxgui_fftsink2_0_0 = fftsink2.fft_sink_f(
 			self.nb.GetPage(1).GetWin(),
@@ -259,8 +278,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			average=True,
 			avg_alpha=0.8,
 			title="FM Demod",
-			peak_hold=False,
-		)
+			peak_hold=False,)
 		self.nb.GetPage(1).Add(self.wxgui_fftsink2_0_0.win)
 		self.wxgui_fftsink2_0 = fftsink2.fft_sink_c(
 			self.nb.GetPage(0).GetWin(),
@@ -275,8 +293,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 			average=True,
 			avg_alpha=0.8,
 			title="Baseband",
-			peak_hold=False,
-		)
+			peak_hold=False,)
 		self.nb.GetPage(0).Add(self.wxgui_fftsink2_0.win)
 		self.uhd_usrp_source_0 = uhd.usrp_source(
 			device_addr="",
@@ -294,11 +311,9 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.gr_rds_freq_divider_0 = rds.freq_divider(16)
 		self.gr_rds_data_decoder_0 = rds.data_decoder(gr_rds_data_decoder_0_msgq_out)
 		self.gr_rds_bpsk_demod_0 = rds.bpsk_demod(audio_decim_rate)
-		self.gr_pll_freqdet_cf_0 = gr.pll_freqdet_cf(1.0, 2.0 * math.pi * 90e3 / baseband_rate, -2.0 * math.pi * 90e3 / baseband_rate)
-		self.gr_pll_freqdet_cf_0.set_alpha(0.785398163397)
-		self.gr_pll_freqdet_cf_0.set_beta(0.154212568767)
-		self.gr_multiply_const_vxx_0_0 = gr.multiply_const_vff((10**(volume/10), ))
-		self.gr_multiply_const_vxx_0 = gr.multiply_const_vff((10**(volume/10), ))
+		self.gr_pll_freqdet_cf_0 = gr.pll_freqdet_cf(1.0*0 + (loop_bw*2*math.pi/baseband_rate), +(2.0 * math.pi * 90e3 / baseband_rate), -(2.0 * math.pi * 90e3 / baseband_rate))
+		self.gr_multiply_const_vxx_0_0 = gr.multiply_const_vff((10**(1.*volume/10), ))
+		self.gr_multiply_const_vxx_0 = gr.multiply_const_vff((10**(1.*volume/10), ))
 		self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(xlate_decim, (firdes.low_pass(1, samp_rate, xlate_bandwidth/2, 1000)), freq_offset, samp_rate)
 		self.fir_filter_xxx_7 = filter.fir_filter_fff(audio_decim, (firdes.low_pass(1,baseband_rate,1.2e3,1.5e3,firdes.WIN_HAMMING)))
 		self.fir_filter_xxx_6 = filter.fir_filter_fff(audio_decim, (firdes.low_pass(1,baseband_rate,1.5e3,2e3,firdes.WIN_HAMMING)))
@@ -325,6 +340,8 @@ class rds_rx(grc_wxgui.top_block_gui):
 			taps=None,
 			fractional_bw=None,
 		)
+		self.blks2_fm_deemph_0_0_0 = blks2.fm_deemph(fs=baseband_rate, tau=75e-6)
+		self.blks2_fm_deemph_0_0 = blks2.fm_deemph(fs=baseband_rate, tau=75e-6)
 		self.audio_sink_0 = audio.sink(audio_rate, "", True)
 
 		##################################################
@@ -343,15 +360,12 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.connect((self.fir_filter_xxx_3, 0), (self.blocks_multiply_xx_0, 2))
 		self.connect((self.fir_filter_xxx_4, 0), (self.blocks_multiply_xx_0_0, 3))
 		self.connect((self.fir_filter_xxx_2, 0), (self.blocks_multiply_xx_0_0, 2))
-		self.connect((self.gr_pll_freqdet_cf_0, 0), (self.wxgui_fftsink2_0_0, 0))
 		self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.wxgui_fftsink2_0, 0))
 		self.connect((self.fir_filter_xxx_1, 0), (self.blocks_sub_xx_0, 0))
 		self.connect((self.fir_filter_xxx_2, 0), (self.gr_rds_freq_divider_0, 0))
 		self.connect((self.fir_filter_xxx_1, 0), (self.blocks_add_xx_0, 0))
 		self.connect((self.blocks_multiply_xx_0, 0), (self.fir_filter_xxx_5, 0))
 		self.connect((self.gr_pll_freqdet_cf_0, 0), (self.fir_filter_xxx_3, 0))
-		self.connect((self.blocks_sub_xx_0, 0), (self.gr_multiply_const_vxx_0_0, 0))
-		self.connect((self.blocks_add_xx_0, 0), (self.gr_multiply_const_vxx_0, 0))
 		self.connect((self.gr_multiply_const_vxx_0, 0), (self.blks2_rational_resampler_xxx_0, 0))
 		self.connect((self.blks2_rational_resampler_xxx_0, 0), (self.audio_sink_0, 0))
 		self.connect((self.blks2_rational_resampler_xxx_0_0, 0), (self.audio_sink_0, 1))
@@ -365,11 +379,17 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.connect((self.fir_filter_xxx_1, 0), (self.wxgui_fftsink2_0_0_0, 0))
 		self.connect((self.fir_filter_xxx_3, 0), (self.wxgui_fftsink2_0_0_0_1, 0))
 		self.connect((self.fir_filter_xxx_4, 0), (self.wxgui_fftsink2_0_0_0_1_0, 0))
-		self.connect((self.blocks_multiply_xx_0_0, 0), (self.wxgui_fftsink2_0_0_0_1_0_1, 0))
 		self.connect((self.blocks_multiply_xx_0_0, 0), (self.fir_filter_xxx_6, 0))
 		self.connect((self.blocks_multiply_xx_0, 0), (self.wxgui_fftsink2_0_0_0_1_0_0, 0))
 		self.connect((self.fir_filter_xxx_5, 0), (self.blocks_add_xx_0, 1))
 		self.connect((self.fir_filter_xxx_5, 0), (self.blocks_sub_xx_0, 1))
+		self.connect((self.blocks_multiply_xx_0_0, 0), (self.wxgui_fftsink2_0_0_0_1_0_1, 0))
+		self.connect((self.blocks_sub_xx_0, 0), (self.blks2_fm_deemph_0_0, 0))
+		self.connect((self.blks2_fm_deemph_0_0, 0), (self.gr_multiply_const_vxx_0_0, 0))
+		self.connect((self.blocks_add_xx_0, 0), (self.blks2_fm_deemph_0_0_0, 0))
+		self.connect((self.blks2_fm_deemph_0_0_0, 0), (self.gr_multiply_const_vxx_0, 0))
+		self.connect((self.gr_pll_freqdet_cf_0, 0), (self.wxgui_fftsink2_0_0, 0))
+
 
 	def get_xlate_decim(self):
 		return self.xlate_decim
@@ -430,6 +450,7 @@ class rds_rx(grc_wxgui.top_block_gui):
 		self.wxgui_fftsink2_0_0_0_1_0_1.set_sample_rate(self.baseband_rate)
 		self.wxgui_fftsink2_0_0_0_1_0_0.set_sample_rate(self.baseband_rate)
 		self.wxgui_fftsink2_0_0_0_1.set_sample_rate(self.baseband_rate)
+		self.gr_pll_freqdet_cf_0.set_loop_bandwidth(1.0*0 + (self.loop_bw*2*math.pi/self.baseband_rate))
 
 	def get_audio_decim(self):
 		return self.audio_decim
@@ -450,10 +471,19 @@ class rds_rx(grc_wxgui.top_block_gui):
 
 	def set_volume(self, volume):
 		self.volume = volume
+		self.gr_multiply_const_vxx_0_0.set_k((10**(1.*self.volume/10), ))
+		self.gr_multiply_const_vxx_0.set_k((10**(1.*self.volume/10), ))
 		self._volume_slider.set_value(self.volume)
 		self._volume_text_box.set_value(self.volume)
-		self.gr_multiply_const_vxx_0_0.set_k((10**(self.volume/10), ))
-		self.gr_multiply_const_vxx_0.set_k((10**(self.volume/10), ))
+
+	def get_loop_bw(self):
+		return self.loop_bw
+
+	def set_loop_bw(self, loop_bw):
+		self.loop_bw = loop_bw
+		self.gr_pll_freqdet_cf_0.set_loop_bandwidth(1.0*0 + (self.loop_bw*2*math.pi/self.baseband_rate))
+		self._loop_bw_slider.set_value(self.loop_bw)
+		self._loop_bw_text_box.set_value(self.loop_bw)
 
 	def get_gain(self):
 		return self.gain

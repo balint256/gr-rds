@@ -30,25 +30,28 @@
 #include "config.h"
 #endif
 
-#include <gr_rds_freq_divider.h>
-#include <gr_io_signature.h>
+#include "freq_divider.h"
+#include <gnuradio/io_signature.h>
+
+using namespace gr::rds;
 
 /*
- * Create a new instance of gr_rds_freq_divider and return
+ * Create a new instance of freq_divider and return
  * a boost shared_ptr.  This is effectively the public constructor.
  */
-gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider)
+freq_divider::sptr
+freq_divider::make (int divider)
 {
-	return gr_rds_freq_divider_sptr (new gr_rds_freq_divider (divider));
+	return gnuradio::get_initial_sptr(new freq_divider(divider));
 }
 
 /*
  * The private constructor
  */
-gr_rds_freq_divider::gr_rds_freq_divider (int divider)
-	: gr_sync_block ("gr_rds_freq_divider",
-		gr_make_io_signature (1, 1, sizeof (float)),
-		gr_make_io_signature (1, 1, sizeof (float)))
+freq_divider::freq_divider (int divider)
+	: gr::sync_block ("gr_rds_freq_divider",
+		gr::io_signature::make(1, 1, sizeof (float)),
+		gr::io_signature::make(1, 1, sizeof (float)))
 {
 	d_divider = 0;
 	DIVIDER = divider;
@@ -59,11 +62,11 @@ gr_rds_freq_divider::gr_rds_freq_divider (int divider)
 /*
  * Our virtual destructor.
  */
-gr_rds_freq_divider::~gr_rds_freq_divider (){
+freq_divider::~freq_divider (){
 }
 
 int 
-gr_rds_freq_divider::work (int noutput_items,
+freq_divider::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {

@@ -31,32 +31,17 @@
 #ifndef INCLUDED_gr_rds_data_decoder_H
 #define INCLUDED_gr_rds_data_decoder_H
 
-#include <gr_sync_block.h>
-#include <gr_msg_queue.h>
+#include <gnuradio/sync_block.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
 #include <stdio.h>
 
+namespace gr {
+namespace rds {
 
-class gr_rds_data_decoder;
 
-/*
- * We use boost::shared_ptr's instead of raw pointers for all access
- * to gr_blocks (and many other data structures).  The shared_ptr gets
- * us transparent reference counting, which greatly simplifies storage
- * management issues.  This is especially helpful in our hybrid
- * 
- * * C++ / Python system.
- *
- * See http://www.boost.org/libs/smart_ptr/smart_ptr.htm
- *
- * As a convention, the _sptr suffix indicates a boost::shared_ptr
- */
-typedef boost::shared_ptr<gr_rds_data_decoder> gr_rds_data_decoder_sptr;
-gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);
-
-class gr_rds_data_decoder : public gr_sync_block
+class data_decoder : public gr::sync_block
 {
 private:
 	unsigned long bit_counter, lastseen_offset_counter, reg;
@@ -85,11 +70,9 @@ private:
 	unsigned char pi_area_coverage;
 	unsigned char pi_program_reference_number;
 	char program_service_name[9];
-	gr_msg_queue_sptr d_msgq;
 
 // Functions
-	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr);
-	gr_rds_data_decoder (gr_msg_queue_sptr);		// private constructor
+	data_decoder ();		// private constructor
 	void enter_no_sync();
 	void enter_sync(unsigned int);
 	void reset_rds_data();
@@ -110,11 +93,28 @@ private:
 
 
 public:
-	~gr_rds_data_decoder();		// public destructor
+	/*
+	 * We use boost::shared_ptr's instead of raw pointers for all access
+	 * to gr_blocks (and many other data structures).  The shared_ptr gets
+	 * us transparent reference counting, which greatly simplifies storage
+	 * management issues.  This is especially helpful in our hybrid
+	 * 
+	 * * C++ / Python system.
+	 *
+	 * See http://www.boost.org/libs/smart_ptr/smart_ptr.htm
+	 *
+	 * As a convention, the _sptr suffix indicates a boost::shared_ptr
+	 */
+	typedef boost::shared_ptr<data_decoder> sptr;
+	static sptr make();
+	~data_decoder();		// public destructor
 	void reset(void);
 	int work (int noutput_items,
 			gr_vector_const_void_star &input_items,
 			gr_vector_void_star &output_items);
 };
+
+}
+}
 
 #endif /* INCLUDED_gr_rds_data_decoder_H */

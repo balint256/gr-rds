@@ -33,48 +33,32 @@
 #ifndef INCLUDED_gr_rds_freq_divider_H
 #define INCLUDED_gr_rds_freq_divider_H
 
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 
-class gr_rds_freq_divider;
+namespace gr {
+namespace rds {
 
-/*
- * We use boost::shared_ptr's instead of raw pointers for all access
- * to gr_blocks (and many other data structures).  The shared_ptr gets
- * us transparent reference counting, which greatly simplifies storage
- * management issues.  This is especially helpful in our hybrid
- * 
- * * C++ / Python system.
- *
- * See http://www.boost.org/libs/smart_ptr/smart_ptr.htm
- *
- * As a convention, the _sptr suffix indicates a boost::shared_ptr
- */
-typedef boost::shared_ptr<gr_rds_freq_divider> gr_rds_freq_divider_sptr;
-
-/*!
- * \ingroup RDS
- */
-gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);
-
-class gr_rds_freq_divider : public gr_sync_block
+class freq_divider : public gr::sync_block
 {
 private:
-// The friend declaration allows gr_rds_make_freq_divider to
-// access the private constructor.
-	friend gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);
-
 	int d_divider;
 	int DIVIDER;
 	float d_out;
 	bool d_sign_current, d_sign_last;
 
-	gr_rds_freq_divider (int divider);  	// private constructor
+	freq_divider (int divider);  	// private constructor
 
 public:
-	~gr_rds_freq_divider ();	// public destructor
+	typedef boost::shared_ptr<freq_divider> sptr;
+	static sptr make(int divider);
+
+	~freq_divider ();	// public destructor
 	int work (int noutput_items,
 			gr_vector_const_void_star &input_items,
 			gr_vector_void_star &output_items);
 };
+
+}
+}
 
 #endif /* INCLUDED_gr_rds_freq_divider_H */

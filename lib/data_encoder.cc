@@ -47,21 +47,24 @@
 #define DBG(x)
 #endif
 
-#include "gr_rds_data_encoder.h"
-#include "gr_rds_constants.h"
-#include <gr_io_signature.h>
+#include "data_encoder.h"
+#include "constants.h"
+#include <gnuradio/io_signature.h>
 #include <math.h>
 #include <ctype.h>
 #include <time.h>
 
-gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
-	return gr_rds_data_encoder_sptr (new gr_rds_data_encoder (xmlfile));
+using namespace gr::rds;
+
+data_encoder::sptr
+data_encoder::make (const char *xmlfile) {
+	return gnuradio::get_initial_sptr(new data_encoder(xmlfile));
 }
 
-gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
-  : gr_sync_block ("gr_rds_data_encoder",
-			gr_make_io_signature (0, 0, 0),
-			gr_make_io_signature (1, 1, sizeof(unsigned char)))
+data_encoder::data_encoder (const char *xmlfile)
+  : gr::sync_block ("gr_rds_data_encoder",
+			gr::io_signature::make (0, 0, 0),
+			gr::io_signature::make (1, 1, sizeof(unsigned char)))
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
@@ -93,13 +96,13 @@ gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
 	
 }
 
-gr_rds_data_encoder::~gr_rds_data_encoder () {
+data_encoder::~data_encoder () {
 	xmlCleanupParser();		// Cleanup function for the XML library
 	xmlMemoryDump();		// this is to debug memory for regression tests
 	free(buffer);
 }
 
-void gr_rds_data_encoder::reset_rds_data(){
+void data_encoder::reset_rds_data(){
 	int i=0;
 	for(i=0; i<4; i++) {infoword[i]=0; checkword[i]=0;}
 	for(i=0; i<32; i++) groups[i]=0;
@@ -131,7 +134,7 @@ void gr_rds_data_encoder::reset_rds_data(){
 /* assinging the values from the xml file to our variables
  * i could do some more checking for invalid inputs,
  * but leaving as is for now */
-void gr_rds_data_encoder::assign_from_xml
+void data_encoder::assign_from_xml
 (const char *field, const char *value, const int length){
 	if(!strcmp(field, "PI")){
 		if(length!=4) printf("invalid PI string length: %i\n", length);
@@ -181,7 +184,7 @@ void gr_rds_data_encoder::assign_from_xml
 }
 
 /* recursively print the xml nodes */
-void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
+void data_encoder::print_element_names(xmlNode * a_node){
 	xmlNode *cur_node = NULL;
 	char *node_name='\0', *attribute='\0', *value='\0';
 	int length=0;
@@ -222,7 +225,7 @@ void gr_rds_data_encoder::print_element_names(xmlNode * a_node){
  * for now, this runs once at startup. in the future, i might want
  * to read periodically (say, each 5 sec?) so as to change values
  * in the xml file and see the results in the "air"... */
-int gr_rds_data_encoder::read_xml (const char *xmlfile){
+int data_encoder::read_xml (const char *xmlfile){
 	xmlDoc *doc;
 	xmlNode *root_element = NULL;
 
@@ -249,7 +252,7 @@ int gr_rds_data_encoder::read_xml (const char *xmlfile){
 //////////////////////  CREATE DATA GROUPS  ///////////////////////
 
 /* see Annex B, page 64 of the standard */
-unsigned int gr_rds_data_encoder::calc_syndrome(unsigned long message, 
+unsigned int data_encoder::calc_syndrome(unsigned long message, 
 			unsigned char mlen){
 	unsigned long reg=0;
 	unsigned int i;
@@ -269,7 +272,7 @@ unsigned int gr_rds_data_encoder::calc_syndrome(unsigned long message,
 
 /* see page 41 in the standard; this is an implementation of AF method A
  * FIXME need to add code that declares the number of AF to follow... */
-unsigned int gr_rds_data_encoder::encode_af(const double af){
+unsigned int data_encoder::encode_af(const double af){
 	unsigned int af_code=0;
 	if((af>=87.6)&&(af<=107.9))
 		af_code=nearbyint((af-87.5)*10);
@@ -283,7 +286,7 @@ unsigned int gr_rds_data_encoder::encode_af(const double af){
 }
 
 /* count and print present groups */
-void gr_rds_data_encoder::count_groups(void){
+void data_encoder::count_groups(void){
 	printf("groups present: ");
 	for(int i=0; i<32; i++){
 		if(groups[i]==1){
@@ -302,7 +305,7 @@ void gr_rds_data_encoder::count_groups(void){
 
 /* create the 4 infowords, according to group type.
  * then calculate checkwords and put everything in the groups */
-void gr_rds_data_encoder::create_group(const int group_type, const bool AB){
+void data_encoder::create_group(const int group_type, const bool AB){
 	int i=0;
 	
 	infoword[0]=PI;
@@ -330,7 +333,7 @@ void gr_rds_data_encoder::create_group(const int group_type, const bool AB){
 	d_current_buffer++;
 }
 
-void gr_rds_data_encoder::prepare_group0(const bool AB){
+void data_encoder::prepare_group0(const bool AB){
 	infoword[1]=infoword[1]|(TA<<4)|(MuSp<<3);
 	if(d_g0_counter==3)
 		infoword[1]=infoword[1]|0x5;	// d0=1 (stereo), d1-3=0
@@ -344,7 +347,7 @@ void gr_rds_data_encoder::prepare_group0(const bool AB){
 	if(d_g0_counter>3) d_g0_counter=0;
 }
 
-void gr_rds_data_encoder::prepare_group2(const bool AB){
+void data_encoder::prepare_group2(const bool AB){
 	infoword[1]=infoword[1]|((AB<<4)|(d_g2_counter&0xf));
 	if(!AB){
 		infoword[2]=(radiotext[d_g2_counter*4]<<8|radiotext[d_g2_counter*4+1]);
@@ -362,7 +365,7 @@ void gr_rds_data_encoder::prepare_group2(const bool AB){
 /* see page 28 and Annex G, page 81 in the standard */
 /* FIXME this is supposed to be transmitted only once per minute, when 
  * the minute changes */
-void gr_rds_data_encoder::prepare_group4a(void){
+void data_encoder::prepare_group4a(void){
 	time_t rightnow;
 	tm *utc;
 	
@@ -389,13 +392,13 @@ void gr_rds_data_encoder::prepare_group4a(void){
 }
 
 // for now single-group only
-void gr_rds_data_encoder::prepare_group8a(void){
+void data_encoder::prepare_group8a(void){
 	infoword[1]=infoword[1]|(1<<3)|(DP&0x7);
 	infoword[2]=(1<<15)|((extent&0x7)<<11)|(event&0x7ff);
 	infoword[3]=location;
 }
 
-void gr_rds_data_encoder::prepare_buffer(int which){
+void data_encoder::prepare_buffer(int which){
 	int q=0, i=0, j=0, a=0, b=0;
 	unsigned char temp[13];	// 13*8=104
 	for(i=0; i<13; i++) temp[i]=0;
@@ -412,7 +415,7 @@ void gr_rds_data_encoder::prepare_buffer(int which){
 }
 
 //////////////////////// WORK ////////////////////////////////////
-int gr_rds_data_encoder::work (int noutput_items,
+int data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {

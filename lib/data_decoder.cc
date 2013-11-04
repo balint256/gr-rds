@@ -35,42 +35,45 @@
 #define DBG(x)
 #endif
 
-#include "gr_rds_data_decoder.h"
-#include "gr_rds_constants.h"
-#include "gr_rds_tmc_events.h"
-//#include "gr_rds_tmc_locations_italy.h"
-#include <gr_io_signature.h>
+#include "data_decoder.h"
+#include "constants.h"
+#include "tmc_events.h"
+//#include "tmc_locations_italy.h"
+#include <gnuradio/io_signature.h>
 #include <math.h>
 
-gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq) {
-  return gr_rds_data_decoder_sptr (new gr_rds_data_decoder (msgq));
+using namespace gr::rds;
+
+data_decoder::sptr
+data_decoder::make() {
+  return gnuradio::get_initial_sptr(new data_decoder());
 }
 
-gr_rds_data_decoder::gr_rds_data_decoder (gr_msg_queue_sptr msgq)
-  : gr_sync_block ("gr_rds_data_decoder",
-			gr_make_io_signature (1, 1, sizeof (bool)),
-			gr_make_io_signature (0, 0, 0))
+data_decoder::data_decoder ()
+: gr::sync_block ("gr_rds_data_decoder",
+			gr::io_signature::make (1, 1, sizeof (bool)),
+			gr::io_signature::make (0, 0, 0))
 {
-	d_msgq=msgq;
 	set_output_multiple(104);	// 1 RDS datagroup contains 104 bits
 	reset();
+        message_port_register_out(pmt::mp("out"));
 }
 
-gr_rds_data_decoder::~gr_rds_data_decoder () {
+data_decoder::~data_decoder () {
 }
 
 
 
 ////////////////////////// HELPER FUNTIONS /////////////////////////
 
-void gr_rds_data_decoder::reset(){
+void data_decoder::reset(){
 	bit_counter=0;
 	reg=0;
 	reset_rds_data();
 	enter_no_sync();
 }
 
-void gr_rds_data_decoder::reset_rds_data(){
+void data_decoder::reset_rds_data(){
 	memset(radiotext,' ',sizeof(radiotext));
 	radiotext[64] = '\0';
 	radiotext_AB_flag=0;
@@ -89,12 +92,12 @@ void gr_rds_data_decoder::reset_rds_data(){
 	static_pty=false;
 }
 
-void gr_rds_data_decoder::enter_no_sync(){
+void data_decoder::enter_no_sync(){
 	presync=false;
 	d_state = ST_NO_SYNC;
 }
 
-void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number){
+void data_decoder::enter_sync(unsigned int sync_block_number){
 	wrong_blocks_counter=0;
 	blocks_counter=0;
 	block_bit_counter=0;
@@ -110,16 +113,14 @@ void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number){
  * type 4 = RadioText 
  * type 5 = ClockTime
  * type 6 = Alternative Frequencies */
-void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext){
-	if (!d_msgq->full_p()) {
-		gr_message_sptr msg = gr_make_message_from_string(msgtext,msgtype,0,0);
-		d_msgq->insert_tail(msg);
-		msg.reset();
-	}
+void data_decoder::send_message(long msgtype, std::string msgtext){
+	//pmt::pmt_t msg = pmt::mp(msgtext);// = gr_make_message_from_string(msgtext,msgtype,0,0);
+	//message_port_pub(pmt::mp("out"), msg);
+        std::cout << "RDS: " << msgtext << std::endl;
 }
 
 /* see Annex B, page 64 of the standard */
-unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message, 
+unsigned int data_decoder::calc_syndrome(unsigned long message, 
 			unsigned char mlen){
 	unsigned long reg=0;
 	unsigned int i;
@@ -142,7 +143,7 @@ unsigned int gr_rds_data_decoder::calc_syndrome(unsigned long message,
 
 
 /* BASIC TUNING: see page 21 of the standard */
-void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
+void data_decoder::decode_type0(unsigned int *group, bool version_code) {
 	unsigned int af_code_1=0, af_code_2=0, no_af=0;
 	double af_1=0, af_2=0;
 	char flagstring[8]="0000000";
@@ -216,7 +217,7 @@ void gr_rds_data_decoder::decode_type0(unsigned int *group, bool version_code) {
 
 /* see page 41 in the standard
  * this is an implementation of AF method A */
-double gr_rds_data_decoder::decode_af(unsigned int af_code) {
+double data_decoder::decode_af(unsigned int af_code) {
 	static unsigned int number_of_freqs;
 	double alt_frequency=0;				// in kHz
 	static bool vhf_or_lfmf=0;			// 0 = vhf, 1 = lf/mf
@@ -260,7 +261,7 @@ double gr_rds_data_decoder::decode_af(unsigned int af_code) {
  * for extended country codes see page 69, Annex D.2 in the standard
  * for language codes see page 84, Annex J in the standard
  * for emergency warning systems (EWS) see page 53 in the standard */
-void gr_rds_data_decoder::decode_type1(unsigned int *group, bool version_code){
+void data_decoder::decode_type1(unsigned int *group, bool version_code){
 	int ecc=0, paging=0;
 
 	char country_code=(group[0]>>12)&0x0f;
@@ -307,7 +308,7 @@ void gr_rds_data_decoder::decode_type1(unsigned int *group, bool version_code){
 }
 
 /* RADIOTEXT: page 25 in the standard */
-void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code){
+void data_decoder::decode_type2(unsigned int *group, bool version_code){
 	unsigned char text_segment_address_code=group[1]&0x0f;
 
 /* when the A/B flag is toggled, flush your current radiotext */
@@ -333,7 +334,7 @@ void gr_rds_data_decoder::decode_type2(unsigned int *group, bool version_code){
 }
 
 /* AID: page 27 in the standard */
-void gr_rds_data_decoder::decode_type3a(unsigned int *group){
+void data_decoder::decode_type3a(unsigned int *group){
 	int application_group=(group[1]>>1)&0xf;
 	int group_type=group[1]&0x1;
 	int message=group[2];
@@ -369,7 +370,7 @@ void gr_rds_data_decoder::decode_type3a(unsigned int *group){
 }
 
 /* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
-void gr_rds_data_decoder::decode_type4a(unsigned int *group){
+void data_decoder::decode_type4a(unsigned int *group){
 	unsigned int hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
 	unsigned int minutes=(group[3]>>6)&0x3f;
 	double local_time_offset=((double)(group[3]&0x1f))/2;
@@ -396,7 +397,7 @@ void gr_rds_data_decoder::decode_type4a(unsigned int *group){
 /* TMC: see page 32 of the standard
    initially defined in CEN standard ENV 12313-1
    superseded by ISO standard 14819:2003 */
-void gr_rds_data_decoder::decode_type8a(unsigned int *group){
+void data_decoder::decode_type8a(unsigned int *group){
 	bool T=(group[1]>>4)&0x1;		// 0 = user message, 1 = tuning info
 	bool F=(group[1]>>3)&0x1;		// 0 = multi-group, 1 = single-group
 	bool D=(group[2]>15)&0x1;		// 1 = diversion recommended
@@ -444,7 +445,7 @@ void gr_rds_data_decoder::decode_type8a(unsigned int *group){
 	}
 }
 
-void gr_rds_data_decoder::decode_optional_content(int no_groups, unsigned long int *free_format){
+void data_decoder::decode_optional_content(int no_groups, unsigned long int *free_format){
 	int label=0;
 	int content=0;
 	int content_length=0;
@@ -465,7 +466,7 @@ void gr_rds_data_decoder::decode_optional_content(int no_groups, unsigned long i
 }
 
 /* EON: see pages 38 and 46 in the standard */
-void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
+void data_decoder::decode_type14(unsigned int *group, bool version_code){
 	
 	bool tp_on=(group[1]>>4)&0x01;
 	char variant_code=group[1]&0x0f;
@@ -536,13 +537,13 @@ void gr_rds_data_decoder::decode_type14(unsigned int *group, bool version_code){
 }
 
 /* FAST BASIC TUNING: see page 39 in the standard */
-void gr_rds_data_decoder::decode_type15b(unsigned int *group){
+void data_decoder::decode_type15b(unsigned int *group){
 /* here we get twice the first two blocks... nothing to be done */
 	printf("\n");
 }
 
 /* See page 17 Table 3 in paragraph 3.1.3 of the standard. */
-void gr_rds_data_decoder::decode_group(unsigned int *group) {
+void data_decoder::decode_group(unsigned int *group) {
 	unsigned int group_type=(unsigned int)((group[1]>>12)&0xf);
 	bool version_code=(group[1]>>11)&0x1;
 	printf("%02i%c ", group_type, (version_code?'B':'A'));
@@ -615,7 +616,7 @@ void gr_rds_data_decoder::decode_group(unsigned int *group) {
 	}
 }
 
-int gr_rds_data_decoder::work (int noutput_items,
+int data_decoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {

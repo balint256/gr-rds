@@ -46,27 +46,30 @@
 #define DBG(x)
 #endif
 
-#include <gr_rds_rate_enforcer.h>
-#include <gr_io_signature.h>
+#include "rate_enforcer.h"
+#include <gnuradio/io_signature.h>
 #include <math.h>
 
-gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate) {
-	return gr_rds_rate_enforcer_sptr (new gr_rds_rate_enforcer (samp_rate));
+using namespace gr::rds;
+
+rate_enforcer::sptr 
+rate_enforcer::make (double samp_rate) {
+	return gnuradio::get_initial_sptr(new rate_enforcer(samp_rate));
 }
 
-gr_rds_rate_enforcer::gr_rds_rate_enforcer (double samp_rate)
-  : gr_block ("gr_rds_rate_enforcer",
-			gr_make_io_signature (2, 2, sizeof(float)),
-			gr_make_io_signature (1, 1, sizeof(float)))
+rate_enforcer::rate_enforcer (double samp_rate)
+  : gr::block ("gr_rds_rate_enforcer",
+			gr::io_signature::make(2, 2, sizeof(float)),
+			gr::io_signature::make(1, 1, sizeof(float)))
 {
 	set_relative_rate(samp_rate/1187.5);
 }
 
-gr_rds_rate_enforcer::~gr_rds_rate_enforcer () {
+rate_enforcer::~rate_enforcer () {
 
 }
 
-int gr_rds_rate_enforcer::general_work (int noutput_items,
+int rate_enforcer::general_work (int noutput_items,
 		gr_vector_int &ninput_items,
 		gr_vector_const_void_star &input_items,
 		gr_vector_void_star &output_items)

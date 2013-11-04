@@ -24,7 +24,7 @@
 #ifndef INCLUDED_gr_rds_data_encoder_H
 #define INCLUDED_gr_rds_data_encoder_H
 
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
@@ -33,27 +33,10 @@
 #include <libxml/tree.h>
 #include <libxml/xmlmemory.h>
 
-class gr_rds_data_encoder;
+namespace gr {
+namespace rds {
 
-/*
- * We use boost::shared_ptr's instead of raw pointers for all access
- * to gr_blocks (and many other data structures).  The shared_ptr gets
- * us transparent reference counting, which greatly simplifies storage
- * management issues.  This is especially helpful in our hybrid
- * 
- * * C++ / Python system.
- *
- * See http://www.boost.org/libs/smart_ptr/smart_ptr.htm
- *
- * As a convention, the _sptr suffix indicates a boost::shared_ptr
- */
-typedef boost::shared_ptr<gr_rds_data_encoder> gr_rds_data_encoder_sptr;
-/*!
- * \ingroup RDS
- */
-gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
-
-class gr_rds_data_encoder : public gr_sync_block
+class data_encoder : public gr::sync_block
 {
 private:
 	unsigned int infoword[4];
@@ -100,8 +83,7 @@ private:
 	int nbuffers;
 
 // Functions
-	friend gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char*);
-	gr_rds_data_encoder (const char*);	// private constructor
+	data_encoder (const char*);	// private constructor
 	int read_xml(const char*);
 	void print_element_names(xmlNode*);
 	void assign_from_xml(const char*, const char*, const int);
@@ -117,10 +99,15 @@ private:
 	unsigned int calc_syndrome(unsigned long, unsigned char);
 
 public:
-	~gr_rds_data_encoder();		// public destructor
+	typedef boost::shared_ptr<data_encoder> sptr;
+	static sptr make(const char*);
+	~data_encoder();		// public destructor
 	int work (int noutput_items,
 			gr_vector_const_void_star &input_items,
 			gr_vector_void_star &output_items);
 };
+
+}
+}
 
 #endif /* INCLUDED_gr_rds_data_encoder_H */

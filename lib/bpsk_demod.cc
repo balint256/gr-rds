@@ -35,27 +35,25 @@
 #define DBG(x)
 #endif
 
-#include <gr_rds_bpsk_demod.h>
-#include <gr_io_signature.h>
+#include "bpsk_demod.h"
+#include <gnuradio/io_signature.h>
 
 #include <fstream>
 
-/*
- * Create a new instance of gr_rds_bpsk_demod and return
- * a boost shared_ptr.  This is effectively the public constructor.
- */
-gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double sampling_rate)
-{
-	return gr_rds_bpsk_demod_sptr (new gr_rds_bpsk_demod (sampling_rate));
+using namespace gr::rds;
+
+bpsk_demod::sptr
+bpsk_demod::make(double sampling_rate) {
+	return gnuradio::get_initial_sptr(new bpsk_demod(sampling_rate));
 }
 
 /*
  * The private constructor
  */
-gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
-	: gr_block("gr_rds_bpsk_demod",
-			gr_make_io_signature (2, 2, sizeof(float)),
-			gr_make_io_signature (1, 8, sizeof(bool)))
+bpsk_demod::bpsk_demod (double input_sampling_rate)
+	: gr::block("gr_rds_bpsk_demod",
+			gr::io_signature::make(2, 2, sizeof(float)),
+			gr::io_signature::make (1, 8, sizeof(bool)))
 {
 	SYMBOL_LENGTH = (int)(input_sampling_rate/1187.5);
 
@@ -68,10 +66,10 @@ gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
 /*
  * Our virtual destructor.
  */
-gr_rds_bpsk_demod::~gr_rds_bpsk_demod (){
+bpsk_demod::~bpsk_demod (){
 }
 
-void gr_rds_bpsk_demod::reset() {
+void bpsk_demod::reset() {
 	d_zc = 0;
 	d_last_zc=0;
 	d_sign_last = 0;
@@ -79,12 +77,12 @@ void gr_rds_bpsk_demod::reset() {
 	enter_looking();
 }
 
-void gr_rds_bpsk_demod::enter_looking () {
+void bpsk_demod::enter_looking () {
 	printf (">>> bpsk demodulator enter_looking\n");
 	d_state = ST_LOOKING;
 }
 
-void  gr_rds_bpsk_demod::enter_locked () {
+void  bpsk_demod::enter_locked () {
 	printf(">>> bpsk demodulator enter_locked\n");
 	d_state = ST_LOCKED;
 	d_symbol_integrator = 0;
@@ -93,7 +91,7 @@ void  gr_rds_bpsk_demod::enter_locked () {
 
 
 ////////////////////////////////////////////////////////////////
-int gr_rds_bpsk_demod::general_work (int noutput_items,
+int bpsk_demod::general_work (int noutput_items,
 					gr_vector_int &ninput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)

@@ -9,7 +9,7 @@
 	<key>gr_rds_data_decoder</key>
 	<category>RDS</category>
 	<import>from gnuradio import gr, rds</import>
-	<make>rds.data_decoder($(id)_msgq_out)</make>
+	<make>rds.data_decoder()</make>
 	<callback>reset();$reset;</callback>
 	<!--<param>
 		<name>Message Queue</name>
@@ -31,7 +31,8 @@
 	</sink>
 	<source>
 		<name>out</name>
-		<type>msg</type>
+		<type>message</type>
+		<optional>1</optional>
 	</source>
 	<doc>
 This block is the RDS data decoder.

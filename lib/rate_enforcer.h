@@ -24,43 +24,31 @@
 #ifndef INCLUDED_gr_rds_rate_enforcer_H
 #define INCLUDED_gr_rds_rate_enforcer_H
 
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 #include <vector>
 #include <iostream>
 
-class gr_rds_rate_enforcer;
+namespace gr {
+namespace rds {
 
-/*
- * We use boost::shared_ptr's instead of raw pointers for all access
- * to gr_blocks (and many other data structures).  The shared_ptr gets
- * us transparent reference counting, which greatly simplifies storage
- * management issues.  This is especially helpful in our hybrid
- * 
- * * C++ / Python system.
- *
- * See http://www.boost.org/libs/smart_ptr/smart_ptr.htm
- *
- * As a convention, the _sptr suffix indicates a boost::shared_ptr
- */
-typedef boost::shared_ptr<gr_rds_rate_enforcer> gr_rds_rate_enforcer_sptr;
-/*!
- * \ingroup RDS
- */
-gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate);
-
-class gr_rds_rate_enforcer : public gr_block
+class rate_enforcer : public gr::block
 {
 private:
 // Functions
-	friend gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate);
-	gr_rds_rate_enforcer (double samp_rate);	// private constructor
+	rate_enforcer (double samp_rate);	// private constructor
 
 public:
-	~gr_rds_rate_enforcer();		// public destructor
+        typedef boost::shared_ptr<rate_enforcer> sptr;
+        static sptr make(double samp_rate);
+
+	~rate_enforcer();		// public destructor
 	int general_work (int noutput_items,
 		gr_vector_int &ninput_items,
 		gr_vector_const_void_star &input_items,
 		gr_vector_void_star &output_items);
 };
+
+}
+}
 
 #endif /* INCLUDED_gr_rds_rate_enforcer_H */

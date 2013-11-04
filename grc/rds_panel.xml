@@ -61,7 +61,7 @@ $(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
 	
 	<sink>
 		<name>in</name>
-		<type>msg</type>
+		<type>message</type>
 	</sink>
 	<doc>Any change in Reset parameter will trigger clearing of panel data.
 Frequency will manually set corresponding text on panel.</doc>

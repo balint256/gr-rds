@@ -35,9 +35,9 @@
 #define DBG(x)
 #endif
 
-#include "data_decoder.h"
-#include "constants.h"
-#include "tmc_events.h"
+#include <rds/data_decoder.h>
+#include <rds/constants.h>
+#include <rds/tmc_events.h>
 //#include "tmc_locations_italy.h"
 #include <gnuradio/io_signature.h>
 #include <math.h>

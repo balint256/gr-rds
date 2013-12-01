@@ -35,7 +35,7 @@
 #define DBG(x)
 #endif
 
-#include "bpsk_demod.h"
+#include <rds/bpsk_demod.h>
 #include <gnuradio/io_signature.h>
 
 #include <fstream>

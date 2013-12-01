@@ -30,7 +30,7 @@ add_library(gnuradio-rds SHARED
 	freq_divider.cc
 )
 target_link_libraries(gnuradio-rds ${Boost_LIBRARIES}  ${GNURADIO_RUNTIME_LIBRARIES} ${LIBXML2_LIBRARIES})
-set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_rds_EXPORTS")
+set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_RDS_EXPORTS")
 
 ########################################################################
 # Install built library files
@@ -40,14 +40,3 @@ install(TARGETS gnuradio-rds
     ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
     RUNTIME DESTINATION bin              # .dll file
 )
-
-########################################################################
-# Build and register unit test
-########################################################################
-find_package(Boost COMPONENTS unit_test_framework)
-
-include(GrTest)
-set(GR_TEST_TARGET_DEPS gnuradio-rds)
-#turn each test cpp file into an executable with an int main() function
-#add_definitions(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
-

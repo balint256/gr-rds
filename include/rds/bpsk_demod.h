@@ -33,6 +33,7 @@
 #ifndef INCLUDED_gr_rds_bpsk_demod_H
 #define INCLUDED_gr_rds_bpsk_demod_H
 
+#include <rds/api.h>
 #include <gnuradio/block.h>
 #include <iostream>
 #include <fstream>
@@ -45,7 +46,7 @@ namespace rds {
  * \brief Decodes a biphase or manchester coded signal to 1, 0 as bool
  * \ingroup RDS
  */
-class bpsk_demod : public gr::block
+class RDS_API bpsk_demod : public gr::block
 {
 private:
 	enum state_t { ST_LOOKING, ST_LOCKED };

@@ -20,35 +20,46 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/*	HSR - MOBKOM LABOR
+ *	Semesterarbeit GnuRadio Contributions
+ *	U. Schaufelberger and R. Gaensli
+ *
+ * 	Written by : WRITTEN_BY
+ * 	Created: CREATED_DATE
+ * 
+ */
 
-#ifndef INCLUDED_gr_rds_rate_enforcer_H
-#define INCLUDED_gr_rds_rate_enforcer_H
 
+#ifndef INCLUDED_gr_rds_freq_divider_H
+#define INCLUDED_gr_rds_freq_divider_H
+
+#include <rds/api.h>
 #include <gnuradio/sync_block.h>
-#include <vector>
-#include <iostream>
 
 namespace gr {
 namespace rds {
 
-class rate_enforcer : public gr::block
+class RDS_API freq_divider : public gr::sync_block
 {
 private:
-// Functions
-	rate_enforcer (double samp_rate);	// private constructor
+	int d_divider;
+	int DIVIDER;
+	float d_out;
+	bool d_sign_current, d_sign_last;
+
+	freq_divider (int divider);  	// private constructor
 
 public:
-        typedef boost::shared_ptr<rate_enforcer> sptr;
-        static sptr make(double samp_rate);
+	typedef boost::shared_ptr<freq_divider> sptr;
+	static sptr make(int divider);
 
-	~rate_enforcer();		// public destructor
-	int general_work (int noutput_items,
-		gr_vector_int &ninput_items,
-		gr_vector_const_void_star &input_items,
-		gr_vector_void_star &output_items);
+	~freq_divider ();	// public destructor
+	int work (int noutput_items,
+			gr_vector_const_void_star &input_items,
+			gr_vector_void_star &output_items);
 };
 
 }
 }
 
-#endif /* INCLUDED_gr_rds_rate_enforcer_H */
+#endif /* INCLUDED_gr_rds_freq_divider_H */

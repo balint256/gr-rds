@@ -24,6 +24,7 @@
 #ifndef INCLUDED_gr_rds_data_encoder_H
 #define INCLUDED_gr_rds_data_encoder_H
 
+#include <rds/api.h>
 #include <gnuradio/sync_block.h>
 #include <string.h>
 #include <vector>
@@ -36,7 +37,7 @@
 namespace gr {
 namespace rds {
 
-class data_encoder : public gr::sync_block
+class RDS_API data_encoder : public gr::sync_block
 {
 private:
 	unsigned int infoword[4];

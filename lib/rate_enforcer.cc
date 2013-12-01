@@ -46,7 +46,7 @@
 #define DBG(x)
 #endif
 
-#include "rate_enforcer.h"
+#include <rds/rate_enforcer.h>
 #include <gnuradio/io_signature.h>
 #include <math.h>
 

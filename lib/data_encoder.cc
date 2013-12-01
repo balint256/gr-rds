@@ -47,8 +47,8 @@
 #define DBG(x)
 #endif
 
-#include "data_encoder.h"
-#include "constants.h"
+#include <rds/data_encoder.h>
+#include <rds/constants.h>
 #include <gnuradio/io_signature.h>
 #include <math.h>
 #include <ctype.h>

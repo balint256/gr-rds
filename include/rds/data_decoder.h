@@ -31,6 +31,7 @@
 #ifndef INCLUDED_gr_rds_data_decoder_H
 #define INCLUDED_gr_rds_data_decoder_H
 
+#include <rds/api.h>
 #include <gnuradio/sync_block.h>
 #include <string.h>
 #include <vector>
@@ -41,7 +42,7 @@ namespace gr {
 namespace rds {
 
 
-class data_decoder : public gr::sync_block
+class RDS_API data_decoder : public gr::sync_block
 {
 private:
 	unsigned long bit_counter, lastseen_offset_counter, reg;

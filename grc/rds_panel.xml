@@ -8,7 +8,7 @@
 	<name>RDS Panel</name>
 	<key>gr_rds_panel</key>
 	<category>RDS</category>
-	<import>from gnuradio import gr, rds</import>
+	<import>import rds</import>
 	<make>#set $parent = $notebook() and 'self.%s.GetPage(%s)'%$notebook() or 'self'
 rds.rdsPanel($(id)_msgq_in, $freq, $(parent).GetWin())
 #if not $grid_pos()

@@ -8,7 +8,7 @@
 	<name>RDS Frequency Divider</name>
 	<key>gr_rds_freq_divider</key>
 	<category>RDS</category>
-	<import>from gnuradio import gr, rds</import>
+	<import>import rds</import>
 	<make>rds.freq_divider($divider)</make>
 	<callback></callback>
 	<param>

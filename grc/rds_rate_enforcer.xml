@@ -8,7 +8,7 @@
 	<name>RDS Rate Enforcer</name>
 	<key>gr_rds_rate_enforcer</key>
 	<category>RDS</category>
-	<import>from gnuradio import gr, rds</import>
+	<import>import rds</import>
 	<make>rds.rate_enforcer($sampling_rate)</make>
 	<callback></callback>
 	<param>

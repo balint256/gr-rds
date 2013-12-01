@@ -31,8 +31,8 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-	rdspanel.py
-    DESTINATION ${GR_PYTHON_DIR}${RDS_PYTHON_SUBDIR}/rds
+    rdspanel.py
+    DESTINATION ${GR_PYTHON_DIR}/rds
 )
 
 ########################################################################

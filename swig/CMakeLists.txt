@@ -43,14 +43,14 @@ set(GR_SWIG_LIBRARIES gnuradio-rds)
 set(GR_SWIG_DOC_FILE ${CMAKE_CURRENT_BINARY_DIR}/rds_swig_doc.i)
 set(GR_SWIG_DOC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../lib)
 
-GR_SWIG_MAKE(rds rds.i)
+GR_SWIG_MAKE(rds_swig rds_swig.i)
 
 ########################################################################
 # Install the build swig module
 ########################################################################
 GR_SWIG_INSTALL(
-    TARGETS rds
-    DESTINATION ${GR_PYTHON_DIR}/gnuradio/rds
+    TARGETS rds_swig
+    DESTINATION ${GR_PYTHON_DIR}/rds
     COMPONENT "rds_python"
 )
 
@@ -58,7 +58,7 @@ GR_SWIG_INSTALL(
 # Install swig .i files for development
 ########################################################################
 list(APPEND swig_sources
-    rds.i
+    rds_swig.i
     ${CMAKE_CURRENT_BINARY_DIR}/rds_swig_doc.i
 )
 

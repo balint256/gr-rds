@@ -40,10 +40,16 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ########################################################################
 # Compiler specific setup
 ########################################################################
-if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32)
+if(NOT WIN32)
+    #http://gcc.gnu.org/wiki/Visibility
+    #    add_definitions(-fvisibility=hidden)
+    add_definitions(-std=c++0x)
+endif()
+
+#if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32)
     #http://gcc.gnu.org/wiki/Visibility
 #	add_definitions(-fvisibility=hidden)
-endif()
+#endif()
 
 ########################################################################
 # Find boost
@@ -60,7 +66,7 @@ set(Boost_ADDITIONAL_VERSIONS
     "1.60.0" "1.60" "1.61.0" "1.61" "1.62.0" "1.62" "1.63.0" "1.63" "1.64.0" "1.64"
     "1.65.0" "1.65" "1.66.0" "1.66" "1.67.0" "1.67" "1.68.0" "1.68" "1.69.0" "1.69"
 )
-find_package(Boost "1.35")
+find_package(Boost "1.35" COMPONENTS filesystem system)
 
 if(NOT Boost_FOUND)
     message(FATAL_ERROR "Boost required to compile gr-rds")
@@ -84,8 +90,6 @@ CHECK_LIBRARY_EXISTS(xml2 xmlParseFile "" HAVE_XML_PARSE_FILE)				# Requires nei
 if (NOT HAVE_XML_PARSE_FILE)
 	message(FATAL_ERROR "xmlParseFile function not found in libxml2")
 endif ()
-
-SET(RDS_PYTHON_SUBDIR "/gnuradio")
 
 ########################################################################
 # Install directories

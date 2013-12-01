@@ -8,7 +8,7 @@
 	<name>RDS Data Sink</name>
 	<key>gr_rds_data_decoder</key>
 	<category>RDS</category>
-	<import>from gnuradio import gr, rds</import>
+	<import>import rds</import>
 	<make>rds.data_decoder()</make>
 	<callback>reset();$reset;</callback>
 	<!--<param>

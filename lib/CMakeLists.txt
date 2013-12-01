@@ -49,13 +49,5 @@ find_package(Boost COMPONENTS unit_test_framework)
 include(GrTest)
 set(GR_TEST_TARGET_DEPS gnuradio-rds)
 #turn each test cpp file into an executable with an int main() function
-add_definitions(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
-
-#add_executable(qa_howto_square_ff qa_howto_square_ff.cc)
-#target_link_libraries(qa_howto_square_ff gnuradio-howto ${Boost_LIBRARIES})
-#GR_ADD_TEST(qa_howto_square_ff qa_howto_square_ff)
-
-#add_executable(qa_howto_square2_ff qa_howto_square2_ff.cc)
-#target_link_libraries(qa_howto_square2_ff gnuradio-howto ${Boost_LIBRARIES})
-#GR_ADD_TEST(qa_howto_square2_ff qa_howto_square2_ff)
+#add_definitions(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
 

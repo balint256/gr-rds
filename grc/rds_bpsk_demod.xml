@@ -8,7 +8,7 @@
 	<name>RDS BPSK Demodulator</name>
 	<key>gr_rds_bpsk_demod</key>
 	<category>RDS</category>
-	<import>from gnuradio import gr, rds</import>
+	<import>import rds</import>
 	<make>rds.bpsk_demod($sampling_rate)</make>
 	<callback>reset();$reset;</callback>
 	<param>

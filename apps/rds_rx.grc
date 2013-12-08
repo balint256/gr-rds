@@ -1991,7 +1991,7 @@
     </param>
     <param>
       <key>taps</key>
-      <value>firdes.low_pass(1, samp_rate, xlate_bandwidth, 2000)</value>
+      <value>firdes.low_pass(1, samp_rate, xlate_bandwidth, 50000)</value>
     </param>
     <param>
       <key>center_freq</key>

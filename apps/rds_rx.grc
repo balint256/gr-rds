@@ -1153,7 +1153,7 @@
     </param>
     <param>
       <key>const</key>
-      <value>10**(1.*volume/10)</value>
+      <value>10**(1.*(volume+15)/10)</value>
     </param>
     <param>
       <key>vlen</key>
@@ -1196,7 +1196,7 @@
     </param>
     <param>
       <key>const</key>
-      <value>10**(1.*volume/10)</value>
+      <value>10**(1.*(volume+15)/10)</value>
     </param>
     <param>
       <key>vlen</key>

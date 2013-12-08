@@ -834,7 +834,7 @@
     </param>
     <param>
       <key>samp_rate</key>
-      <value>baseband_rate</value>
+      <value>audio_decim_rate</value>
     </param>
     <param>
       <key>tau</key>
@@ -2281,7 +2281,7 @@
     </param>
     <param>
       <key>samp_rate</key>
-      <value>baseband_rate</value>
+      <value>audio_decim_rate</value>
     </param>
     <param>
       <key>tau</key>

@@ -2651,7 +2651,7 @@
     </param>
     <param>
       <key>taps</key>
-      <value>firdes.band_pass(1.0,baseband_rate,38e3-15e3/2,38e3+15e3/2,1e3,firdes.WIN_HAMMING)</value>
+      <value>firdes.band_pass(1.0,baseband_rate,38e3-15e3,38e3+15e3,1e3,firdes.WIN_HAMMING)</value>
     </param>
     <param>
       <key>samp_delay</key>

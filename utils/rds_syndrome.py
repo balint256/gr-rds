@@ -30,14 +30,3 @@ def rds_syndrome(message, mlen):
 			if(checkword==SYNDROME[i]):
 				print "checkword matches syndrome for offset", OFFSET_NAME[i]
 
-# reads an ascii string of a decimal, and outputs the equivalent binary
-# ascii string
-def dec2bin(dec_string):
-	bin_string=''
-	dec=int(dec_string)
-	if(dec<0): raise ValueError, "must be a positive integer"
-	if(dec==0): return '0'
-	while(dec):
-		bin_string = str(dec%2) + bin_string
-		dec = dec >> 1
-	return bin_string

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <flow_graph>
-  <timestamp>Sat Jan  4 23:49:47 2014</timestamp>
+  <timestamp>Sat Jan  4 23:56:31 2014</timestamp>
   <block>
     <key>options</key>
     <param>
@@ -64,7 +64,7 @@
     <key>variable</key>
     <param>
       <key>id</key>
-      <value>audio_decim</value>
+      <value>audio_rate</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -72,103 +72,11 @@
     </param>
     <param>
       <key>value</key>
-      <value>5</value>
+      <value>48000</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(7, 169)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>variable</key>
-    <param>
-      <key>id</key>
-      <value>samp_rate</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>1200000</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(13, 93)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>variable</key>
-    <param>
-      <key>id</key>
-      <value>audio_decim_rate</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>baseband_rate/audio_decim</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(113, 165)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>variable</key>
-    <param>
-      <key>id</key>
-      <value>bb_decim</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>5</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(250, 165)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
-    </param>
-  </block>
-  <block>
-    <key>variable</key>
-    <param>
-      <key>id</key>
-      <value>baseband_rate</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>value</key>
-      <value>samp_rate/bb_decim</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(116, 93)</value>
+      <value>(352, 14)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -202,7 +110,7 @@
     <key>variable</key>
     <param>
       <key>id</key>
-      <value>audio_rate</value>
+      <value>baseband_rate</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -210,11 +118,103 @@
     </param>
     <param>
       <key>value</key>
-      <value>48000</value>
+      <value>samp_rate/bb_decim</value>
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(352, 14)</value>
+      <value>(116, 93)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>variable</key>
+    <param>
+      <key>id</key>
+      <value>bb_decim</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>5</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(250, 165)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>variable</key>
+    <param>
+      <key>id</key>
+      <value>audio_decim_rate</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>baseband_rate/audio_decim</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(113, 165)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>variable</key>
+    <param>
+      <key>id</key>
+      <value>samp_rate</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>1200000</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(13, 93)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>variable</key>
+    <param>
+      <key>id</key>
+      <value>audio_decim</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>value</key>
+      <value>5</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(7, 169)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -534,41 +534,6 @@
     <param>
       <key>_rotation</key>
       <value>270</value>
-    </param>
-  </block>
-  <block>
-    <key>gr_rds_data_decoder</key>
-    <param>
-      <key>id</key>
-      <value>gr_rds_data_decoder_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>reset</key>
-      <value>freq</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(1452, 1550)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>0</value>
     </param>
   </block>
   <block>
@@ -2161,45 +2126,6 @@
     </param>
   </block>
   <block>
-    <key>gr_rds_bpsk_demod</key>
-    <param>
-      <key>id</key>
-      <value>gr_rds_bpsk_demod_0</value>
-    </param>
-    <param>
-      <key>_enabled</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>sampling_rate</key>
-      <value>audio_decim_rate</value>
-    </param>
-    <param>
-      <key>reset</key>
-      <value>freq</value>
-    </param>
-    <param>
-      <key>affinity</key>
-      <value></value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>_coordinate</key>
-      <value>(1096, 1377)</value>
-    </param>
-    <param>
-      <key>_rotation</key>
-      <value>270</value>
-    </param>
-  </block>
-  <block>
     <key>analog_pll_refout_cc</key>
     <param>
       <key>id</key>
@@ -2922,6 +2848,80 @@
     <param>
       <key>_rotation</key>
       <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_rds_data_decoder</key>
+    <param>
+      <key>id</key>
+      <value>gr_rds_data_decoder_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>reset</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(1452, 1550)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+  </block>
+  <block>
+    <key>gr_rds_bpsk_demod</key>
+    <param>
+      <key>id</key>
+      <value>gr_rds_bpsk_demod_0</value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>sampling_rate</key>
+      <value>audio_decim_rate</value>
+    </param>
+    <param>
+      <key>reset</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>minoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>maxoutbuf</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(1096, 1377)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>270</value>
     </param>
   </block>
   <connection>

@@ -121,7 +121,7 @@ class rdsWxPanel(wx.Panel):
 		sizer_2.Add(self.compressed_flag, 0, flag, 30)
 		sizer_2.Add(self.staticpty_flag, 0, flag, 30)
 		sizer_0.Add(sizer_2, 1, wx.ALIGN_CENTER)
-		
+
 		sizer_3.Add(self.label_6, 0, flag, 10)
 		sizer_3.Add(self.clocktime, 0, flag, 10)
 		sizer_3.Add(self.label_7, 0, flag, 10)
@@ -136,14 +136,14 @@ class rdsWxPanel(wx.Panel):
 
 	def display_data(self, event):
 		msg_type = event.data[0]
-		msg = event.data[1]
-		if (msg_type==0):		 #program information
+		msg = unicode(event.data[1], errors='replace')
+		if (msg_type==0):     #program information
 			self.program_information.SetLabel(msg)
-		elif (msg_type==1):	#station name
+		elif (msg_type==1):   #station name
 			self.station_name.SetLabel(msg)
-		elif (msg_type==2):	#program type
+		elif (msg_type==2):   #program type
 			self.program_type.SetLabel(msg)
-		elif (msg_type==3):	#flags
+		elif (msg_type==3):   #flags
 			flags=msg
 			if (flags[0]=='1'):
 				self.tp_flag.SetForegroundColour(wx.RED)

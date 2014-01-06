@@ -99,9 +99,9 @@ class rdsWxPanel(wx.Panel):
 		sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_4 = wx.BoxSizer(wx.HORIZONTAL)
-		
+
 		flag = wx.ALIGN_CENTER_VERTICAL|wx.LEFT
-		
+
 		# arguments: window, proportion, flag, border
 		sizer_1.Add(self.label_1, 0, flag)
 		sizer_1.Add(self.frequency, 0, flag, 20)
@@ -123,8 +123,10 @@ class rdsWxPanel(wx.Panel):
 		sizer_0.Add(sizer_2, 1, wx.ALIGN_CENTER)
 
 		sizer_3.Add(self.label_6, 0, flag, 10)
+		self.clocktime.SetSizeHints(250, -1)
 		sizer_3.Add(self.clocktime, 0, flag, 10)
 		sizer_3.Add(self.label_7, 0, flag, 10)
+		self.alt_freq.SetSizeHints(200, -1)
 		sizer_3.Add(self.alt_freq, 0, flag, 10)
 		sizer_0.Add(sizer_3, 0, wx.ALIGN_CENTER)
 
@@ -177,12 +179,14 @@ class rdsWxPanel(wx.Panel):
 				self.staticpty_flag.SetForegroundColour(wx.RED)
 			else:
 				self.staticpty_flag.SetForegroundColour(wx.LIGHT_GREY)
-		elif (msg_type==4):	#radiotext
+		elif (msg_type==4):   #radiotext
 			self.radiotext.SetLabel(msg)
-		elif (msg_type==5):	#clocktime
+		elif (msg_type==5):   #clocktime
 			self.clocktime.SetLabel(msg)
-		elif (msg_type==6):	#alternative frequencies
+		elif (msg_type==6):   #alternative frequencies
 			self.alt_freq.SetLabel(msg)
+
+		self.Layout()
 
 	def clear_data(self):
 		self.program_information.SetLabel("xxxx")

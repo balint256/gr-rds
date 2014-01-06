@@ -33,6 +33,7 @@
 
 #include <rds/api.h>
 #include <gnuradio/sync_block.h>
+#include <gnuradio/thread/thread.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
@@ -71,6 +72,7 @@ private:
 	unsigned char pi_area_coverage;
 	unsigned char pi_program_reference_number;
 	char program_service_name[9];
+	gr::thread::mutex d_mutex;
 
 // Functions
 	data_decoder ();		// private constructor

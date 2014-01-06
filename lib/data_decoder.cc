@@ -62,6 +62,7 @@ data_decoder::~data_decoder () {
 ////////////////////////// HELPER FUNTIONS /////////////////////////
 
 void data_decoder::reset(){
+	gr::thread::scoped_lock lock(d_mutex);
 	bit_counter=0;
 	reg=0;
 	reset_rds_data();
@@ -616,6 +617,7 @@ int data_decoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
+	gr::thread::scoped_lock lock(d_mutex);
 	const bool *in = (const bool *) input_items[0];
 
 	DBG(printf("RDS data decoder at work: input_items = %d, /104 = %d\n", 

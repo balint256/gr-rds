@@ -18,12 +18,10 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    rds_bpsk_demod.xml
-	rds_data_decoder.xml
-	rds_data_encoder.xml
-	rds_freq_divider.xml
-	rds_rate_enforcer.xml
-	rds_panel.xml
+    rds_data_decoder.xml
+    rds_data_encoder.xml
+    rds_rate_enforcer.xml
+    rds_panel.xml
     DESTINATION share/gnuradio/grc/blocks
 )
 

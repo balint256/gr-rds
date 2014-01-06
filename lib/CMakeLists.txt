@@ -23,11 +23,9 @@
 include(GrPlatform) #define LIB_SUFFIX
 
 add_library(gnuradio-rds SHARED
-	bpsk_demod.cc
-	data_decoder.cc
-	data_encoder.cc
-	rate_enforcer.cc
-	freq_divider.cc
+    data_decoder.cc
+    data_encoder.cc
+    rate_enforcer.cc
 )
 target_link_libraries(gnuradio-rds ${Boost_LIBRARIES}  ${GNURADIO_RUNTIME_LIBRARIES} ${LIBXML2_LIBRARIES})
 set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_RDS_EXPORTS")

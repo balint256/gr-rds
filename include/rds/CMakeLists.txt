@@ -22,11 +22,9 @@ include(GrPython)
 
 list(APPEND include_sources
     api.h
-    bpsk_demod.h
     constants.h
     data_decoder.h
     data_encoder.h
-    freq_divider.h
     rate_enforcer.h
     tmc_events.h
     tmc_locations_italy.h

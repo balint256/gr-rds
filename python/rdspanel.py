@@ -21,10 +21,10 @@ class DataEvent(wx.PyEvent):
 class rdsPanel(gr.sync_block):
 	def __init__(self, freq, *args, **kwds):
 		gr.sync_block.__init__(
-		    self,
-		    name = "rds_panel",
-		    in_sig = None,
-		    out_sig = None,
+			self,
+			name = "rds_panel",
+			in_sig = None,
+			out_sig = None,
 		)
 		self.message_port_register_in(pmt.intern('in'))
 		self.set_msg_handler(pmt.intern('in'), self.handle_msg)
@@ -40,7 +40,17 @@ class rdsPanel(gr.sync_block):
 			del de
 
 	def set_frequency(self, freq=None):
-		self.panel.set_frequency(freq)
+		freq_str = "xxx.xx"
+		if freq is not None:
+			if isinstance(freq, float) or isinstance(freq, int):
+				freq_str = "%.2f" % (float(freq) / 1e6)
+			else:
+				freq_str = str(freq)
+
+		de = DataEvent([7, freq_str])
+		wx.PostEvent(self.panel, de)
+		del de
+
 
 class rdsWxPanel(wx.Panel):
 	def __init__(self, freq, *args, **kwds):
@@ -70,14 +80,18 @@ class rdsWxPanel(wx.Panel):
 
 		self.__set_properties()
 		self.__do_layout()
-		self.set_frequency(freq)
+		if isinstance(freq, float) or isinstance(freq, int):
+			freq_str = "%.2f" % (float(freq) / 1e6)
+		else:
+			freq_str = str(freq)
+		self.frequency.SetLabel(freq_str)
 		EVT_DATA_EVENT (self, self.display_data)
 
 	def __set_properties(self):
 		font_bold = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, "")
 		font_normal = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, "")
 		font_small = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, "")
-		
+
 		self.frequency.SetFont(font_bold)
 		self.station_name.SetFont(font_bold)
 		self.program_type.SetFont(font_bold)
@@ -185,6 +199,9 @@ class rdsWxPanel(wx.Panel):
 			self.clocktime.SetLabel(msg)
 		elif (msg_type==6):   #alternative frequencies
 			self.alt_freq.SetLabel(msg)
+		elif (msg_type==7):   #update freq label
+			self.frequency.SetLabel(msg)
+			self.clear_data()
 
 		self.Layout()
 
@@ -205,12 +222,3 @@ class rdsWxPanel(wx.Panel):
 		self.clocktime.SetLabel("xxxxxxxxxxxx")
 		self.alt_freq.SetLabel("xxxxxxxxxxxxxxxxx")
 
-	def set_frequency(self, freq=None):
-		freq_str = "xxx.xx"
-		if freq is not None:
-			if isinstance(freq, float) or isinstance(freq, int):
-				freq_str = "%.2f" % (float(freq) / 1e6)
-			else:
-				freq_str = str(freq)
-		self.frequency.SetLabel(freq_str)
-		self.clear_data()

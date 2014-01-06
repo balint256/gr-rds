@@ -2,10 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import wx
-import gnuradio.gr.gr_threading as _threading
+import pmt
+from gnuradio import gr, blocks
 
 wxDATA_EVENT = wx.NewEventType()
-
 def EVT_DATA_EVENT(win, func):
 	win.Connect(-1, -1, wxDATA_EVENT, func)
 
@@ -18,27 +18,32 @@ class DataEvent(wx.PyEvent):
 	def Clone (self):
 		self.__class__ (self.GetId())
 
-class queue_watcher_thread(_threading.Thread):
-	def __init__(self, rcvd_pktq, event_receiver):
-		_threading.Thread.__init__(self)
-		self.setDaemon(1)
-		self.rcvd_pktq = rcvd_pktq
-		self.event_receiver = event_receiver
-		self.keep_running = True
-		self.start()
+class rdsPanel(gr.sync_block):
+	def __init__(self, freq, *args, **kwds):
+		gr.sync_block.__init__(
+		    self,
+		    name = "rds_panel",
+		    in_sig = None,
+		    out_sig = None,
+		)
+		self.message_port_register_in(pmt.intern('in'))
+		self.set_msg_handler(pmt.intern('in'), self.handle_msg)
 
-	def stop(self):
-		self.keep_running = False
+		self.panel = rdsWxPanel(freq, *args, **kwds);
 
-	def run(self):
-		while self.keep_running:
-			msg = self.rcvd_pktq.delete_head()
-			de = DataEvent (msg)
-			wx.PostEvent (self.event_receiver, de)
+	def handle_msg(self, msg):
+		if(pmt.is_tuple(msg)):
+			t = pmt.to_long(pmt.tuple_ref(msg, 0))
+			m = pmt.symbol_to_string(pmt.tuple_ref(msg, 1))
+			de = DataEvent([t, m])
+			wx.PostEvent(self.panel, de)
 			del de
 
-class rdsPanel(wx.Panel):
-	def __init__(self, msgq, freq=None, *args, **kwds):
+	def set_frequency(self, freq=None):
+		self.panel.set_frequency(freq)
+
+class rdsWxPanel(wx.Panel):
+	def __init__(self, freq, *args, **kwds):
 		kwds["style"] = wx.TAB_TRAVERSAL
 		wx.Panel.__init__(self, *args, **kwds)
 		self.label_1 = wx.StaticText(self, -1, "Frequency")
@@ -65,10 +70,8 @@ class rdsPanel(wx.Panel):
 
 		self.__set_properties()
 		self.__do_layout()
-		if freq is not None:
-			self.set_frequency(freq)
+		self.set_frequency(freq)
 		EVT_DATA_EVENT (self, self.display_data)
-		watcher=queue_watcher_thread(msgq,self)
 
 	def __set_properties(self):
 		font_bold = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, "")
@@ -95,6 +98,7 @@ class rdsPanel(wx.Panel):
 		sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
 		sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
+		sizer_4 = wx.BoxSizer(wx.HORIZONTAL)
 		
 		flag = wx.ALIGN_CENTER_VERTICAL|wx.LEFT
 		
@@ -118,26 +122,29 @@ class rdsPanel(wx.Panel):
 		sizer_2.Add(self.staticpty_flag, 0, flag, 30)
 		sizer_0.Add(sizer_2, 1, wx.ALIGN_CENTER)
 		
-		sizer_3.Add(self.label_5, 0, flag)
-		sizer_3.Add(self.radiotext, 0, flag, 10)
 		sizer_3.Add(self.label_6, 0, flag, 10)
 		sizer_3.Add(self.clocktime, 0, flag, 10)
 		sizer_3.Add(self.label_7, 0, flag, 10)
 		sizer_3.Add(self.alt_freq, 0, flag, 10)
 		sizer_0.Add(sizer_3, 0, wx.ALIGN_CENTER)
 
+		sizer_4.Add(self.label_5, 0, flag)
+		sizer_4.Add(self.radiotext, 0, flag, 10)
+		sizer_0.Add(sizer_4, 0, wx.ALIGN_CENTER)
+
 		self.SetSizer(sizer_0)
 
-	def display_data(self,event):
-		message = event.data
-		if (message.type()==0):		 #program information
-			self.program_information.SetLabel(message.to_string())
-		elif (message.type()==1):	#station name
-			self.station_name.SetLabel(message.to_string())
-		elif (message.type()==2):	#program type
-			self.program_type.SetLabel(message.to_string())
-		elif (message.type()==3):	#flags
-			flags=message.to_string()
+	def display_data(self, event):
+		msg_type = event.data[0]
+		msg = event.data[1]
+		if (msg_type==0):		 #program information
+			self.program_information.SetLabel(msg)
+		elif (msg_type==1):	#station name
+			self.station_name.SetLabel(msg)
+		elif (msg_type==2):	#program type
+			self.program_type.SetLabel(msg)
+		elif (msg_type==3):	#flags
+			flags=msg
 			if (flags[0]=='1'):
 				self.tp_flag.SetForegroundColour(wx.RED)
 			else:
@@ -170,12 +177,12 @@ class rdsPanel(wx.Panel):
 				self.staticpty_flag.SetForegroundColour(wx.RED)
 			else:
 				self.staticpty_flag.SetForegroundColour(wx.LIGHT_GREY)
-		elif (message.type()==4):	#radiotext
-			self.radiotext.SetLabel(message.to_string())
-		elif (message.type()==5):	#clocktime
-			self.clocktime.SetLabel(message.to_string())
-		elif (message.type()==6):	#alternative frequencies
-			self.alt_freq.SetLabel(message.to_string())
+		elif (msg_type==4):	#radiotext
+			self.radiotext.SetLabel(msg)
+		elif (msg_type==5):	#clocktime
+			self.clocktime.SetLabel(msg)
+		elif (msg_type==6):	#alternative frequencies
+			self.alt_freq.SetLabel(msg)
 
 	def clear_data(self):
 		self.program_information.SetLabel("xxxx")
@@ -193,7 +200,7 @@ class rdsPanel(wx.Panel):
 		self.radiotext.SetLabel("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 		self.clocktime.SetLabel("xxxxxxxxxxxx")
 		self.alt_freq.SetLabel("xxxxxxxxxxxxxxxxx")
-	
+
 	def set_frequency(self, freq=None):
 		freq_str = "xxx.xx"
 		if freq is not None:
@@ -202,3 +209,4 @@ class rdsPanel(wx.Panel):
 			else:
 				freq_str = str(freq)
 		self.frequency.SetLabel(freq_str)
+		self.clear_data()

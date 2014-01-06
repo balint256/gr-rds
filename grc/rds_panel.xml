@@ -10,13 +10,12 @@
 	<category>RDS</category>
 	<import>import rds</import>
 	<make>#set $parent = $notebook() and 'self.%s.GetPage(%s)'%$notebook() or 'self'
-rds.rdsPanel($(id)_msgq_in, $freq, $(parent).GetWin())
+rds.rdsPanel($freq, $(parent).GetWin())
 #if not $grid_pos()
-$(parent).Add(self.$(id))
+$(parent).Add(self.$(id).panel)
 #else
-$(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
+$(parent).GridAdd(self.$(id).panel, $(', '.join(map(str, $grid_pos()))))
 #end if</make>
-	<callback>clear_data();$reset;</callback>
 	<callback>set_frequency($freq);</callback>
 	
 	<param>
@@ -27,22 +26,6 @@ $(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
 		<hide>part</hide>
 	</param>
 	
-	<param>
-		<name>Reset</name>
-		<key>reset</key>
-		<value>0</value>
-		<type>raw</type>
-		<hide>part</hide>
-	</param>
-	
-	<!--<param>
-		<name>Window Size</name>
-		<key>win_size</key>
-		<value></value>
-		<type>int_vector</type>
-		<hide>#if $win_size() then 'none' else 'part'#</hide>
-	</param>-->
-
 	<param>
 		<name>Grid Position</name>
 		<key>grid_pos</key>
@@ -56,13 +39,10 @@ $(parent).GridAdd(self.$(id), $(', '.join(map(str, $grid_pos()))))
 		<value></value>
 		<type>notebook</type>
 	</param>
-
-	<!--<check>not $win_size or len($win_size) == 2</check>-->
 	
 	<sink>
 		<name>in</name>
 		<type>message</type>
 	</sink>
-	<doc>Any change in Reset parameter will trigger clearing of panel data.
-Frequency will manually set corresponding text on panel.</doc>
+	<doc>Any change in Frequency parameter will trigger clearing of panel data and set corresponding text on panel.</doc>
 </block>

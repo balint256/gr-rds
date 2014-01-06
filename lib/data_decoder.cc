@@ -109,8 +109,9 @@ void data_decoder::enter_sync(unsigned int sync_block_number){
  * type 5 = ClockTime
  * type 6 = Alternative Frequencies */
 void data_decoder::send_message(long msgtype, std::string msgtext){
-	//pmt::pmt_t msg = pmt::mp(msgtext);// = gr_make_message_from_string(msgtext,msgtype,0,0);
-	//message_port_pub(pmt::mp("out"), msg);
+	pmt::pmt_t msg = pmt::mp(msgtext);
+	pmt::pmt_t type = pmt::from_long(msgtype);
+	message_port_pub(pmt::mp("out"), pmt::make_tuple(type, msg));
         std::cout << "RDS: " << msgtext << std::endl;
 }
 

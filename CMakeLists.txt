@@ -35,6 +35,13 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
+# Set the version information here
+set(VERSION_INFO_MAJOR_VERSION 0)
+set(VERSION_INFO_API_COMPAT    1)
+set(VERSION_INFO_MINOR_VERSION 1)
+set(VERSION_INFO_MAINT_VERSION git)
+include(GrVersion) #setup version info
+
 ########################################################################
 # Compiler specific setup
 ########################################################################
@@ -143,6 +150,7 @@ configure_file(
 add_custom_target(uninstall
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
+
 
 ########################################################################
 # Add subdirectories

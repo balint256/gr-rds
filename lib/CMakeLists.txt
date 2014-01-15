@@ -21,6 +21,7 @@
 # Setup library
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
+include(GrMiscUtils)
 
 add_library(gnuradio-rds SHARED
     data_decoder.cc
@@ -38,3 +39,5 @@ install(TARGETS gnuradio-rds
     ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
     RUNTIME DESTINATION bin              # .dll file
 )
+
+GR_LIBRARY_FOO(gnuradio-rds)

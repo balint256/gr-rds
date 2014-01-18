@@ -8,13 +8,11 @@
 		<field name="MuSp" type="bool">true</field>
 		<field name="AF1" type="float">89.8</field>
 		<field name="AF2" type="float">102.3</field>
-		<field name="PS" type="string">AZIMOUT.</field>
+		<field name="PS" type="string">Arrrrrr!</field>
 	</group>
-<!--
 	<group type="2A">
-		<field name="RadioText" type="string">JRCRadio-building72-USRP-GNURadio-GR-RDS</field>
+		<field name="RadioText" type="string"> ..:: pirate radio ::..</field>
 	</group>
--->
 	<group type="8A">
 		<field name="DP" type="int">3</field>
 		<field name="extent" type="int">2</field>

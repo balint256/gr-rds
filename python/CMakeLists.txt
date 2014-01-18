@@ -38,9 +38,9 @@ GR_PYTHON_INSTALL(
 ########################################################################
 # Handle the unit tests
 ########################################################################
-include(GrTest)
-
-set(GR_TEST_TARGET_DEPS gnuradio-rds)
-set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
-GR_ADD_TEST(qa_rds ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_rds.py)
+#include(GrTest)
+#
+#set(GR_TEST_TARGET_DEPS gnuradio-rds)
+#set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
+#GR_ADD_TEST(qa_rds ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_rds.py)
 

@@ -18,6 +18,11 @@
 		<type>file_open</type>
 	</param>
 	<check>len($xmlfile) &gt; 0</check>
+	<sink>
+		<name>rds in</name>
+		<type>message</type>
+		<optional>1</optional>
+	</sink>
 	<source>
 		<name>out</name>
 		<type>byte</type>

@@ -66,15 +66,32 @@ data_encoder::data_encoder (const char *xmlfile)
 			gr::io_signature::make (0, 0, 0),
 			gr::io_signature::make (1, 1, sizeof(unsigned char)))
 {
-// initializes the library, checks for potential ABI mismatches
+	message_port_register_in(pmt::mp("rds in"));
+	set_msg_handler(pmt::mp("rds in"), boost::bind(&data_encoder::rds_in, this, _1));
+
+	xml = (char*)malloc(strlen(xmlfile) + 1);
+	memcpy(xml, xmlfile, strlen(xmlfile) + 1);
+
+	init();
+}
+
+void data_encoder::init(char *txt, int len) {
+	gr::thread::scoped_lock lock(d_mutex);
+	// initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION
 	int i=0, j=0;
 	reset_rds_data();
-	read_xml(xmlfile);
-	groups[4]=1;		// group 4a: clocktime
+	read_xml(xml);
+
+	if(txt) {
+		memcpy(radiotext, txt, len);
+		radiotext[len] = '\0';
+	}
+
+	groups[4]=1;      // group 4a: clocktime
 	count_groups();
 
-// allocate memory for nbuffers buffers of 104 unsigned chars each
+	// allocate memory for nbuffers buffers of 104 unsigned chars each
 	buffer = (unsigned char **)malloc(nbuffers*sizeof(unsigned char *));
 	for(i=0;i<nbuffers;i++){
 		buffer[i] = (unsigned char *)malloc(104*sizeof(unsigned char));
@@ -82,23 +99,35 @@ data_encoder::data_encoder (const char *xmlfile)
 	}
 	printf("%i buffers allocated\n", nbuffers);
 
-// prepare each of the groups
+	// prepare each of the groups
 	for(i=0; i<32; i++){
 		if(groups[i]==1){
 			create_group(i%16, (i<16)?false:true);
-			if(i%16==0)	// if group is type 0, call 3 more times
+			if(i%16==0)  // if group is type 0, call 3 more times
 				for(j=0; j<3; j++) create_group(i%16, (i<16)?false:true);
-			if(i%16==2)	// if group type is 2, call 15 more times
+			if(i%16==2) // if group type is 2, call 15 more times
 				for(j=0; j<15; j++) create_group(i%16, (i<16)?false:true);
 		}
 	}
 	d_current_buffer=0;
-	
+
+}
+
+void data_encoder::rds_in(pmt::pmt_t msg) {
+	if(!pmt::is_pair(msg)) {
+		return;
+	}
+
+	int msg_len = pmt::blob_length(pmt::cdr(msg));
+	std::string text = std::string((char*)pmt::blob_data(pmt::cdr(msg)), msg_len);
+	std::cout << std::endl << "new rds text: " << text << std::endl;
+	init((char *)pmt::blob_data(pmt::cdr(msg)), msg_len);
+
 }
 
 data_encoder::~data_encoder () {
-	xmlCleanupParser();		// Cleanup function for the XML library
-	xmlMemoryDump();		// this is to debug memory for regression tests
+	xmlCleanupParser();  // Cleanup function for the XML library
+	xmlMemoryDump();     // this is to debug memory for regression tests
 	free(buffer);
 }
 
@@ -419,6 +448,7 @@ int data_encoder::work (int noutput_items,
 					gr_vector_const_void_star &input_items,
 					gr_vector_void_star &output_items)
 {
+	gr::thread::scoped_lock lock(d_mutex);
 	unsigned char *out = (unsigned char *) output_items[0];
 	
 	for(int i=0; i<noutput_items; i++){

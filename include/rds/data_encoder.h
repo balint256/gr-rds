@@ -26,6 +26,7 @@
 
 #include <rds/api.h>
 #include <gnuradio/sync_block.h>
+#include <gnuradio/thread/thread.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
@@ -63,6 +64,8 @@ private:
 	int extent;
 	int event;
 	int location;
+	gr::thread::mutex d_mutex;
+	char *xml;
 
 /* each type 0 group contains 2 out of 8 PS characters;
  * this is used to count 0..3 and send all PS characters */
@@ -98,6 +101,8 @@ private:
 	void prepare_buffer(int);
 	unsigned int encode_af(double);
 	unsigned int calc_syndrome(unsigned long, unsigned char);
+	void rds_in(pmt::pmt_t msg);
+	void init(char *txt=NULL, int len=0);
 
 public:
 	typedef boost::shared_ptr<data_encoder> sptr;

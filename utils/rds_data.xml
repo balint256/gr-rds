@@ -11,7 +11,7 @@
 		<field name="PS" type="string">Arrrrrr!</field>
 	</group>
 	<group type="2A">
-		<field name="RadioText" type="string"> ..:: pirate radio ::..</field>
+		<field name="RadioText" type="string"> ..:: http://www.ccs-labs.org ::..</field>
 	</group>
 	<group type="8A">
 		<field name="DP" type="int">3</field>

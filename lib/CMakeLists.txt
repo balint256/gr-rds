@@ -17,38 +17,33 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 
-if(DEFINED __INCLUDED_GR_PLATFORM_CMAKE)
-    return()
-endif()
-set(__INCLUDED_GR_PLATFORM_CMAKE TRUE)
+########################################################################
+# Setup library
+########################################################################
+include(GrPlatform) #define LIB_SUFFIX
+include(GrMiscUtils)
+
+add_library(gnuradio-rds SHARED
+    data_decoder.cc
+    data_encoder.cc
+    rate_enforcer.cc
+)
+target_link_libraries(gnuradio-rds ${Boost_LIBRARIES}  ${GNURADIO_RUNTIME_LIBRARIES} ${LIBXML2_LIBRARIES})
+set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_RDS_EXPORTS")
+
+if(APPLE)
+    set_target_properties(gnuradio-rds PROPERTIES
+        INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+)
+endif(APPLE)
 
 ########################################################################
-# Setup additional defines for OS types
+# Install built library files
 ########################################################################
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(LINUX TRUE)
-endif()
+install(TARGETS gnuradio-rds
+    LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
+    ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
+    RUNTIME DESTINATION bin              # .dll file
+)
 
-if(LINUX AND EXISTS "/etc/debian_version")
-    set(DEBIAN TRUE)
-endif()
-
-if(LINUX AND EXISTS "/etc/redhat-release")
-    set(REDHAT TRUE)
-endif()
-
-if(LINUX AND EXISTS "/etc/slackware-version")
-    set(SLACKWARE TRUE)
-endif()
-
-########################################################################
-# when the library suffix should be 64 (applies to redhat linux family)
-########################################################################
-if (REDHAT OR SLACKWARE)
-    set(LIB64_CONVENTION TRUE)
-endif()
-
-if(NOT DEFINED LIB_SUFFIX AND LIB64_CONVENTION AND CMAKE_SYSTEM_PROCESSOR MATCHES "64$")
-    set(LIB_SUFFIX 64)
-endif()
-set(LIB_SUFFIX ${LIB_SUFFIX} CACHE STRING "lib directory suffix")
+GR_LIBRARY_FOO(gnuradio-rds)

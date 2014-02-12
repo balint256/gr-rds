@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##RDS Data Source
+###################################################
+ -->
+<block>
+	<name>RDS Data Source</name>
+	<key>gr_rds_data_encoder</key>
+	<category>RDS</category>
+	<import>import rds</import>
+	<make>rds.data_encoder($xmlfile)</make>
+	<callback></callback>
+	<param>
+		<name>File</name>
+		<key>xmlfile</key>
+		<value></value>
+		<type>file_open</type>
+	</param>
+	<check>len($xmlfile) &gt; 0</check>
+	<source>
+		<name>out</name>
+		<type>byte</type>
+	</source>
+	<doc>
+This source block creates the baseband RDS signal.
+
+It reads its configuration from an XML file; composes the infowords;
+calculates checkwords; merges the two into blocks and then groups;
+and streams out the resulting buffer.
+	</doc>
+</block>

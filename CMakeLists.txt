@@ -22,10 +22,8 @@
 # Project setup
 ########################################################################
 cmake_minimum_required(VERSION 2.6)
-#include(CheckCXXSymbolExists)
-#include(CheckFunctionExists)
-include(CheckLibraryExists) 
 project(gr-rds CXX C)
+include(CheckLibraryExists)
 enable_testing()
 
 #select the release build type by default to get optimization flags
@@ -37,12 +35,19 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
+# Set the version information here
+set(VERSION_INFO_MAJOR_VERSION 0)
+set(VERSION_INFO_API_COMPAT    1)
+set(VERSION_INFO_MINOR_VERSION 1)
+set(VERSION_INFO_MAINT_VERSION git)
+include(GrVersion) #setup version info
+
 ########################################################################
 # Compiler specific setup
 ########################################################################
-if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32)
+if(NOT WIN32)
     #http://gcc.gnu.org/wiki/Visibility
-#	add_definitions(-fvisibility=hidden)
+    add_definitions(-fvisibility=hidden)
 endif()
 
 ########################################################################
@@ -60,7 +65,7 @@ set(Boost_ADDITIONAL_VERSIONS
     "1.60.0" "1.60" "1.61.0" "1.61" "1.62.0" "1.62" "1.63.0" "1.63" "1.64.0" "1.64"
     "1.65.0" "1.65" "1.66.0" "1.66" "1.67.0" "1.67" "1.68.0" "1.68" "1.69.0" "1.69"
 )
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 if(NOT Boost_FOUND)
     message(FATAL_ERROR "Boost required to compile gr-rds")
@@ -73,19 +78,13 @@ find_package(LibXml2 REQUIRED)
 
 if(LIBXML2_FOUND)
 	include_directories(${LIBXML2_INCLUDE_DIR})
-	#link_directories(${LIBXML2_LIBRARIES})
 endif ()
 
-#list(APPEND CMAKE_REQUIRED_LIBRARIES ${LIBXML2_LIBRARIES})
-#list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBXML2_INCLUDE_DIR})
-#CHECK_CXX_SYMBOL_EXISTS(xmlParseFile "libxml/xmlIO.h" HAVE_XML_PARSE_FILE)	# Requires both
-CHECK_LIBRARY_EXISTS(xml2 xmlParseFile "" HAVE_XML_PARSE_FILE)				# Requires neither
-#CHECK_FUNCTION_EXISTS(xmlParseFile HAVE_XML_PARSE_FILE)					# Only requires CMAKE_REQUIRED_LIBRARIES ${LIBXML2_LIBRARIES}
+# Requires neither
+CHECK_LIBRARY_EXISTS(xml2 xmlParseFile "" HAVE_XML_PARSE_FILE)
 if (NOT HAVE_XML_PARSE_FILE)
 	message(FATAL_ERROR "xmlParseFile function not found in libxml2")
 endif ()
-
-SET(RDS_PYTHON_SUBDIR "/gnuradio")
 
 ########################################################################
 # Install directories
@@ -93,7 +92,7 @@ SET(RDS_PYTHON_SUBDIR "/gnuradio")
 include(GrPlatform) #define LIB_SUFFIX
 set(GR_RUNTIME_DIR      bin)
 set(GR_LIBRARY_DIR      lib${LIB_SUFFIX})
-set(GR_INCLUDE_DIR      include)
+set(GR_INCLUDE_DIR      include/rds)
 set(GR_DATA_DIR         share)
 set(GR_PKG_DATA_DIR     ${GR_DATA_DIR}/${CMAKE_PROJECT_NAME})
 set(GR_DOC_DIR          ${GR_DATA_DIR}/doc)
@@ -107,15 +106,16 @@ set(GRC_BLOCKS_DIR      ${GR_PKG_DATA_DIR}/grc/blocks)
 ########################################################################
 # Find gnuradio build dependencies
 ########################################################################
-find_package(Gruel)
-find_package(GnuradioCore)
+set(GR_REQUIRED_COMPONENTS RUNTIME)
+find_package(Gnuradio)
+find_package(CppUnit)
 
-if(NOT GRUEL_FOUND)
-    message(FATAL_ERROR "Gruel required to compile gr-rds")
+if(NOT GNURADIO_RUNTIME_FOUND)
+    message(FATAL_ERROR "GnuRadio Runtime required to compile gr-rds")
 endif()
 
-if(NOT GNURADIO_CORE_FOUND)
-    message(FATAL_ERROR "GnuRadio Core required to compile gr-rds")
+if(NOT CPPUNIT_FOUND)
+    message(FATAL_ERROR "CppUnit required to compile ieee802-11")
 endif()
 
 ########################################################################
@@ -124,14 +124,14 @@ endif()
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
-    ${GRUEL_INCLUDE_DIRS}
-    ${GNURADIO_CORE_INCLUDE_DIRS}
+    ${CPPUNIT_INCLUDE_DIRS}
+    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
 )
 
 link_directories(
     ${Boost_LIBRARY_DIRS}
-    ${GRUEL_LIBRARY_DIRS}
-    ${GNURADIO_CORE_LIBRARY_DIRS}
+    ${CPPUNIT_LIBRARY_DIRS}
+    ${GNURADIO_RUNTIME_LIBRARY_DIRS}
 )
 
 # Set component parameters
@@ -150,15 +150,12 @@ add_custom_target(uninstall
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
 
+
 ########################################################################
 # Add subdirectories
 ########################################################################
-add_subdirectory(src)
-#add_subdirectory(include)
-#add_subdirectory(lib)
-#add_subdirectory(swig)
-#add_subdirectory(python)
-#add_subdirectory(grc)
-add_subdirectory(apps)
-#add_subdirectory(docs)
-
+add_subdirectory(include/rds)
+add_subdirectory(lib)
+add_subdirectory(swig)
+add_subdirectory(python)
+add_subdirectory(grc)

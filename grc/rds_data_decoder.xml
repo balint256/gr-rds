@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+###################################################
+##RDS Data Sink
+###################################################
+ -->
+<block>
+	<name>RDS Data Sink</name>
+	<key>gr_rds_data_decoder</key>
+	<category>RDS</category>
+	<import>import rds</import>
+	<make>rds.data_decoder()</make>
+	<callback>reset();$reset;</callback>
+	<!--<param>
+		<name>Message Queue</name>
+		<key>msgq</key>
+		<value>gr.msg_queue()</value>
+		<type>raw</type>
+	</param>-->
+	<param>
+		<name>Reset</name>
+		<key>reset</key>
+		<value>0</value>
+		<type>raw</type>
+		<hide>part</hide>
+	</param>
+	<sink>
+		<name>in</name>
+		<type>byte</type>
+		<vlen>gr.sizeof_char</vlen>
+	</sink>
+	<source>
+		<name>out</name>
+		<type>message</type>
+		<optional>1</optional>
+	</source>
+	<doc>
+This block is the RDS data decoder.
+
+It takes as input a bitstream of RDS data after DBPSK-demodulation, in
+bytes containing single bits [0, 1]. It then does the framing, checksumming, 
+and decoding of the data, which it then sends to a message gueue.
+	</doc>
+</block>

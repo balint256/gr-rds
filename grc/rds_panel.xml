@@ -16,6 +16,7 @@ $(parent).Add(self.$(id).panel)
 #else
 $(parent).GridAdd(self.$(id).panel, $(', '.join(map(str, $grid_pos()))))
 #end if</make>
+	<callback>clear_data();$reset;</callback>
 	<callback>set_frequency($freq);</callback>
 	
 	<param>
@@ -23,6 +24,14 @@ $(parent).GridAdd(self.$(id).panel, $(', '.join(map(str, $grid_pos()))))
 		<key>freq</key>
 		<value>0</value>
 		<type>real</type>
+		<hide>part</hide>
+	</param>
+	
+	<param>
+		<name>Reset</name>
+		<key>reset</key>
+		<value>0</value>
+		<type>raw</type>
 		<hide>part</hide>
 	</param>
 	

@@ -28,6 +28,8 @@ list(APPEND include_sources
     rate_enforcer.h
     tmc_events.h
     tmc_locations_italy.h
+	bpsk_demod.h
+	freq_divider.h
 )
 
 install(

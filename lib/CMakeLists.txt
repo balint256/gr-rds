@@ -27,6 +27,8 @@ add_library(gnuradio-rds SHARED
     data_decoder.cc
     data_encoder.cc
     rate_enforcer.cc
+	bpsk_demod.cc
+	freq_divider.cc
 )
 target_link_libraries(gnuradio-rds ${Boost_LIBRARIES}  ${GNURADIO_RUNTIME_LIBRARIES} ${GNURADIO_PMT_LIBRARIES} ${LIBXML2_LIBRARIES})
 set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_RDS_EXPORTS")

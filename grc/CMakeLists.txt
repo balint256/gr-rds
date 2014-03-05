@@ -22,6 +22,8 @@ install(FILES
     rds_data_encoder.xml
     rds_rate_enforcer.xml
     rds_panel.xml
+	rds_bpsk_demod.xml
+	rds_freq_divider.xml
     DESTINATION share/gnuradio/grc/blocks
 )
 

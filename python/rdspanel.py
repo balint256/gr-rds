@@ -50,6 +50,11 @@ class rdsPanel(gr.sync_block):
 		de = DataEvent([7, freq_str])
 		wx.PostEvent(self.panel, de)
 		del de
+	
+	def clear_data(self):
+		de = DataEvent([8,''])
+		wx.PostEvent(self.panel, de)
+		del de
 
 
 class rdsWxPanel(wx.Panel):
@@ -201,6 +206,8 @@ class rdsWxPanel(wx.Panel):
 			self.alt_freq.SetLabel(msg)
 		elif (msg_type==7):   #update freq label
 			self.frequency.SetLabel(msg)
+			self.clear_data()
+		elif (msg_type==8):
 			self.clear_data()
 
 		self.Layout()

@@ -84,6 +84,7 @@ void data_encoder::init(char *txt, int len) {
 	read_xml(xml);
 
 	if(txt) {
+		memset(radiotext,' ',sizeof(radiotext));
 		memcpy(radiotext, txt, len);
 		radiotext[len] = '\0';
 	}

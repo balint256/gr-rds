@@ -47,7 +47,7 @@
 #endif
 
 #include <gr_rds_rate_enforcer.h>
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 #include <math.h>
 
 gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate) {
@@ -55,9 +55,9 @@ gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate) {
 }
 
 gr_rds_rate_enforcer::gr_rds_rate_enforcer (double samp_rate)
-  : gr_block ("gr_rds_rate_enforcer",
-			gr_make_io_signature (2, 2, sizeof(float)),
-			gr_make_io_signature (1, 1, sizeof(float)))
+  : gr::block ("gr_rds_rate_enforcer",
+			gr::io_signature::make (2, 2, sizeof(float)),
+			gr::io_signature::make (1, 1, sizeof(float)))
 {
 	set_relative_rate(samp_rate/1187.5);
 }

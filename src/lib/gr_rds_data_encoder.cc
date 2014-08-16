@@ -49,7 +49,7 @@
 
 #include "gr_rds_data_encoder.h"
 #include "gr_rds_constants.h"
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 #include <math.h>
 #include <ctype.h>
 #include <time.h>
@@ -59,9 +59,9 @@ gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile) {
 }
 
 gr_rds_data_encoder::gr_rds_data_encoder (const char *xmlfile)
-  : gr_sync_block ("gr_rds_data_encoder",
-			gr_make_io_signature (0, 0, 0),
-			gr_make_io_signature (1, 1, sizeof(unsigned char)))
+  : gr::sync_block ("gr_rds_data_encoder",
+			gr::io_signature::make (0, 0, 0),
+			gr::io_signature::make (1, 1, sizeof(unsigned char)))
 {
 // initializes the library, checks for potential ABI mismatches
 	LIBXML_TEST_VERSION

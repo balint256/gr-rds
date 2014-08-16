@@ -33,7 +33,7 @@
 #ifndef INCLUDED_gr_rds_bpsk_demod_H
 #define INCLUDED_gr_rds_bpsk_demod_H
 
-#include <gr_block.h>
+#include <gnuradio/block.h>
 #include <iostream>
 #include <fstream>
 
@@ -66,7 +66,7 @@ gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double input_sample_rate);
  * \brief Decodes a biphase or manchester coded signal to 1, 0 as bool
  * \ingroup RDS
  */
-class gr_rds_bpsk_demod : public gr_block
+class gr_rds_bpsk_demod : public gr::block
 {
 private:
 	enum state_t { ST_LOOKING, ST_LOCKED };

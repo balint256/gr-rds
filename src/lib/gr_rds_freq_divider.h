@@ -33,7 +33,7 @@
 #ifndef INCLUDED_gr_rds_freq_divider_H
 #define INCLUDED_gr_rds_freq_divider_H
 
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 
 class gr_rds_freq_divider;
 
@@ -56,7 +56,7 @@ typedef boost::shared_ptr<gr_rds_freq_divider> gr_rds_freq_divider_sptr;
  */
 gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider);
 
-class gr_rds_freq_divider : public gr_sync_block
+class gr_rds_freq_divider : public gr::sync_block
 {
 private:
 // The friend declaration allows gr_rds_make_freq_divider to

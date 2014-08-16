@@ -31,7 +31,7 @@
 #endif
 
 #include <gr_rds_freq_divider.h>
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 
 /*
  * Create a new instance of gr_rds_freq_divider and return
@@ -46,9 +46,9 @@ gr_rds_freq_divider_sptr gr_rds_make_freq_divider (int divider)
  * The private constructor
  */
 gr_rds_freq_divider::gr_rds_freq_divider (int divider)
-	: gr_sync_block ("gr_rds_freq_divider",
-		gr_make_io_signature (1, 1, sizeof (float)),
-		gr_make_io_signature (1, 1, sizeof (float)))
+	: gr::sync_block ("gr_rds_freq_divider",
+		gr::io_signature::make (1, 1, sizeof (float)),
+		gr::io_signature::make (1, 1, sizeof (float)))
 {
 	d_divider = 0;
 	DIVIDER = divider;

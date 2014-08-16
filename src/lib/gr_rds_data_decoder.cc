@@ -39,17 +39,17 @@
 #include "gr_rds_constants.h"
 #include "gr_rds_tmc_events.h"
 //#include "gr_rds_tmc_locations_italy.h"
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 #include <math.h>
 
-gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq) {
+gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr::msg_queue::sptr msgq) {
   return gr_rds_data_decoder_sptr (new gr_rds_data_decoder (msgq));
 }
 
-gr_rds_data_decoder::gr_rds_data_decoder (gr_msg_queue_sptr msgq)
-  : gr_sync_block ("gr_rds_data_decoder",
-			gr_make_io_signature (1, 1, sizeof (bool)),
-			gr_make_io_signature (0, 0, 0))
+gr_rds_data_decoder::gr_rds_data_decoder (gr::msg_queue::sptr msgq)
+  : gr::sync_block ("gr_rds_data_decoder",
+			gr::io_signature::make (1, 1, sizeof (bool)),
+			gr::io_signature::make (0, 0, 0))
 {
 	d_msgq=msgq;
 	set_output_multiple(104);	// 1 RDS datagroup contains 104 bits
@@ -112,7 +112,7 @@ void gr_rds_data_decoder::enter_sync(unsigned int sync_block_number){
  * type 6 = Alternative Frequencies */
 void gr_rds_data_decoder::send_message(long msgtype, std::string msgtext){
 	if (!d_msgq->full_p()) {
-		gr_message_sptr msg = gr_make_message_from_string(msgtext,msgtype,0,0);
+		gr::message::sptr msg = gr::message::make_from_string(msgtext,msgtype,0,0);
 		d_msgq->insert_tail(msg);
 		msg.reset();
 	}

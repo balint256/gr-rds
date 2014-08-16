@@ -25,16 +25,10 @@ of the RDS (Radio Data System) block for GNU Radio.
 This package requires that gnuradio-core is already installed.  It
 also depends on some GNU Radio prerequisites, such as boost.
 
-To build the examples from the tarball use the normal recipe:
+To build the examples use the normal recipe:
 
-  $ ./configure
+  $ mkdir build
+  $ cmake ../
   $ make
-  $ make check
+  $ make install
 
-If you're building from CVS, you'll need to use this sequence, since
-CVS doesn't contain configure or the generated Makefiles.
-
-  $ ./bootstrap
-  $ ./configure
-  $ make
-  $ make check

@@ -29,7 +29,7 @@ add_library(gnuradio-rds SHARED
 	gr_rds_rate_enforcer.cc
 	gr_rds_freq_divider.cc
 )
-target_link_libraries(gnuradio-rds ${Boost_LIBRARIES} ${GRUEL_LIBRARIES} ${GNURADIO_CORE_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(gnuradio-rds ${Boost_LIBRARIES} ${GRUEL_LIBRARIES} ${GNURADIO_RUNTIME_LIBRARIES}  ${GNURADIO_BLOCKS_LIBRARIES} ${LIBXML2_LIBRARIES})
 set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_rds_EXPORTS")
 
 ########################################################################
@@ -77,8 +77,8 @@ include(GrPython)
 ########################################################################
 # Setup swig generation
 ########################################################################
-foreach(incdir ${GNURADIO_CORE_INCLUDE_DIRS})
-    list(APPEND GR_SWIG_INCLUDE_DIRS ${incdir}/swig)
+foreach(incdir ${GNURADIO_RUNTIME_INCLUDE_DIRS})
+    list(APPEND GR_SWIG_INCLUDE_DIRS ${incdir}/swig ${incdir}/gnuradio/swig)
 endforeach(incdir)
 
 foreach(incdir ${GRUEL_INCLUDE_DIRS})

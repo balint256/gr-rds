@@ -24,7 +24,7 @@
 #ifndef INCLUDED_gr_rds_data_encoder_H
 #define INCLUDED_gr_rds_data_encoder_H
 
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
@@ -53,7 +53,7 @@ typedef boost::shared_ptr<gr_rds_data_encoder> gr_rds_data_encoder_sptr;
  */
 gr_rds_data_encoder_sptr gr_rds_make_data_encoder (const char *xmlfile);
 
-class gr_rds_data_encoder : public gr_sync_block
+class gr_rds_data_encoder : public gr::sync_block
 {
 private:
 	unsigned int infoword[4];

@@ -24,7 +24,7 @@
 #ifndef INCLUDED_gr_rds_rate_enforcer_H
 #define INCLUDED_gr_rds_rate_enforcer_H
 
-#include <gr_sync_block.h>
+#include <gnuradio/sync_block.h>
 #include <vector>
 #include <iostream>
 
@@ -48,7 +48,7 @@ typedef boost::shared_ptr<gr_rds_rate_enforcer> gr_rds_rate_enforcer_sptr;
  */
 gr_rds_rate_enforcer_sptr gr_rds_make_rate_enforcer (double samp_rate);
 
-class gr_rds_rate_enforcer : public gr_block
+class gr_rds_rate_enforcer : public gr::block
 {
 private:
 // Functions

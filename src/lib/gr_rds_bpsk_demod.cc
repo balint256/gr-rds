@@ -36,7 +36,7 @@
 #endif
 
 #include <gr_rds_bpsk_demod.h>
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 
 #include <fstream>
 
@@ -53,9 +53,9 @@ gr_rds_bpsk_demod_sptr gr_rds_make_bpsk_demod (double sampling_rate)
  * The private constructor
  */
 gr_rds_bpsk_demod::gr_rds_bpsk_demod (double input_sampling_rate)
-	: gr_block("gr_rds_bpsk_demod",
-			gr_make_io_signature (2, 2, sizeof(float)),
-			gr_make_io_signature (1, 8, sizeof(bool)))
+	: gr::block("gr_rds_bpsk_demod",
+			gr::io_signature::make (2, 2, sizeof(float)),
+			gr::io_signature::make (1, 8, sizeof(bool)))
 {
 	SYMBOL_LENGTH = (int)(input_sampling_rate/1187.5);
 

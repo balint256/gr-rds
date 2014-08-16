@@ -31,8 +31,8 @@
 #ifndef INCLUDED_gr_rds_data_decoder_H
 #define INCLUDED_gr_rds_data_decoder_H
 
-#include <gr_sync_block.h>
-#include <gr_msg_queue.h>
+#include <gnuradio/sync_block.h>
+#include <gnuradio/msg_queue.h>
 #include <string.h>
 #include <vector>
 #include <iostream>
@@ -54,9 +54,9 @@ class gr_rds_data_decoder;
  * As a convention, the _sptr suffix indicates a boost::shared_ptr
  */
 typedef boost::shared_ptr<gr_rds_data_decoder> gr_rds_data_decoder_sptr;
-gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr msgq);
+gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr::msg_queue::sptr msgq);
 
-class gr_rds_data_decoder : public gr_sync_block
+class gr_rds_data_decoder : public gr::sync_block
 {
 private:
 	unsigned long bit_counter, lastseen_offset_counter, reg;
@@ -85,11 +85,11 @@ private:
 	unsigned char pi_area_coverage;
 	unsigned char pi_program_reference_number;
 	char program_service_name[9];
-	gr_msg_queue_sptr d_msgq;
+	gr::msg_queue::sptr d_msgq;
 
 // Functions
-	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr_msg_queue_sptr);
-	gr_rds_data_decoder (gr_msg_queue_sptr);		// private constructor
+	friend gr_rds_data_decoder_sptr gr_rds_make_data_decoder (gr::msg_queue::sptr);
+	gr_rds_data_decoder (gr::msg_queue::sptr);		// private constructor
 	void enter_no_sync();
 	void enter_sync(unsigned int);
 	void reset_rds_data();

@@ -73,22 +73,6 @@ if(NOT Boost_FOUND)
 endif()
 
 ########################################################################
-# gr-rds specific
-########################################################################
-find_package(LibXml2 REQUIRED)
-
-if(LIBXML2_FOUND)
-	include_directories(${LIBXML2_INCLUDE_DIR})
-	#link_directories(${LIBXML2_LIBRARIES})
-endif ()
-
-# Requires neither
-CHECK_LIBRARY_EXISTS(xml2 xmlParseFile "" HAVE_XML_PARSE_FILE)
-if (NOT HAVE_XML_PARSE_FILE)
-	message(FATAL_ERROR "xmlParseFile function not found in libxml2")
-endif ()
-
-########################################################################
 # Install directories
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX

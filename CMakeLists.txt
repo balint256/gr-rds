@@ -37,9 +37,9 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 # Set the version information here
-set(VERSION_INFO_MAJOR_VERSION 0)
-set(VERSION_INFO_API_COMPAT    1)
-set(VERSION_INFO_MINOR_VERSION 1)
+set(VERSION_INFO_MAJOR_VERSION 3)
+set(VERSION_INFO_API_COMPAT    7)
+set(VERSION_INFO_MINOR_VERSION 0)
 set(VERSION_INFO_MAINT_VERSION git)
 include(GrVersion) #setup version info
 
@@ -110,15 +110,21 @@ set(GRC_BLOCKS_DIR      ${GR_PKG_DATA_DIR}/grc/blocks)
 ########################################################################
 set(GR_REQUIRED_COMPONENTS RUNTIME PMT)
 find_package(Gnuradio)
-find_package(CppUnit)
 
 if(NOT GNURADIO_RUNTIME_FOUND)
     message(FATAL_ERROR "GnuRadio Runtime required to compile gr-rds")
 endif()
 
+find_package(CppUnit)
 if(NOT CPPUNIT_FOUND)
     message(FATAL_ERROR "CppUnit required to compile ieee802-11")
 endif()
+
+find_package(Doxygen)
+
+find_package(PythonLibs 2)
+
+find_package(SWIG)
 
 ########################################################################
 # On Apple only, set install name and use rpath correctly, if not already set
@@ -147,13 +153,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
     ${CPPUNIT_INCLUDE_DIRS}
-    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
+    ${GNURADIO_ALL_INCLUDE_DIRS}
 )
 
 link_directories(
     ${Boost_LIBRARY_DIRS}
     ${CPPUNIT_LIBRARY_DIRS}
-    ${GNURADIO_RUNTIME_LIBRARY_DIRS}
+    ${GNURADIO_ALL_LIBRARY_DIRS}
 )
 
 # Set component parameters

@@ -31,12 +31,6 @@ add_library(gnuradio-rds SHARED
 target_link_libraries(gnuradio-rds ${Boost_LIBRARIES}  ${GNURADIO_ALL_LIBRARIES} ${LIBXML2_LIBRARIES})
 set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_RDS_EXPORTS")
 
-if(APPLE)
-    set_target_properties(gnuradio-rds PROPERTIES
-        INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
-)
-endif(APPLE)
-
 ########################################################################
 # Install built library files
 ########################################################################

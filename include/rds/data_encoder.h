@@ -42,7 +42,7 @@ private:
 	unsigned int block[4];
 	unsigned char **buffer;
 
-// FIXME make this a struct (or a class)
+	// FIXME make this a struct (or a class)
 	unsigned int PI;
 	bool TP;
 	unsigned char PTY;
@@ -80,7 +80,9 @@ private:
 
 // Functions
 	data_encoder ();  // private constructor
-	void reset_rds_data();
+	void rebuild();
+	void set_radiotext(std::string text);
+	void set_ps(std::string text);
 	void count_groups();
 	void create_group(const int, const bool);
 	void prepare_group0(const bool);
@@ -91,7 +93,6 @@ private:
 	unsigned int encode_af(double);
 	unsigned int calc_syndrome(unsigned long, unsigned char);
 	void rds_in(pmt::pmt_t msg);
-	void init(char *txt = NULL, int len = 0);
 	void assign_value(const char *field, const char *value);
 
 public:

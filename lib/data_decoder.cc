@@ -44,62 +44,63 @@ data_decoder::make() {
   return gnuradio::get_initial_sptr(new data_decoder());
 }
 
-data_decoder::data_decoder ()
-: gr::sync_block ("gr_rds_data_decoder",
+data_decoder::data_decoder()
+	: gr::sync_block ("gr_rds_data_decoder",
 			gr::io_signature::make (1, 1, sizeof (bool)),
 			gr::io_signature::make (0, 0, 0))
 {
 	set_output_multiple(104);	// 1 RDS datagroup contains 104 bits
+	message_port_register_out(pmt::mp("out"));
 	reset();
-        message_port_register_out(pmt::mp("out"));
 }
 
-data_decoder::~data_decoder () {
+data_decoder::~data_decoder() {
 }
-
 
 
 ////////////////////////// HELPER FUNTIONS /////////////////////////
 
-void data_decoder::reset(){
+void data_decoder::reset() {
 	gr::thread::scoped_lock lock(d_mutex);
-	bit_counter=0;
-	reg=0;
+	bit_counter = 0;
+	reg = 0;
 	reset_rds_data();
 	enter_no_sync();
 }
 
-void data_decoder::reset_rds_data(){
-	memset(radiotext,' ',sizeof(radiotext));
-	radiotext[64] = '\0';
-	radiotext_AB_flag=0;
-	traffic_program=false;
-	traffic_announcement=false;
-	music_speech=false;
-	program_type=0;
-	pi_country_identification=0;
-	pi_area_coverage=0;
-	pi_program_reference_number=0;
-	memset(program_service_name,' ',sizeof(program_service_name));
-	program_service_name[8]='\0';
-	mono_stereo=false;
-	artificial_head=false;
-	compressed=false;
-	static_pty=false;
+void data_decoder::reset_rds_data() {
+
+	memset(radiotext, ' ', sizeof(radiotext));
+	memset(program_service_name, ' ', sizeof(program_service_name));
+
+	radiotext[64]                  = '\0';
+	radiotext_AB_flag              = 0;
+	traffic_program                = false;
+	traffic_announcement           = false;
+	music_speech                   = false;
+	program_type                   = 0;
+	pi_country_identification      = 0;
+	pi_area_coverage               = 0;
+	pi_program_reference_number    = 0;
+	program_service_name[8]        = '\0';
+	mono_stereo                    = false;
+	artificial_head                = false;
+	compressed                     = false;
+	static_pty                     = false;
 }
 
-void data_decoder::enter_no_sync(){
-	presync=false;
+void data_decoder::enter_no_sync() {
+	presync = false;
 	d_state = ST_NO_SYNC;
 }
 
-void data_decoder::enter_sync(unsigned int sync_block_number){
-	wrong_blocks_counter=0;
-	blocks_counter=0;
-	block_bit_counter=0;
-	block_number=(sync_block_number+1) % 4;
-	group_assembly_started=false;
-	d_state = ST_SYNC;
+void data_decoder::enter_sync(unsigned int sync_block_number) {
+	wrong_blocks_counter   = 0;
+	blocks_counter         = 0;
+	block_bit_counter      = 0;
+	block_number           = (sync_block_number+1) % 4;
+	group_assembly_started = false;
+	d_state                = ST_SYNC;
 }
 
 /* type 0 = PI
@@ -109,28 +110,28 @@ void data_decoder::enter_sync(unsigned int sync_block_number){
  * type 4 = RadioText 
  * type 5 = ClockTime
  * type 6 = Alternative Frequencies */
-void data_decoder::send_message(long msgtype, std::string msgtext){
-	pmt::pmt_t msg = pmt::mp(msgtext);
+void data_decoder::send_message(long msgtype, std::string msgtext) {
+	pmt::pmt_t msg  = pmt::mp(msgtext);
 	pmt::pmt_t type = pmt::from_long(msgtype);
 	message_port_pub(pmt::mp("out"), pmt::make_tuple(type, msg));
         std::cout << "RDS: " << msgtext << std::endl;
 }
 
 /* see Annex B, page 64 of the standard */
-unsigned int data_decoder::calc_syndrome(unsigned long message, 
-			unsigned char mlen){
-	unsigned long reg=0;
+unsigned int data_decoder::calc_syndrome(unsigned long message,
+		unsigned char mlen) {
+	unsigned long reg = 0;
 	unsigned int i;
-	const unsigned long poly=0x5B9;
-	const unsigned char plen=10;
+	const unsigned long poly = 0x5B9;
+	const unsigned char plen = 10;
 
-	for (i=mlen;i>0;i--)  {
-		reg=(reg<<1) | ((message>>(i-1)) & 0x01);
-		if (reg & (1<<plen)) reg=reg^poly;
+	for (i = mlen; i > 0; i--)  {
+		reg = (reg << 1) | ((message >> (i-1)) & 0x01);
+		if (reg & (1 << plen)) reg = reg ^ poly;
 	}
-	for (i=plen;i>0;i--) {
-		reg=reg<<1;
-		if (reg & (1<<plen)) reg=reg^poly;
+	for (i = plen; i > 0; i--) {
+		reg = reg << 1;
+		if (reg & (1<<plen)) reg = reg ^ poly;
 	}
 	return (reg & ((1<<plen)-1));	// select the bottom plen bits of reg
 }
@@ -141,18 +142,24 @@ unsigned int data_decoder::calc_syndrome(unsigned long message,
 
 /* BASIC TUNING: see page 21 of the standard */
 void data_decoder::decode_type0(unsigned int *group, bool version_code) {
-	unsigned int af_code_1=0, af_code_2=0, no_af=0;
-	double af_1=0, af_2=0;
-	char flagstring[8]="0000000";
+	unsigned int af_code_1 = 0;
+	unsigned int af_code_2 = 0;
+	unsigned int  no_af    = 0;
+	double af_1            = 0;
+	double af_2            = 0;
+	char flagstring[8]     = "0000000";
 	
-	traffic_program=(group[1]>>10) & 0x01;				// "TP"
-	traffic_announcement=(group[1]>>4) & 0x01;			// "TA"
-	music_speech=(group[1]>>3) & 0x01;					// "MuSp"
-	bool decoder_control_bit=(group[1]>>2) & 0x01;	// "DI"
-	unsigned char segment_address=group[1] & 0x03;	// "DI segment"
-	program_service_name[segment_address*2]=(group[3]>>8)&0xff;
-	program_service_name[segment_address*2+1]=group[3]&0xff;
-/* see page 41, table 9 of the standard */
+	traffic_program        = (group[1] >> 10) & 0x01;       // "TP"
+	traffic_announcement   = (group[1] >>  4) & 0x01;       // "TA"
+	music_speech           = (group[1] >>  3) & 0x01;       // "MuSp"
+
+	bool decoder_control_bit      = (group[1] >> 2) & 0x01; // "DI"
+	unsigned char segment_address =  group[1] & 0x03;       // "DI segment"
+
+	program_service_name[segment_address * 2]     = (group[3] >> 8) & 0xff;
+	program_service_name[segment_address * 2 + 1] =  group[3]       & 0xff;
+
+	/* see page 41, table 9 of the standard */
 	switch (segment_address) {
 		case 0:
 			mono_stereo=decoder_control_bit;
@@ -169,18 +176,19 @@ void data_decoder::decode_type0(unsigned int *group, bool version_code) {
 		default:
 		break;
 	}
-	flagstring[0]=traffic_program?'1':'0';
-	flagstring[1]=traffic_announcement?'1':'0';
-	flagstring[2]=music_speech?'1':'0';
-	flagstring[3]=mono_stereo?'1':'0';
-	flagstring[4]=artificial_head?'1':'0';
-	flagstring[5]=compressed?'1':'0';
-	flagstring[6]=static_pty?'1':'0';
-	if (!version_code) {			// type 0A
-		af_code_1=(int)(group[2]>>8)&0xff;
-		af_code_2=(int)group[2]&0xff;
-		if((af_1=decode_af(af_code_1))) no_af+=1;
-		if((af_2=decode_af(af_code_2))) no_af+=2;
+	flagstring[0] = traffic_program        ? '1' : '0';
+	flagstring[1] = traffic_announcement   ? '1' : '0';
+	flagstring[2] = music_speech           ? '1' : '0';
+	flagstring[3] = mono_stereo            ? '1' : '0';
+	flagstring[4] = artificial_head        ? '1' : '0';
+	flagstring[5] = compressed             ? '1' : '0';
+	flagstring[6] = static_pty             ? '1' : '0';
+	if(!version_code) {     // type 0A
+		af_code_1 = (int)(group[2] >> 8) & 0xff;
+		af_code_2 = (int) group[2]       & 0xff;
+
+		if(af_1 = decode_af(af_code_1)) no_af += 1;
+		if(af_2 = decode_af(af_code_2)) no_af += 2;
 /* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
 		memset(af1_string, ' ', sizeof(af1_string));
 		memset(af2_string, ' ', sizeof(af2_string));

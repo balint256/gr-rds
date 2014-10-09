@@ -29,30 +29,82 @@
 #include <math.h>
 #include <ctype.h>
 #include <time.h>
+#include <cstdio>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace gr::rds;
+using pmt::mp;
+using pmt::cons;
+using pmt::make_blob;
+using std::cout;
+using std::endl;
+using std::string;
+using boost::format;
+
 
 data_encoder::data_encoder ()
 	: gr::sync_block ("gr_rds_data_encoder",
 			gr::io_signature::make (0, 0, 0),
 			gr::io_signature::make (1, 1, sizeof(unsigned char)))
 {
-	message_port_register_in(pmt::mp("rds in"));
-	set_msg_handler(pmt::mp("rds in"), boost::bind(&data_encoder::rds_in, this, _1));
 
-	init();
+	message_port_register_out(mp("status"));
+
+	message_port_register_in(mp("rds in"));
+	set_msg_handler(mp("rds in"), boost::bind(&data_encoder::rds_in, this, _1));
+
+	std::memset(infoword,    0, sizeof(infoword));
+	std::memset(checkword,   0, sizeof(checkword));
+	std::memset(groups,      0, sizeof(groups));
+	std::memset(PS,        ' ', sizeof(PS));
+	std::memset(radiotext, ' ', sizeof(radiotext));
+
+	nbuffers             = 0;
+	d_g0_counter         = 0;
+	d_g2_counter         = 0;
+	d_current_buffer     = 0;
+	d_buffer_bit_counter = 0;
+
+	PI                   = 0;
+	PTY                  = 5;     // programm type (education)
+	TP                   = false;
+	TA                   = false; // traffic announcement
+	MuSp                 = false;
+	MS                   = false;
+	AH                   = false;
+	compressed           = false;
+	static_pty           = false;
+
+	set_radiotext(string("GNU Radio <3"));
+	set_ps(string("Arrrrrr!"));
+
+	// which groups are set
+	groups[0] = 1; // basic tuning and switching
+	groups[2] = 1; // radio text
+	groups[4] = 1; // clock time
+	groups[8] = 1; // tmc
+
+	// set some default values
+	assign_value("PI", "50FF");
+	assign_value("TP", "true");
+	assign_value("MuSp", "true");
+	assign_value("AF1", "89.8");
+	assign_value("AF2", "102.3");
+	assign_value("DP", "3");
+	assign_value("extent", "2");
+	assign_value("event", "724");
+	assign_value("location", "6126");
+
+	rebuild();
 }
 
-void data_encoder::init(char *txt, int len) {
+data_encoder::~data_encoder () {
+	free(buffer);
+}
+
+void data_encoder::rebuild() {
 	gr::thread::scoped_lock lock(d_mutex);
-
-	reset_rds_data();
-
-	if(txt) {
-		std::memset(radiotext,' ',sizeof(radiotext));
-		std::memcpy(radiotext, txt, len);
-		radiotext[len] = '\0';
-	}
 
 	count_groups();
 
@@ -84,62 +136,77 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 	}
 
 	int msg_len = pmt::blob_length(pmt::cdr(msg));
-	std::string text = std::string((char*)pmt::blob_data(pmt::cdr(msg)), msg_len);
-	std::cout << std::endl << "new rds text: " << text << std::endl;
-	init((char *)pmt::blob_data(pmt::cdr(msg)), msg_len);
+	std::string command = std::string((char*)pmt::blob_data(pmt::cdr(msg)), msg_len);
+	command.erase(std::remove(command.begin(), command.end(), '\n'), command.end());
+
+	std::vector<std::string> str;
+	boost::split(str, command, boost::is_any_of("\t "));
+
+	cout << "input string: " << command << "   length: " << str.size() << std::endl;
+
+	try{
+
+	if(!str[0].compare("status")) {
+
+	} else if(!str[0].compare("pty")) {
+		if(str.size() != 2) goto error;
+		unsigned int n = boost::lexical_cast<unsigned int>(str[1]);
+		if(n > 31) goto error;
+		
+		format msg = boost::format("setting pty to %d thats %s\n") % n % pty_table[n];
+		cout << msg << endl;
+		string s = msg.str();
+		message_port_pub(mp("status"), cons(pmt::PMT_NIL, make_blob(s.c_str(), s.size())));
+		PTY = n;
+
+	} else if(!str[0].compare("rds")) {
+		if(str.size() < 2) goto error;
+		string text;
+		for(int i = 1; i < str.size(); i++) {
+			text += " ";
+			text += str[i];
+		}
+
+		set_radiotext(text);
+
+		format msg = boost::format("setting rds text to: %s\n") % radiotext;
+		cout << msg << endl;
+		string s = msg.str();
+		message_port_pub(mp("status"), cons(pmt::PMT_NIL, make_blob(s.c_str(), s.size())));
+	}
+
+	}catch(boost::bad_lexical_cast const& ) {
+		cout << "bad lexical cast" << endl;
+		goto error;
+	}
+
+	//std::cout << std::endl << "new rds text: " << text << std::endl;
+	//init((char *)pmt::blob_data(pmt::cdr(msg)), msg_len);
+	rebuild();
+
+	return;
+
+
+error:
+	cout << "error" << endl;
+	//print_help();
 
 }
 
-data_encoder::~data_encoder () {
-	free(buffer);
+void data_encoder::set_radiotext(string text) {
+		size_t len = std::min(sizeof(radiotext) - 1, text.length());
+
+		std::memset(radiotext, ' ', sizeof(radiotext));
+		std::memcpy(radiotext, text.c_str(), len);
+		radiotext[len] = '\0';
 }
 
-void data_encoder::reset_rds_data() {
+void data_encoder::set_ps(string text) {
+		size_t len = std::min(sizeof(PS) - 1, text.length());
 
-	std::memset(infoword,    0, sizeof(infoword));
-	std::memset(checkword,   0, sizeof(checkword));
-	std::memset(groups,      0, sizeof(groups));
-	std::memset(PS,        ' ', sizeof(PS));
-	std::memset(radiotext, ' ', sizeof(radiotext));
-
-	nbuffers             = 0;
-	d_g0_counter         = 0;
-	d_g2_counter         = 0;
-	d_current_buffer     = 0;
-	d_buffer_bit_counter = 0;
-
-	PI                   = 0;
-	PTY                  = 0;
-	TP                   = false;
-	TA                   = false;
-	MuSp                 = false;
-	MS                   = false;
-	AH                   = false;
-	compressed           = false;
-	static_pty           = false;
-
-	// which groups are set
-	groups[0] = 1;
-	groups[2] = 1;
-	groups[4] = 1; // clock time
-	groups[8] = 1;
-
-	// set some default values
-	assign_value("PI", "50FF");
-	assign_value("PTY", "31");
-	assign_value("TP", "true");
-	assign_value("TA", "false");
-	assign_value("MuSp", "true");
-	assign_value("AF1", "89.8");
-	assign_value("AF2", "102.3");
-	assign_value("PS", "Arrrrrr!");
-	assign_value("RadioText", " ..:: http://www.ccs-labs.org ::..");
-	assign_value("DP", "3");
-	assign_value("extent", "2");
-	assign_value("event", "724");
-	assign_value("location", "6126");
-
-	printf("RDS data reset\n");
+		std::memset(radiotext, ' ', sizeof(PS));
+		std::memcpy(radiotext, text.c_str(), len);
+		radiotext[len] = '\0';
 }
 
 void data_encoder::assign_value (const char *field, const char *value) {
@@ -152,11 +219,6 @@ void data_encoder::assign_value (const char *field, const char *value) {
 		if(!strcmp(value, "true")) TP=true;
 		else if(!strcmp(value, "false")) TP=false;
 		else printf("unrecognized TP value: %s\n", value);
-	}
-	else if(!strcmp(field, "PTY")) {
-		if((length!=1)&&(length!=2))
-			printf("invalid TPY string length: %i\n", length);
-		else PTY=atol(value);
 	}
 	else if(!strcmp(field, "TA")) {
 		if(!strcmp(value, "true")) TA=true;

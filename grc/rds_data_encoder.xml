@@ -14,4 +14,9 @@
 		<name>out</name>
 		<type>byte</type>
 	</source>
+	<source>
+		<name>status</name>
+		<type>message</type>
+		<optional>1</optional>
+	</source>
 </block>

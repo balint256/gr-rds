@@ -2,8 +2,6 @@
 /*
  * Copyright 2004 Free Software Foundation, Inc.
  * 
- * This file is part of GNU Radio
- * 
  * GNU Radio is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
@@ -20,16 +18,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/*	HSR - MOBKOM LABOR
- *	Semesterarbeit GnuRadio Contributions
- *	U. Schaufelberger and R. Gaensli
- * 
- * 	Heavily modified by Dimitrios Symeonidis
- */
-
-
-#ifndef INCLUDED_gr_rds_data_decoder_H
-#define INCLUDED_gr_rds_data_decoder_H
+#ifndef INCLUDED_GR_RDS_DATA_DECODER_H
+#define INCLUDED_GR_RDS_DATA_DECODER_H
 
 #include <rds/api.h>
 #include <gnuradio/sync_block.h>
@@ -46,36 +36,45 @@ namespace rds {
 class RDS_API data_decoder : public gr::sync_block
 {
 private:
-	unsigned long bit_counter, lastseen_offset_counter, reg;
-	unsigned char lastseen_offset, block_number;
-	unsigned int block_bit_counter, wrong_blocks_counter, blocks_counter, group_good_blocks_counter;
-	bool presync,good_block, group_assembly_started;
-	unsigned int group[4];
-	enum state_t { ST_NO_SYNC, ST_SYNC };
-	state_t d_state;
-	char radiotext[65];
-	char clocktime_string[33];
-	char af1_string[10];
-	char af2_string[10];
-	char af_string[21];
-	bool radiotext_AB_flag;
-	bool traffic_program;
-	bool traffic_announcement;
-	bool music_speech;
-	bool mono_stereo;
-	bool artificial_head;
-	bool compressed;
-	bool static_pty;
-	unsigned char program_type;
-	unsigned int program_identification;
-	unsigned char pi_country_identification;
-	unsigned char pi_area_coverage;
-	unsigned char pi_program_reference_number;
-	char program_service_name[9];
+	unsigned long  bit_counter;
+	unsigned long  lastseen_offset_counter, reg;
+	unsigned int   block_bit_counter;
+	unsigned int   wrong_blocks_counter;
+	unsigned int   blocks_counter;
+	unsigned int   group_good_blocks_counter;
+	unsigned int   group[4];
+	unsigned int   program_identification;
+	bool           presync;
+	bool           good_block;
+	bool           group_assembly_started;
+	unsigned char  program_type;
+	unsigned char  lastseen_offset;
+	unsigned char  block_number;
+	unsigned char  pi_country_identification;
+	unsigned char  pi_area_coverage;
+	unsigned char  pi_program_reference_number;
+	char           radiotext[65];
+	char           clocktime_string[33];
+	char           af1_string[10];
+	char           af2_string[10];
+	char           af_string[21];
+	char           program_service_name[9];
+	bool           radiotext_AB_flag;
+	bool           traffic_program;
+	bool           traffic_announcement;
+	bool           music_speech;
+	bool           mono_stereo;
+	bool           artificial_head;
+	bool           compressed;
+	bool           static_pty;
+
 	gr::thread::mutex d_mutex;
 
-// Functions
-	data_decoder ();		// private constructor
+	enum state_t { ST_NO_SYNC, ST_SYNC };
+	state_t d_state;
+
+
+	data_decoder();
 	void enter_no_sync();
 	void enter_sync(unsigned int);
 	void reset_rds_data();
@@ -96,18 +95,6 @@ private:
 
 
 public:
-	/*
-	 * We use boost::shared_ptr's instead of raw pointers for all access
-	 * to gr_blocks (and many other data structures).  The shared_ptr gets
-	 * us transparent reference counting, which greatly simplifies storage
-	 * management issues.  This is especially helpful in our hybrid
-	 * 
-	 * * C++ / Python system.
-	 *
-	 * See http://www.boost.org/libs/smart_ptr/smart_ptr.htm
-	 *
-	 * As a convention, the _sptr suffix indicates a boost::shared_ptr
-	 */
 	typedef boost::shared_ptr<data_decoder> sptr;
 	static sptr make();
 	~data_decoder();		// public destructor
@@ -120,4 +107,4 @@ public:
 }
 }
 
-#endif /* INCLUDED_gr_rds_data_decoder_H */
+#endif /* INCLUDED_GR_RDS_DATA_DECODER_H */

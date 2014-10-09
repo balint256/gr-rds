@@ -2,8 +2,6 @@
 /*
  * Copyright 2004 Free Software Foundation, Inc.
  * 
- * This file is part of GNU Radio
- * 
  * GNU Radio is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
@@ -21,8 +19,8 @@
  */
 
 
-#ifndef INCLUDED_gr_rds_data_encoder_H
-#define INCLUDED_gr_rds_data_encoder_H
+#ifndef INCLUDED_GR_RDS_DATA_ENCODER_H
+#define INCLUDED_GR_RDS_DATA_ENCODER_H
 
 #include <rds/api.h>
 #include <gnuradio/sync_block.h>
@@ -37,25 +35,21 @@ namespace rds {
 class RDS_API data_encoder : public gr::sync_block
 {
 private:
-	unsigned int infoword[4];
-	unsigned int checkword[4];
-	unsigned int block[4];
+	unsigned int  infoword[4];
+	unsigned int  checkword[4];
+	unsigned int  block[4];
 	unsigned char **buffer;
 
 	// FIXME make this a struct (or a class)
-	unsigned int PI;
-	bool TP;
 	unsigned char PTY;
+	char radiotext[64];
+	char PS[8];
 	bool TA;
-	bool MuSp;
+	bool TP;
 	bool MS;
-	bool AH;
-	bool compressed;
-	bool static_pty;
+	unsigned int PI;
 	double AF1;
 	double AF2;
-	char PS[8];
-	unsigned char radiotext[64];
 	int DP;
 	int extent;
 	int event;
@@ -81,6 +75,10 @@ private:
 // Functions
 	data_encoder ();  // private constructor
 	void rebuild();
+	void set_ms(bool ms);
+	void set_tp(bool tp);
+	void set_ta(bool ta);
+	void set_pty(int pty);
 	void set_radiotext(std::string text);
 	void set_ps(std::string text);
 	void count_groups();
@@ -107,4 +105,4 @@ public:
 }
 }
 
-#endif /* INCLUDED_gr_rds_data_encoder_H */
+#endif /* INCLUDED_GR_RDS_DATA_ENCODER_H */

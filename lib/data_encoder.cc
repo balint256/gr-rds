@@ -26,33 +26,21 @@
 #include <rds/data_encoder.h>
 #include <rds/constants.h>
 #include <gnuradio/io_signature.h>
+#include <boost/spirit/include/qi.hpp>
 #include <math.h>
 #include <ctype.h>
 #include <time.h>
 #include <cstdio>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 using namespace gr::rds;
-using pmt::mp;
-using pmt::cons;
-using pmt::make_blob;
-using std::cout;
-using std::endl;
-using std::string;
-using boost::format;
-
 
 data_encoder::data_encoder ()
 	: gr::sync_block ("gr_rds_data_encoder",
 			gr::io_signature::make (0, 0, 0),
-			gr::io_signature::make (1, 1, sizeof(unsigned char)))
-{
+			gr::io_signature::make (1, 1, sizeof(unsigned char))) {
 
-	message_port_register_out(mp("status"));
-
-	message_port_register_in(mp("rds in"));
-	set_msg_handler(mp("rds in"), boost::bind(&data_encoder::rds_in, this, _1));
+	message_port_register_in(pmt::mp("rds in"));
+	set_msg_handler(pmt::mp("rds in"), boost::bind(&data_encoder::rds_in, this, _1));
 
 	std::memset(infoword,    0, sizeof(infoword));
 	std::memset(checkword,   0, sizeof(checkword));
@@ -68,27 +56,21 @@ data_encoder::data_encoder ()
 
 	PI                   = 0;
 	PTY                  = 5;     // programm type (education)
-	TP                   = false;
+	TP                   = false; // traffic programm
 	TA                   = false; // traffic announcement
-	MuSp                 = false;
-	MS                   = false;
-	AH                   = false;
-	compressed           = false;
-	static_pty           = false;
+	MS                   = true;  // music/speech switch (1=music)
 
-	set_radiotext(string("GNU Radio <3"));
-	set_ps(string("Arrrrrr!"));
+	set_radiotext(std::string("GNU Radio <3"));
+	set_ps(std::string("Arrrrrr!"));
 
 	// which groups are set
 	groups[0] = 1; // basic tuning and switching
 	groups[2] = 1; // radio text
 	groups[4] = 1; // clock time
-	groups[8] = 1; // tmc
+	groups[8] = 0; // tmc
 
 	// set some default values
 	assign_value("PI", "50FF");
-	assign_value("TP", "true");
-	assign_value("MuSp", "true");
 	assign_value("AF1", "89.8");
 	assign_value("AF2", "102.3");
 	assign_value("DP", "3");
@@ -99,7 +81,7 @@ data_encoder::data_encoder ()
 	rebuild();
 }
 
-data_encoder::~data_encoder () {
+data_encoder::~data_encoder() {
 	free(buffer);
 }
 
@@ -107,6 +89,7 @@ void data_encoder::rebuild() {
 	gr::thread::scoped_lock lock(d_mutex);
 
 	count_groups();
+	d_current_buffer = 0;
 
 	// allocate memory for nbuffers buffers of 104 unsigned chars each
 	buffer = (unsigned char **)malloc(nbuffers * sizeof(unsigned char *));
@@ -114,7 +97,7 @@ void data_encoder::rebuild() {
 		buffer[i] = (unsigned char *)malloc(104 * sizeof(unsigned char));
 		for(int j = 0; j < 104; j++) buffer[i][j] = 0;
 	}
-	printf("%i buffers allocated\n", nbuffers);
+	//printf("%i buffers allocated\n", nbuffers);
 
 	// prepare each of the groups
 	for(int i = 0; i < 32; i++) {
@@ -126,8 +109,9 @@ void data_encoder::rebuild() {
 				for(int j = 0; j < 15; j++) create_group(i % 16, (i < 16) ? false : true);
 		}
 	}
-	d_current_buffer = 0;
 
+	d_current_buffer = 0;
+	std::cout << "nbuffers: " << nbuffers << std::endl;
 }
 
 void data_encoder::rds_in(pmt::pmt_t msg) {
@@ -135,65 +119,105 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 		return;
 	}
 
+	using std::cout;
+	using std::endl;
+	using boost::spirit::qi::phrase_parse;
+	using boost::spirit::qi::lexeme;
+	using boost::spirit::qi::char_;
+	using boost::spirit::qi::int_;
+	using boost::spirit::qi::bool_;
+	using boost::spirit::qi::space;
+	using boost::spirit::qi::blank;
+	using boost::spirit::qi::lit;
+
 	int msg_len = pmt::blob_length(pmt::cdr(msg));
-	std::string command = std::string((char*)pmt::blob_data(pmt::cdr(msg)), msg_len);
-	command.erase(std::remove(command.begin(), command.end(), '\n'), command.end());
+	std::string in = std::string((char*)pmt::blob_data(pmt::cdr(msg)), msg_len);
+	cout << "input string: " << in << "   length: " << in.size() << endl;
 
-	std::vector<std::string> str;
-	boost::split(str, command, boost::is_any_of("\t "));
+	int i1;
+	std::string s1;
+	bool b1;
 
-	cout << "input string: " << command << "   length: " << str.size() << std::endl;
+	// state
+	if(phrase_parse(in.begin(), in.end(),
+			"status", space)) {
+		cout << "print state" << endl;
+		//print_state();
 
-	try{
+	// pty
+	} else if(phrase_parse(in.begin(), in.end(),
+			"pty" >> int_, space, i1)) {
+		cout << "set pty: " << i1 << endl;
+		set_pty(i1);
 
-	if(!str[0].compare("status")) {
+	// radio text
+	} else if(phrase_parse(in.begin(), in.end(),
+			"text" >> lexeme[+(char_ - '\n')] >> -lit("\n"),
+			space, s1)) {
+		cout << "text: " << s1 << endl;
+		set_radiotext(s1);
 
-	} else if(!str[0].compare("pty")) {
-		if(str.size() != 2) goto error;
-		unsigned int n = boost::lexical_cast<unsigned int>(str[1]);
-		if(n > 31) goto error;
-		
-		format msg = boost::format("setting pty to %d thats %s\n") % n % pty_table[n];
-		cout << msg << endl;
-		string s = msg.str();
-		message_port_pub(mp("status"), cons(pmt::PMT_NIL, make_blob(s.c_str(), s.size())));
-		PTY = n;
+	// ps
+	} else if(phrase_parse(in.begin(), in.end(),
+			"ps" >> lexeme[+(char_ - '\n')] >> -lit("\n"),
+			space, s1)) {
+		cout << "ps: " << s1 << endl;
+		set_ps(s1);
 
-	} else if(!str[0].compare("rds")) {
-		if(str.size() < 2) goto error;
-		string text;
-		for(int i = 1; i < str.size(); i++) {
-			text += " ";
-			text += str[i];
-		}
+	// ta
+	} else if(phrase_parse(in.begin(), in.end(),
+			"ta" >> bool_,
+			space, b1)) {
+		cout << "ta: " << b1 << endl;
+		set_ta(b1);
 
-		set_radiotext(text);
+	// tp
+	} else if(phrase_parse(in.begin(), in.end(),
+			"tp" >> bool_,
+			space, b1)) {
+		cout << "tp: " << b1 << endl;
+		set_tp(b1);
 
-		format msg = boost::format("setting rds text to: %s\n") % radiotext;
-		cout << msg << endl;
-		string s = msg.str();
-		message_port_pub(mp("status"), cons(pmt::PMT_NIL, make_blob(s.c_str(), s.size())));
+	// MS
+	} else if(phrase_parse(in.begin(), in.end(),
+			"ms" >> bool_,
+			space, b1)) {
+		cout << "ms: " << b1 << endl;
+		set_ms(b1);
+
+	// no match / unkonwn command
+	} else {
+		cout << "not understood" << endl;
 	}
 
-	}catch(boost::bad_lexical_cast const& ) {
-		cout << "bad lexical cast" << endl;
-		goto error;
-	}
-
-	//std::cout << std::endl << "new rds text: " << text << std::endl;
-	//init((char *)pmt::blob_data(pmt::cdr(msg)), msg_len);
 	rebuild();
-
-	return;
-
-
-error:
-	cout << "error" << endl;
-	//print_help();
-
 }
 
-void data_encoder::set_radiotext(string text) {
+void data_encoder::set_ms(bool ms) {
+	MS = ms;
+	std::cout << "setting Music/Speech code to " << ms << " (";
+	if(ms) std::cout << "music)" << std::endl;
+	else std::cout << "speech)" << std::endl;
+}
+
+void data_encoder::set_tp(bool tp) {
+	TP = tp;
+}
+
+void data_encoder::set_ta(bool ta) {
+	TA = ta;
+}
+
+void data_encoder::set_pty(int pty) {
+	if(pty < 0 || pty > 31) {
+		std::cout << "warning: ignoring invalid pty: " << std::endl;
+	} else {
+		PTY = pty;
+		std::cout << "setting pty to " << pty << " (" << pty_table[pty] << ")" << std::endl;
+	}
+}
+
+void data_encoder::set_radiotext(std::string text) {
 		size_t len = std::min(sizeof(radiotext) - 1, text.length());
 
 		std::memset(radiotext, ' ', sizeof(radiotext));
@@ -201,7 +225,7 @@ void data_encoder::set_radiotext(string text) {
 		radiotext[len] = '\0';
 }
 
-void data_encoder::set_ps(string text) {
+void data_encoder::set_ps(std::string text) {
 		size_t len = std::min(sizeof(PS) - 1, text.length());
 
 		std::memset(radiotext, ' ', sizeof(PS));
@@ -215,33 +239,8 @@ void data_encoder::assign_value (const char *field, const char *value) {
 		if(length!=4) printf("invalid PI string length: %i\n", length);
 		else PI=strtol(value, NULL, 16);
 	}
-	else if(!strcmp(field, "TP")) {
-		if(!strcmp(value, "true")) TP=true;
-		else if(!strcmp(value, "false")) TP=false;
-		else printf("unrecognized TP value: %s\n", value);
-	}
-	else if(!strcmp(field, "TA")) {
-		if(!strcmp(value, "true")) TA=true;
-		else if(!strcmp(value, "false")) TA=false;
-		else printf("unrecognized TA value: %s\n", value);
-	}
-	else if(!strcmp(field, "MuSp")) {
-		if(!strcmp(value, "true")) MuSp=true;
-		else if(!strcmp(value, "false")) MuSp=false;
-		else printf("unrecognized MuSp value: %s\n", value);
-	}
 	else if(!strcmp(field, "AF1")) AF1=atof(value);
 	else if(!strcmp(field, "AF2")) AF2=atof(value);
-/* need to copy a char arrays here */
-	else if(!strcmp(field, "PS")) {
-		if(length!=8) printf("invalid PS string length: %i\n", length);
-		else for(int i=0; i<8; i++)
-			PS[i]=value[i];
-	}
-	else if(!strcmp(field, "RadioText")) {
-		if(length>64) printf("invalid RadioText string length: %i\n", length);
-		else for(int i=0; i<length; i++) radiotext[i]=value[i];
-	}
 	else if(!strcmp(field, "DP"))
 		DP=atol(value);
 	else if(!strcmp(field, "extent"))
@@ -293,11 +292,12 @@ unsigned int data_encoder::encode_af(const double af) {
 /* count and print present groups */
 void data_encoder::count_groups(void) {
 	int ngroups = 0;
-	printf("groups present: ");
+	nbuffers = 0;
+	//printf("groups present: ");
 	for(int i = 0; i < 32; i++) {
 		if(groups[i] == 1) {
 			ngroups++;
-			printf("%i%c ", i % 16, (i < 16) ? 'A' : 'B');
+			//printf("%i%c ", i % 16, (i < 16) ? 'A' : 'B');
 			if(i % 16 == 0)  // group 0
 				nbuffers += 4;
 			else if(i % 16 == 2)  // group 2
@@ -306,7 +306,7 @@ void data_encoder::count_groups(void) {
 				nbuffers++;
 		}
 	}
-	printf("(%i groups)\n", ngroups);
+	//printf("(%i groups)\n", ngroups);
 }
 
 /* create the 4 infowords, according to group type.
@@ -321,8 +321,7 @@ void data_encoder::create_group(const int group_type, const bool AB) {
 	else if(group_type == 4) prepare_group4a();
 	else if(group_type == 8) prepare_group8a();
 	else printf("preparation of group %i not yet supported\n", group_type);
-	printf("data: %04X %04X %04X %04X, ",
-		infoword[0], infoword[1], infoword[2], infoword[3]);
+	//printf("data: %04X %04X %04X %04X, ", infoword[0], infoword[1], infoword[2], infoword[3]);
 
 	for(int i= 0; i < 4; i++) {
 		checkword[i]=calc_syndrome(infoword[i], 16);
@@ -331,15 +330,14 @@ void data_encoder::create_group(const int group_type, const bool AB) {
 		if((i == 2) && AB) block[2] ^= offset_word[4];
 		else block[i] ^= offset_word[i];
 	}
-	printf("group: %04X %04X %04X %04X\n",
-		block[0], block[1], block[2], block[3]);
+	//printf("group: %04X %04X %04X %04X\n", block[0], block[1], block[2], block[3]);
 
 	prepare_buffer(d_current_buffer);
 	d_current_buffer++;
 }
 
 void data_encoder::prepare_group0(const bool AB) {
-	infoword[1] = infoword[1] | (TA << 4) | (MuSp << 3);
+	infoword[1] = infoword[1] | (TA << 4) | (MS << 3);
 	if(d_g0_counter == 3)
 		infoword[1] = infoword[1] | 0x5;  // d0=1 (stereo), d1-3=0
 	infoword[1] = infoword[1] | (d_g0_counter & 0x3);
@@ -374,7 +372,7 @@ void data_encoder::prepare_group4a(void) {
 	tm *utc;
 	
 	time(&rightnow);
-	printf("%s", asctime(localtime(&rightnow)));
+	//printf("%s", asctime(localtime(&rightnow)));
 
 /* we're supposed to send UTC time; the receiver should then add the
  * local timezone offset */

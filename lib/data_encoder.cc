@@ -54,11 +54,13 @@ data_encoder::data_encoder ()
 	d_current_buffer     = 0;
 	d_buffer_bit_counter = 0;
 
-	PI                   = 0;
+	PI                   = 0x10FF;
 	PTY                  = 5;     // programm type (education)
 	TP                   = false; // traffic programm
 	TA                   = false; // traffic announcement
 	MS                   = true;  // music/speech switch (1=music)
+	AF1                  = 89.8;
+	AF2                  = 102.3;
 
 	set_radiotext(std::string("GNU Radio <3"));
 	set_ps(std::string("Arrrrrr!"));
@@ -67,12 +69,9 @@ data_encoder::data_encoder ()
 	groups[0] = 1; // basic tuning and switching
 	groups[2] = 1; // radio text
 	groups[4] = 1; // clock time
-	groups[8] = 0; // tmc
+	groups[8] = 1; // tmc
 
 	// set some default values
-	assign_value("PI", "50FF");
-	assign_value("AF1", "89.8");
-	assign_value("AF2", "102.3");
 	assign_value("DP", "3");
 	assign_value("extent", "2");
 	assign_value("event", "724");
@@ -124,8 +123,11 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 	using boost::spirit::qi::phrase_parse;
 	using boost::spirit::qi::lexeme;
 	using boost::spirit::qi::char_;
+	using boost::spirit::qi::hex;
 	using boost::spirit::qi::int_;
+	using boost::spirit::qi::uint_;
 	using boost::spirit::qi::bool_;
+	using boost::spirit::qi::double_;
 	using boost::spirit::qi::space;
 	using boost::spirit::qi::blank;
 	using boost::spirit::qi::lit;
@@ -134,9 +136,11 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 	std::string in = std::string((char*)pmt::blob_data(pmt::cdr(msg)), msg_len);
 	cout << "input string: " << in << "   length: " << in.size() << endl;
 
+	unsigned int ui1;
 	int i1;
 	std::string s1;
 	bool b1;
+	double d1;
 
 	// state
 	if(phrase_parse(in.begin(), in.end(),
@@ -146,9 +150,9 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 
 	// pty
 	} else if(phrase_parse(in.begin(), in.end(),
-			"pty" >> int_, space, i1)) {
-		cout << "set pty: " << i1 << endl;
-		set_pty(i1);
+			"pty" >> (("0x" >> hex) | uint_), space, ui1)) {
+		cout << "set pty: " << ui1 << endl;
+		set_pty(ui1);
 
 	// radio text
 	} else if(phrase_parse(in.begin(), in.end(),
@@ -185,6 +189,24 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 		cout << "ms: " << b1 << endl;
 		set_ms(b1);
 
+	// PI
+	} else if(phrase_parse(in.begin(), in.end(),
+			"pi" >> lit("0x") >> hex, space, ui1)) {
+		cout << "set pi: " << ui1 << endl;
+		set_pi(ui1);
+
+	// AF1
+	} else if(phrase_parse(in.begin(), in.end(),
+			"af1" >> double_, space, d1)) {
+		cout << "set af1: " << d1 << endl;
+		set_af1(d1);
+
+	// AF2
+	} else if(phrase_parse(in.begin(), in.end(),
+			"af2" >> double_, space, d1)) {
+		cout << "set af2: " << d1 << endl;
+		set_af2(d1);
+
 	// no match / unkonwn command
 	} else {
 		cout << "not understood" << endl;
@@ -200,6 +222,14 @@ void data_encoder::set_ms(bool ms) {
 	else std::cout << "speech)" << std::endl;
 }
 
+void data_encoder::set_af1(double af1) {
+	AF1 = af1;
+}
+
+void data_encoder::set_af2(double af2) {
+	AF2 = af2;
+}
+
 void data_encoder::set_tp(bool tp) {
 	TP = tp;
 }
@@ -208,14 +238,30 @@ void data_encoder::set_ta(bool ta) {
 	TA = ta;
 }
 
-void data_encoder::set_pty(int pty) {
-	if(pty < 0 || pty > 31) {
+void data_encoder::set_pty(unsigned int pty) {
+	if(pty > 31) {
 		std::cout << "warning: ignoring invalid pty: " << std::endl;
 	} else {
 		PTY = pty;
 		std::cout << "setting pty to " << pty << " (" << pty_table[pty] << ")" << std::endl;
 	}
 }
+
+void data_encoder::set_pi(unsigned int pi) {
+	if(pi > 0xFFFF) {
+		std::cout << "warning: ignoring invalid pi: " << std::endl;
+	} else {
+		PI = pi;
+		std::cout << "setting pi to " << std::hex << pi << std::endl;
+		if(pi & 0xF000)
+			std::cout << "    country code " << pi_country_codes[((pi & 0xF000) >> 12) - 1][0] << std::endl;
+		else
+			std::cout << "    country code 0 (incorrect)" << std::endl;
+		std::cout << "    coverage area " << coverage_area_codes[(pi & 0xF00) >> 8] << std::endl;
+		std::cout << "    program reference number " << (pi & 0xFF) << std::dec << std::endl;
+	}
+}
+
 
 void data_encoder::set_radiotext(std::string text) {
 		size_t len = std::min(sizeof(radiotext) - 1, text.length());
@@ -239,8 +285,6 @@ void data_encoder::assign_value (const char *field, const char *value) {
 		if(length!=4) printf("invalid PI string length: %i\n", length);
 		else PI=strtol(value, NULL, 16);
 	}
-	else if(!strcmp(field, "AF1")) AF1=atof(value);
-	else if(!strcmp(field, "AF2")) AF2=atof(value);
 	else if(!strcmp(field, "DP"))
 		DP=atol(value);
 	else if(!strcmp(field, "extent"))
@@ -271,7 +315,7 @@ unsigned int data_encoder::calc_syndrome(unsigned long message,
 		reg = reg << 1;
 		if (reg & (1 << plen)) reg = reg ^ poly;
 	}
-	return (reg & ((1 << plen) - 1));
+	return reg & ((1 << plen) - 1);
 }
 
 /* see page 41 in the standard; this is an implementation of AF method A
@@ -286,7 +330,7 @@ unsigned int data_encoder::encode_af(const double af) {
 		af_code = nearbyint((af - 531) / 9 + 16);
 	else
 		printf("invalid alternate frequency: %f\n", af);
-	return(af_code);
+	return af_code;
 }
 
 /* count and print present groups */
@@ -338,6 +382,7 @@ void data_encoder::create_group(const int group_type, const bool AB) {
 
 void data_encoder::prepare_group0(const bool AB) {
 	infoword[1] = infoword[1] | (TA << 4) | (MS << 3);
+	//FIXME: make DI configurable
 	if(d_g0_counter == 3)
 		infoword[1] = infoword[1] | 0x5;  // d0=1 (stereo), d1-3=0
 	infoword[1] = infoword[1] | (d_g0_counter & 0x3);
@@ -348,6 +393,10 @@ void data_encoder::prepare_group0(const bool AB) {
 	infoword[3] = (PS[2 * d_g0_counter] << 8) | PS[2 * d_g0_counter + 1];
 	d_g0_counter++;
 	if(d_g0_counter > 3) d_g0_counter = 0;
+
+
+	std::cout << "af1 " << encode_af(AF1) << std::endl;
+	std::cout << "af2 " << encode_af(AF2) << std::endl;
 }
 
 void data_encoder::prepare_group2(const bool AB) {

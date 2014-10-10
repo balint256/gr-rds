@@ -50,6 +50,7 @@ private:
 	unsigned int PI;
 	double AF1;
 	double AF2;
+
 	int DP;
 	int extent;
 	int event;
@@ -78,7 +79,10 @@ private:
 	void set_ms(bool ms);
 	void set_tp(bool tp);
 	void set_ta(bool ta);
-	void set_pty(int pty);
+	void set_af1(double af1);
+	void set_af2(double af2);
+	void set_pty(unsigned int pty);
+	void set_pi(unsigned int pty);
 	void set_radiotext(std::string text);
 	void set_ps(std::string text);
 	void count_groups();

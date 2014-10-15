@@ -264,19 +264,17 @@ void data_encoder::set_pi(unsigned int pi) {
 
 
 void data_encoder::set_radiotext(std::string text) {
-		size_t len = std::min(sizeof(radiotext) - 1, text.length());
+		size_t len = std::min(sizeof(radiotext), text.length());
 
 		std::memset(radiotext, ' ', sizeof(radiotext));
 		std::memcpy(radiotext, text.c_str(), len);
-		radiotext[len] = '\0';
 }
 
 void data_encoder::set_ps(std::string text) {
-		size_t len = std::min(sizeof(PS) - 1, text.length());
+		size_t len = std::min(sizeof(PS), text.length());
 
 		std::memset(PS, ' ', sizeof(PS));
 		std::memcpy(PS, text.c_str(), len);
-		PS[len] = '\0';
 }
 
 void data_encoder::assign_value (const char *field, const char *value) {

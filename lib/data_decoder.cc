@@ -187,8 +187,8 @@ void data_decoder::decode_type0(unsigned int *group, bool version_code) {
 		af_code_1 = (int)(group[2] >> 8) & 0xff;
 		af_code_2 = (int) group[2]       & 0xff;
 
-		if(af_1 = decode_af(af_code_1)) no_af += 1;
-		if(af_2 = decode_af(af_code_2)) no_af += 2;
+		if((af_1 = decode_af(af_code_1))) no_af += 1;
+		if((af_2 = decode_af(af_code_2))) no_af += 2;
 /* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
 		memset(af1_string, ' ', sizeof(af1_string));
 		memset(af2_string, ' ', sizeof(af2_string));

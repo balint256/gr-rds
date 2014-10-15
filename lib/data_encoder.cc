@@ -1,8 +1,6 @@
 /*
  * Copyright 2004 Free Software Foundation, Inc.
  * 
- * This file is part of GNU Radio
- * 
  * GNU Radio is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
@@ -45,8 +43,6 @@ data_encoder::data_encoder ()
 	std::memset(infoword,    0, sizeof(infoword));
 	std::memset(checkword,   0, sizeof(checkword));
 	std::memset(groups,      0, sizeof(groups));
-	std::memset(PS,        ' ', sizeof(PS));
-	std::memset(radiotext, ' ', sizeof(radiotext));
 
 	nbuffers             = 0;
 	d_g0_counter         = 0;
@@ -456,9 +452,9 @@ void data_encoder::prepare_buffer(int which) {
 		j = 7 - q % 8;
 		temp[i] = temp[i]|(buffer[which][q] << j);
 	}
-	printf("buffer[%i]: ", which);
-	for(i = 0; i < 13; i++) printf("%02X", temp[i]);
-	printf("\n");
+	//printf("buffer[%i]: ", which);
+	//for(i = 0; i < 13; i++) printf("%02X", temp[i]);
+	//printf("\n");
 }
 
 //////////////////////// WORK ////////////////////////////////////

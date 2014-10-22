@@ -1,8 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2004 Free Software Foundation, Inc.
- * 
- * This file is part of GNU Radio
+ * Copyright 2014 Free Software Foundation, Inc.
  * 
  * GNU Radio is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +31,6 @@
 #include <rds/data_decoder.h>
 #include <rds/constants.h>
 #include <rds/tmc_events.h>
-//#include "tmc_locations_italy.h"
 #include <gnuradio/io_signature.h>
 #include <math.h>
 
@@ -46,10 +43,10 @@ data_decoder::make() {
 
 data_decoder::data_decoder()
 	: gr::sync_block ("gr_rds_data_decoder",
-			gr::io_signature::make (1, 1, sizeof (bool)),
+			gr::io_signature::make (1, 1, sizeof (char)),
 			gr::io_signature::make (0, 0, 0))
 {
-	set_output_multiple(104);	// 1 RDS datagroup contains 104 bits
+	set_output_multiple(104);  // 1 RDS datagroup = 104 bits
 	message_port_register_out(pmt::mp("out"));
 	reset();
 }
@@ -114,7 +111,7 @@ void data_decoder::send_message(long msgtype, std::string msgtext) {
 	pmt::pmt_t msg  = pmt::mp(msgtext);
 	pmt::pmt_t type = pmt::from_long(msgtype);
 	message_port_pub(pmt::mp("out"), pmt::make_tuple(type, msg));
-        std::cout << "RDS: " << msgtext << std::endl;
+        //std::cout << "RDS: " << msgtext << std::endl;
 }
 
 /* see Annex B, page 64 of the standard */
@@ -362,7 +359,8 @@ void data_decoder::decode_type3a(unsigned int *group){
 				<< (I?"international ":"")
 				<< (N?"national ":"")
 				<< (R?"regional ":"")
-				<< (U?"urban":"") << std::endl;
+				<< (U?"urban":"") 
+				<< " aid: " << aid << std::endl;
 		}
 		else if(variant_code==1){
 			int G=(message>>12)&0x3;	// gap
@@ -576,19 +574,19 @@ void data_decoder::decode_group(unsigned int *group) {
 
 	switch (group_type) {
 		case 0:
-			decode_type0(group, version_code);
+			//decode_type0(group, version_code);
 		break;
 		case 1:
 			decode_type1(group, version_code);
 		break;
 		case 2:
-			decode_type2(group, version_code);
+			//decode_type2(group, version_code);
 		break;
 		case 3:
 			if(!version_code) decode_type3a(group);
 		break;
 		case 4:
-			if(!version_code) decode_type4a(group);
+			//if(!version_code) decode_type4a(group);
 		break;
 		case 5:
 		break;
@@ -597,7 +595,7 @@ void data_decoder::decode_group(unsigned int *group) {
 		case 7:
 		break;
 		case 8:
-			if(!version_code) decode_type8a(group);
+			//if(!version_code) decode_type8a(group);
 		break;
 		case 9:
 		break;
@@ -610,10 +608,10 @@ void data_decoder::decode_group(unsigned int *group) {
 		case 13:
 		break;
 		case 14:
-			decode_type14(group, version_code);
+			//decode_type14(group, version_code);
 		break;
 		case 15:
-			if(version_code) decode_type15b(group);
+			//if(version_code) decode_type15b(group);
 		break;
 		default:
 			printf("DECODE ERROR!!! (group_type=%u)\n",group_type);

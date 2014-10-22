@@ -50,7 +50,7 @@ data_encoder::data_encoder ()
 	d_current_buffer     = 0;
 	d_buffer_bit_counter = 0;
 
-	PI                   = 0x10FF;
+	PI                   = 0xD342;// ger, supra-national
 	PTY                  = 5;     // programm type (education)
 	TP                   = false; // traffic programm
 	TA                   = false; // traffic announcement
@@ -70,8 +70,8 @@ data_encoder::data_encoder ()
 	// set some default values
 	assign_value("DP", "3");
 	assign_value("extent", "2");
-	assign_value("event", "724");
-	assign_value("location", "6126");
+	assign_value("event", "729");
+	assign_value("location", "24742");
 
 	rebuild();
 }

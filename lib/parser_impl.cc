@@ -84,7 +84,7 @@ void parser_impl::send_message(long msgtype, std::string msgtext) {
 }
 
 /* BASIC TUNING: see page 21 of the standard */
-void parser_impl::decode_type0(unsigned int *group, bool version_code) {
+void parser_impl::decode_type0(unsigned int *group, bool B) {
 	unsigned int af_code_1 = 0;
 	unsigned int af_code_2 = 0;
 	unsigned int  no_af    = 0;
@@ -126,7 +126,7 @@ void parser_impl::decode_type0(unsigned int *group, bool version_code) {
 	flagstring[4] = artificial_head        ? '1' : '0';
 	flagstring[5] = compressed             ? '1' : '0';
 	flagstring[6] = static_pty             ? '1' : '0';
-	if(!version_code) {     // type 0A
+	if(!B) {     // type 0A
 		af_code_1 = (int)(group[2] >> 8) & 0xff;
 		af_code_2 = (int) group[2]       & 0xff;
 
@@ -209,7 +209,7 @@ double parser_impl::decode_af(unsigned int af_code) {
  * for extended country codes see page 69, Annex D.2 in the standard
  * for language codes see page 84, Annex J in the standard
  * for emergency warning systems (EWS) see page 53 in the standard */
-void parser_impl::decode_type1(unsigned int *group, bool version_code){
+void parser_impl::decode_type1(unsigned int *group, bool B){
 	int ecc=0, paging=0;
 
 	char country_code=(group[0]>>12)&0x0f;
@@ -226,7 +226,7 @@ void parser_impl::decode_type1(unsigned int *group, bool version_code){
 	if (day||hour||minute)
 		printf("program item: %id, %i:%i ", day, hour, minute);
 
-	if(!version_code){
+	if(!B){
 		switch(variant_code){
 			case 0:			// paging + ecc
 				paging=(slow_labelling>>8)&0x0f;
@@ -256,7 +256,7 @@ void parser_impl::decode_type1(unsigned int *group, bool version_code){
 }
 
 /* RADIOTEXT: page 25 in the standard */
-void parser_impl::decode_type2(unsigned int *group, bool version_code){
+void parser_impl::decode_type2(unsigned int *group, bool B){
 	unsigned char text_segment_address_code=group[1]&0x0f;
 
 /* when the A/B flag is toggled, flush your current radiotext */
@@ -267,7 +267,7 @@ void parser_impl::decode_type2(unsigned int *group, bool version_code){
 	}
 	radiotext_AB_flag=(group[1]>>4)&0x01;
 
-	if (!version_code) {
+	if (!B) {
 		radiotext[text_segment_address_code*4]=(group[2]>>8)&0xff;
 		radiotext[text_segment_address_code*4+1]=group[2]&0xff;
 		radiotext[text_segment_address_code*4+2]=(group[3]>>8)&0xff;
@@ -282,7 +282,12 @@ void parser_impl::decode_type2(unsigned int *group, bool version_code){
 }
 
 /* AID: page 27 in the standard */
-void parser_impl::decode_type3a(unsigned int *group){
+void parser_impl::decode_type3(unsigned int *group, bool B){
+	if(B) {
+		dout << "type 3B not implemented yet" << std::endl;
+		return;
+	}
+
 	int application_group=(group[1]>>1)&0xf;
 	int group_type=group[1]&0x1;
 	int message=group[2];
@@ -319,14 +324,18 @@ void parser_impl::decode_type3a(unsigned int *group){
 }
 
 /* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
-void parser_impl::decode_type4a(unsigned int *group){
+void parser_impl::decode_type4(unsigned int *group, bool B){
+	if(B) {
+		dout << "type 4B not implemented yet" << std::endl;
+		return;
+	}
 	unsigned int hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
 	unsigned int minutes=(group[3]>>6)&0x3f;
 	double local_time_offset=((double)(group[3]&0x1f))/2;
 	if((group[3]>>5)&0x1) local_time_offset *= -1;
 	double modified_julian_date=((group[1]&0x03)<<15)|((group[2]>>1)&0x7fff);
 
-/* MJD -> Y-M-D */
+	/* MJD -> Y-M-D */
 	unsigned int year=(int)((modified_julian_date-15078.2)/365.25);
 	unsigned int month=(int)((modified_julian_date-14956.1-(int)(year*365.25))/30.6001);
 	unsigned int day_of_month=modified_julian_date-14956-(int)(year*365.25)-(int)(month*30.6001);
@@ -334,7 +343,7 @@ void parser_impl::decode_type4a(unsigned int *group){
 	year+=K;
 	month-=1+K*12;
 
-// concatenate into a string, print and send message
+	// concatenate into a string, print and send message
 	for (int i=0; i<32; i++) clocktime_string[i]=' ';
 	clocktime_string[32]='\0';
 	sprintf(clocktime_string, "%02i.%02i.%4i, %02i:%02i (%+.1fh)",
@@ -343,10 +352,26 @@ void parser_impl::decode_type4a(unsigned int *group){
 	send_message(5,clocktime_string);
 }
 
+void parser_impl::decode_type5(unsigned int *group, bool B){
+	dout << "type 5 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type6(unsigned int *group, bool B){
+	dout << "type 6 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type7(unsigned int *group, bool B){
+	dout << "type 7 not implemented yet" << std::endl;
+}
+
 /* TMC: see page 32 of the standard
    initially defined in CEN standard ENV 12313-1
    superseded by ISO standard 14819:2003 */
-void parser_impl::decode_type8a(unsigned int *group){
+void parser_impl::decode_type8(unsigned int *group, bool B){
+	if(B) {
+		dout << "type 8B not implemented yet" << std::endl;
+		return;
+	}
 	bool T=(group[1]>>4)&0x1;		// 0 = user message, 1 = tuning info
 	bool F=(group[1]>>3)&0x1;		// 0 = multi-group, 1 = single-group
 	bool D=(group[2]>15)&0x1;		// 1 = diversion recommended
@@ -414,8 +439,27 @@ void parser_impl::decode_optional_content(int no_groups, unsigned long int *free
 	}
 }
 
-/* EON: see pages 38 and 46 in the standard */
-void parser_impl::decode_type14(unsigned int *group, bool version_code){
+void parser_impl::decode_type9(unsigned int *group, bool B){
+	dout << "type 9 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type10(unsigned int *group, bool B){
+	dout << "type 10 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type11(unsigned int *group, bool B){
+	dout << "type 11 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type12(unsigned int *group, bool B){
+	dout << "type 12 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type13(unsigned int *group, bool B){
+	dout << "type 13 not implemented yet" << std::endl;
+}
+
+void parser_impl::decode_type14(unsigned int *group, bool B){
 	
 	bool tp_on=(group[1]>>4)&0x01;
 	char variant_code=group[1]&0x0f;
@@ -427,7 +471,7 @@ void parser_impl::decode_type14(unsigned int *group, bool version_code){
 	static char ps_on[9]={' ',' ',' ',' ',' ',' ',' ',' ','\0'};
 	double af_1=0, af_2=0;
 	
-	if (!version_code){
+	if (!B){
 		switch (variant_code){
 			case 0:			// PS(ON)
 			case 1:			// PS(ON)
@@ -485,10 +529,8 @@ void parser_impl::decode_type14(unsigned int *group, bool version_code){
 	std::cout << std::endl;
 }
 
-/* FAST BASIC TUNING: see page 39 in the standard */
-void parser_impl::decode_type15b(unsigned int *group){
-/* here we get twice the first two blocks... nothing to be done */
-	printf("\n");
+void parser_impl::decode_type15(unsigned int *group, bool B){
+	dout << "type 15 not implemented yet" << std::endl;
 }
 
 void parser_impl::parse(pmt::pmt_t msg) {
@@ -500,9 +542,11 @@ void parser_impl::parse(pmt::pmt_t msg) {
 			<< pmt::blob_length(msg) << ")" << std::endl;
 	}
 	unsigned int *group = (unsigned int*)pmt::blob_data(msg);
-	unsigned int group_type=(unsigned int)((group[1]>>12)&0xf);
-	bool version_code=(group[1]>>11)&0x1;
-	printf("%02i%c ", group_type, (version_code?'B':'A'));
+
+	unsigned int group_type = (unsigned int)((group[1] >> 12) & 0xf);
+	bool ab = (group[1] >> 11 ) & 0x1;
+
+	printf("%02i%c ", group_type, (ab ? 'B' :'A'));
 	std::cout << "(" << rds_group_acronyms[group_type] << ")";
 
 	program_identification=group[0];			// "PI"
@@ -515,7 +559,6 @@ void parser_impl::parse(pmt::pmt_t msg) {
 	send_message(0,pistring);
 	send_message(2,pty_table[program_type]);
 
-/* page 69, Annex D in the standard */
 	std::cout << " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type];
 	std::cout << " (country:" << pi_country_codes[pi_country_identification-1][0];
 	std::cout << "/" << pi_country_codes[pi_country_identification-1][1];
@@ -527,48 +570,59 @@ void parser_impl::parse(pmt::pmt_t msg) {
 
 	switch (group_type) {
 		case 0:
-			//decode_type0(group, version_code);
-		break;
+			decode_type0(group, ab);
+			break;
 		case 1:
-			decode_type1(group, version_code);
-		break;
+			decode_type1(group, ab);
+			break;
 		case 2:
-			//decode_type2(group, version_code);
-		break;
+			decode_type2(group, ab);
+			break;
 		case 3:
-			if(!version_code) decode_type3a(group);
-		break;
+			decode_type3(group, ab);
+			break;
 		case 4:
-			//if(!version_code) decode_type4a(group);
-		break;
+			decode_type4(group, ab);
+			break;
 		case 5:
-		break;
+			decode_type5(group, ab);
+			break;
 		case 6:
-		break;
+			decode_type6(group, ab);
+			break;
 		case 7:
-		break;
+			decode_type7(group, ab);
+			break;
 		case 8:
-			//if(!version_code) decode_type8a(group);
-		break;
+			decode_type8(group, ab);
+			break;
 		case 9:
-		break;
+			decode_type9(group, ab);
+			break;
 		case 10:
-		break;
+			decode_type10(group, ab);
+			break;
 		case 11:
-		break;
+			decode_type11(group, ab);
+			break;
 		case 12:
-		break;
+			decode_type12(group, ab);
+			break;
 		case 13:
-		break;
+			decode_type13(group, ab);
+			break;
 		case 14:
-			//decode_type14(group, version_code);
-		break;
+			decode_type14(group, ab);
+			break;
 		case 15:
-			//if(version_code) decode_type15b(group);
-		break;
-		default:
-			printf("DECODE ERROR!!! (group_type=%u)\n",group_type);
-		break;
+			decode_type15(group, ab);
+			break;
 	}
+
+	#define HEX(a) std::hex << std::setfill('0') << std::setw(4) << long(a) << std::dec
+	for(int i = 0; i < 4; i++) {
+		dout << "  " << HEX(group[i]);
+	}
+	dout << std::endl;
 }
 

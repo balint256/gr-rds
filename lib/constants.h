@@ -1,4 +1,3 @@
-/* -*- c++ -*- */
 /*
  * Copyright 2004 Free Software Foundation, Inc.
  *

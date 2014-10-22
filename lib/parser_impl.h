@@ -36,15 +36,23 @@ private:
 	void parse(pmt::pmt_t msg);
 	double decode_af(unsigned int);
 	void decode_optional_content(int, unsigned long int *);
-	void decode_type0(unsigned int*, bool);
-	void decode_type1(unsigned int*, bool);
-	void decode_type2(unsigned int*, bool);
-	void decode_type3a(unsigned int*);
-	void decode_type4a(unsigned int*);
-	void decode_type8a(unsigned int*);
-	void decode_type14(unsigned int*, bool);
-	void decode_type15b(unsigned int*);
 
+	void decode_type0( unsigned int* group, bool B);
+	void decode_type1( unsigned int* group, bool B);
+	void decode_type2( unsigned int* group, bool B);
+	void decode_type3( unsigned int* group, bool B);
+	void decode_type4( unsigned int* group, bool B);
+	void decode_type5( unsigned int* group, bool B);
+	void decode_type6( unsigned int* group, bool B);
+	void decode_type7( unsigned int* group, bool B);
+	void decode_type8( unsigned int* group, bool B);
+	void decode_type9( unsigned int* group, bool B);
+	void decode_type10(unsigned int* group, bool B);
+	void decode_type11(unsigned int* group, bool B);
+	void decode_type12(unsigned int* group, bool B);
+	void decode_type13(unsigned int* group, bool B);
+	void decode_type14(unsigned int* group, bool B);
+	void decode_type15(unsigned int* group, bool B);
 
 	unsigned int   program_identification;
 	unsigned char  program_type;

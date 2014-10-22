@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2013 Bastian Bloessl <bloessl@ccs-labs.org>
+#  Copyright (C) 2014 Bastian Bloessl <bloessl@ccs-labs.org>
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,11 +22,9 @@ include(GrPython)
 
 list(APPEND include_sources
     api.h
-    constants.h
     decoder.h
     encoder.h
-    tmc_events.h
-    tmc_locations_italy.h
+    parser.h
 )
 
 install(

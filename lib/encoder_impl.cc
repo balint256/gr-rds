@@ -19,7 +19,7 @@
 #endif
 
 #include "encoder_impl.h"
-#include <rds/constants.h>
+#include "constants.h"
 #include <gnuradio/io_signature.h>
 #include <boost/spirit/include/qi.hpp>
 #include <math.h>

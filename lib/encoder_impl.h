@@ -92,6 +92,7 @@ private:
 	void prepare_group3a();
 	void prepare_group4a();
 	void prepare_group8a();
+	void prepare_group11a();
 	void prepare_buffer(int);
 	unsigned int encode_af(double);
 	unsigned int calc_syndrome(unsigned long, unsigned char);

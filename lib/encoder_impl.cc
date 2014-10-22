@@ -47,24 +47,25 @@ encoder_impl::encoder_impl ()
 	d_current_buffer     = 0;
 	d_buffer_bit_counter = 0;
 
-	PI                   = 0x10FF;
-	PTY                  = 5;     // programm type (education)
-	TP                   = false; // traffic programm
-	TA                   = false; // traffic announcement
-	MS                   = true;  // music/speech switch (1=music)
+	PI                   = 0xd393;
+	PTY                  = 14;     // programm type (education)
+	TP                   = true;   // traffic programm
+	TA                   = false;   // traffic announcement
+	MS                   = true;   // music/speech switch (1=music)
 	AF1                  = 89.8;
 	AF2                  = 102.3;
 
 	set_radiotext(std::string("GNU Radio <3"));
-	set_ps(std::string("Arrrrrr!"));
+	set_ps(std::string("WDR 3"));
 
 	// which groups are set
-	groups[0] = 1; // basic tuning and switching
-	groups[1] = 1; // Extended Country Code
-	groups[2] = 1; // radio text
-	groups[3] = 1; // announce TMC
-	groups[4] = 1; // clock time
-	groups[8] = 1; // tmc
+	groups[ 0] = 1; // basic tuning and switching
+	groups[ 1] = 0; // Extended Country Code
+	groups[ 2] = 0; // radio text
+	groups[ 3] = 1; // announce TMC
+	groups[ 4] = 1; // clock time
+	groups[ 8] = 1; // tmc
+	groups[11] = 1;
 
 	// set some default values
 	assign_value("DP", "3");
@@ -101,6 +102,8 @@ void encoder_impl::rebuild() {
 				for(int j = 0; j < 3; j++) create_group(i % 16, (i < 16) ? false : true);
 			if(i % 16 == 2) // if group type is 2, call 15 more times
 				for(int j = 0; j < 15; j++) create_group(i % 16, (i < 16) ? false : true);
+			if(i % 16 == 3)  // if group is type 3, call 1 more times
+				create_group(i % 16, (i < 16) ? false : true);
 		}
 	}
 
@@ -339,6 +342,8 @@ void encoder_impl::count_groups(void) {
 				nbuffers += 4;
 			else if(i % 16 == 2)  // group 2
 				nbuffers += 16;
+			else if(i % 16 == 3)
+				nbuffers += 2;
 			else
 				nbuffers++;
 		}
@@ -359,6 +364,7 @@ void encoder_impl::create_group(const int group_type, const bool AB) {
 	else if(group_type == 3) prepare_group3a();
 	else if(group_type == 4) prepare_group4a();
 	else if(group_type == 8) prepare_group8a();
+	else if(group_type == 11) prepare_group11a();
 	else printf("preparation of group %i not yet supported\n", group_type);
 	//printf("data: %04X %04X %04X %04X, ", infoword[0], infoword[1], infoword[2], infoword[3]);
 
@@ -413,9 +419,18 @@ void encoder_impl::prepare_group1a(void) {
 
 void encoder_impl::prepare_group3a(void) {
 	std::cout << "preparing group 3" << std::endl;
-	infoword[1] = infoword[1] | (1 << 4); // TMC in 8A
-	infoword[2] = 104;
-	infoword[3] = 52550; // AID for TMC (Alert C)
+	static int count = 0;
+	if(count) {
+		infoword[1] = infoword[1] | (0x31d0 & 0x1f);
+		infoword[2] = 0x6280;
+		infoword[3] = 0xcd46;
+	} else {
+		infoword[1] = infoword[1] | (0x31d0 & 0x1f);
+		infoword[2] = 0x0066;
+		infoword[3] = 0xcd46; // AID for TMC (Alert C)
+	}
+	count++;
+	count = count % 2;
 }
 
 /* see page 28 and Annex G, page 81 in the standard */
@@ -449,9 +464,20 @@ void encoder_impl::prepare_group4a(void) {
 
 // for now single-group only
 void encoder_impl::prepare_group8a(void) {
-	infoword[1] = infoword[1] | (1 << 3) | (DP & 0x7);
-	infoword[2] = (1 << 15) | ((extent & 0x7) << 11) | (event & 0x7ff);
-	infoword[3] = location;
+	//infoword[1] = infoword[1] | (1 << 3) | (DP & 0x7);
+	//infoword[2] = (1 << 15) | ((extent & 0x7) << 11) | (event & 0x7ff);
+	//infoword[3] = location;
+	infoword[1] = infoword[1] | (0x81c8 & 0x1f);
+	infoword[2] = 0x5068;
+	infoword[3] = 11023;
+}
+
+// for now single-group only
+void encoder_impl::prepare_group11a(void) {
+	std::cout << "preparing group 11" << std::endl;
+	infoword[1] = infoword[1] | (0xb1c8 & 0x1f);
+	infoword[2] = 0x2038;
+	infoword[3] = 0x4456;
 }
 
 void encoder_impl::prepare_buffer(int which) {

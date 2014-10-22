@@ -24,8 +24,8 @@ include(GrPlatform) #define LIB_SUFFIX
 include(GrMiscUtils)
 
 add_library(gnuradio-rds SHARED
-    data_decoder.cc
-    data_encoder.cc
+    decoder_impl.cc
+    encoder_impl.cc
 )
 target_link_libraries(gnuradio-rds ${Boost_LIBRARIES}  ${GNURADIO_ALL_LIBRARIES})
 set_target_properties(gnuradio-rds PROPERTIES DEFINE_SYMBOL "gnuradio_RDS_EXPORTS")

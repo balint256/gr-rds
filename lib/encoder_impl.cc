@@ -1,27 +1,24 @@
 /*
- * Copyright 2004 Free Software Foundation, Inc.
- * 
- * GNU Radio is free software; you can redistribute it and/or modify
+ * Copyright (C) 2014 Bastian Bloessl <bloessl@ccs-labs.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * GNU Radio is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with GNU Radio; see the file COPYING.  If not, write to
- * the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <rds/data_encoder.h>
+#include "encoder_impl.h"
 #include <rds/constants.h>
 #include <gnuradio/io_signature.h>
 #include <boost/spirit/include/qi.hpp>
@@ -32,13 +29,13 @@
 
 using namespace gr::rds;
 
-data_encoder::data_encoder ()
-	: gr::sync_block ("gr_rds_data_encoder",
+encoder_impl::encoder_impl ()
+	: gr::sync_block ("gr_rds_encoder",
 			gr::io_signature::make (0, 0, 0),
 			gr::io_signature::make (1, 1, sizeof(unsigned char))) {
 
 	message_port_register_in(pmt::mp("rds in"));
-	set_msg_handler(pmt::mp("rds in"), boost::bind(&data_encoder::rds_in, this, _1));
+	set_msg_handler(pmt::mp("rds in"), boost::bind(&encoder_impl::rds_in, this, _1));
 
 	std::memset(infoword,    0, sizeof(infoword));
 	std::memset(checkword,   0, sizeof(checkword));
@@ -50,7 +47,7 @@ data_encoder::data_encoder ()
 	d_current_buffer     = 0;
 	d_buffer_bit_counter = 0;
 
-	PI                   = 0xD342;// ger, supra-national
+	PI                   = 0x10FF;
 	PTY                  = 5;     // programm type (education)
 	TP                   = false; // traffic programm
 	TA                   = false; // traffic announcement
@@ -63,24 +60,26 @@ data_encoder::data_encoder ()
 
 	// which groups are set
 	groups[0] = 1; // basic tuning and switching
+	groups[1] = 1; // Extended Country Code
 	groups[2] = 1; // radio text
+	groups[3] = 1; // announce TMC
 	groups[4] = 1; // clock time
 	groups[8] = 1; // tmc
 
 	// set some default values
 	assign_value("DP", "3");
 	assign_value("extent", "2");
-	assign_value("event", "729");
-	assign_value("location", "24742");
+	assign_value("event", "724");
+	assign_value("location", "11023");
 
 	rebuild();
 }
 
-data_encoder::~data_encoder() {
+encoder_impl::~encoder_impl() {
 	free(buffer);
 }
 
-void data_encoder::rebuild() {
+void encoder_impl::rebuild() {
 	gr::thread::scoped_lock lock(d_mutex);
 
 	count_groups();
@@ -109,7 +108,7 @@ void data_encoder::rebuild() {
 	std::cout << "nbuffers: " << nbuffers << std::endl;
 }
 
-void data_encoder::rds_in(pmt::pmt_t msg) {
+void encoder_impl::rds_in(pmt::pmt_t msg) {
 	if(!pmt::is_pair(msg)) {
 		return;
 	}
@@ -211,30 +210,30 @@ void data_encoder::rds_in(pmt::pmt_t msg) {
 	rebuild();
 }
 
-void data_encoder::set_ms(bool ms) {
+void encoder_impl::set_ms(bool ms) {
 	MS = ms;
 	std::cout << "setting Music/Speech code to " << ms << " (";
 	if(ms) std::cout << "music)" << std::endl;
 	else std::cout << "speech)" << std::endl;
 }
 
-void data_encoder::set_af1(double af1) {
+void encoder_impl::set_af1(double af1) {
 	AF1 = af1;
 }
 
-void data_encoder::set_af2(double af2) {
+void encoder_impl::set_af2(double af2) {
 	AF2 = af2;
 }
 
-void data_encoder::set_tp(bool tp) {
+void encoder_impl::set_tp(bool tp) {
 	TP = tp;
 }
 
-void data_encoder::set_ta(bool ta) {
+void encoder_impl::set_ta(bool ta) {
 	TA = ta;
 }
 
-void data_encoder::set_pty(unsigned int pty) {
+void encoder_impl::set_pty(unsigned int pty) {
 	if(pty > 31) {
 		std::cout << "warning: ignoring invalid pty: " << std::endl;
 	} else {
@@ -243,7 +242,7 @@ void data_encoder::set_pty(unsigned int pty) {
 	}
 }
 
-void data_encoder::set_pi(unsigned int pi) {
+void encoder_impl::set_pi(unsigned int pi) {
 	if(pi > 0xFFFF) {
 		std::cout << "warning: ignoring invalid pi: " << std::endl;
 	} else {
@@ -259,21 +258,21 @@ void data_encoder::set_pi(unsigned int pi) {
 }
 
 
-void data_encoder::set_radiotext(std::string text) {
+void encoder_impl::set_radiotext(std::string text) {
 		size_t len = std::min(sizeof(radiotext), text.length());
 
 		std::memset(radiotext, ' ', sizeof(radiotext));
 		std::memcpy(radiotext, text.c_str(), len);
 }
 
-void data_encoder::set_ps(std::string text) {
+void encoder_impl::set_ps(std::string text) {
 		size_t len = std::min(sizeof(PS), text.length());
 
 		std::memset(PS, ' ', sizeof(PS));
 		std::memcpy(PS, text.c_str(), len);
 }
 
-void data_encoder::assign_value (const char *field, const char *value) {
+void encoder_impl::assign_value (const char *field, const char *value) {
 	int length = strlen(value);
 	if(!strcmp(field, "PI")) {
 		if(length!=4) printf("invalid PI string length: %i\n", length);
@@ -293,7 +292,7 @@ void data_encoder::assign_value (const char *field, const char *value) {
 //////////////////////  CREATE DATA GROUPS  ///////////////////////
 
 /* see Annex B, page 64 of the standard */
-unsigned int data_encoder::calc_syndrome(unsigned long message, 
+unsigned int encoder_impl::calc_syndrome(unsigned long message, 
 		unsigned char mlen) {
 
 	unsigned long reg = 0;
@@ -314,7 +313,7 @@ unsigned int data_encoder::calc_syndrome(unsigned long message,
 
 /* see page 41 in the standard; this is an implementation of AF method A
  * FIXME need to add code that declares the number of AF to follow... */
-unsigned int data_encoder::encode_af(const double af) {
+unsigned int encoder_impl::encode_af(const double af) {
 	unsigned int af_code = 0;
 	if(( af >= 87.6) && (af <= 107.9))
 		af_code = nearbyint((af - 87.5) * 10);
@@ -328,7 +327,7 @@ unsigned int data_encoder::encode_af(const double af) {
 }
 
 /* count and print present groups */
-void data_encoder::count_groups(void) {
+void encoder_impl::count_groups(void) {
 	int ngroups = 0;
 	nbuffers = 0;
 	//printf("groups present: ");
@@ -349,13 +348,15 @@ void data_encoder::count_groups(void) {
 
 /* create the 4 infowords, according to group type.
  * then calculate checkwords and put everything in the groups */
-void data_encoder::create_group(const int group_type, const bool AB) {
+void encoder_impl::create_group(const int group_type, const bool AB) {
 	
 	infoword[0] = PI;
 	infoword[1] = (((group_type & 0xf) << 12) | (AB << 11) | (TP << 10) | (PTY << 5));
 
 	if(group_type == 0) prepare_group0(AB);
+	else if(group_type == 1) prepare_group1a();
 	else if(group_type == 2) prepare_group2(AB);
+	else if(group_type == 3) prepare_group3a();
 	else if(group_type == 4) prepare_group4a();
 	else if(group_type == 8) prepare_group8a();
 	else printf("preparation of group %i not yet supported\n", group_type);
@@ -374,7 +375,7 @@ void data_encoder::create_group(const int group_type, const bool AB) {
 	d_current_buffer++;
 }
 
-void data_encoder::prepare_group0(const bool AB) {
+void encoder_impl::prepare_group0(const bool AB) {
 	infoword[1] = infoword[1] | (TA << 4) | (MS << 3);
 	//FIXME: make DI configurable
 	if(d_g0_counter == 3)
@@ -389,7 +390,7 @@ void data_encoder::prepare_group0(const bool AB) {
 	if(d_g0_counter > 3) d_g0_counter = 0;
 }
 
-void data_encoder::prepare_group2(const bool AB) {
+void encoder_impl::prepare_group2(const bool AB) {
 	infoword[1] = infoword[1] | ((AB << 4) | (d_g2_counter & 0xf));
 	if(!AB) {
 		infoword[2] = (radiotext[d_g2_counter * 4] << 8 | radiotext[d_g2_counter * 4 + 1]);
@@ -403,10 +404,24 @@ void data_encoder::prepare_group2(const bool AB) {
 	d_g2_counter %= 16;
 }
 
+void encoder_impl::prepare_group1a(void) {
+	std::cout << "preparing group 1" << std::endl;
+	//infoword[1] = infoword[1] | (1 << 4); // TMC in 8A
+	infoword[2] = (0b10000000 << 8) | 0xE0;
+	infoword[3] = 0; // time
+}
+
+void encoder_impl::prepare_group3a(void) {
+	std::cout << "preparing group 3" << std::endl;
+	infoword[1] = infoword[1] | (1 << 4); // TMC in 8A
+	infoword[2] = 104;
+	infoword[3] = 52550; // AID for TMC (Alert C)
+}
+
 /* see page 28 and Annex G, page 81 in the standard */
 /* FIXME this is supposed to be transmitted only once per minute, when 
  * the minute changes */
-void data_encoder::prepare_group4a(void) {
+void encoder_impl::prepare_group4a(void) {
 	time_t rightnow;
 	tm *utc;
 	
@@ -433,13 +448,13 @@ void data_encoder::prepare_group4a(void) {
 }
 
 // for now single-group only
-void data_encoder::prepare_group8a(void) {
+void encoder_impl::prepare_group8a(void) {
 	infoword[1] = infoword[1] | (1 << 3) | (DP & 0x7);
 	infoword[2] = (1 << 15) | ((extent & 0x7) << 11) | (event & 0x7ff);
 	infoword[3] = location;
 }
 
-void data_encoder::prepare_buffer(int which) {
+void encoder_impl::prepare_buffer(int which) {
 	int q=0, i=0, j=0, a=0, b=0;
 	unsigned char temp[13]; // 13*8=104
 	std::memset(temp, 0, 13);
@@ -458,7 +473,7 @@ void data_encoder::prepare_buffer(int which) {
 }
 
 //////////////////////// WORK ////////////////////////////////////
-int data_encoder::work (int noutput_items,
+int encoder_impl::work (int noutput_items,
 		gr_vector_const_void_star &input_items,
 		gr_vector_void_star &output_items) {
 
@@ -477,8 +492,8 @@ int data_encoder::work (int noutput_items,
 	return noutput_items;
 }
 
-data_encoder::sptr
-data_encoder::make () {
-	return gnuradio::get_initial_sptr(new data_encoder());
+encoder::sptr
+encoder::make () {
+	return gnuradio::get_initial_sptr(new encoder_impl());
 }
 

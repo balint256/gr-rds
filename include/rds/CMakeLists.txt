@@ -23,8 +23,8 @@ include(GrPython)
 list(APPEND include_sources
     api.h
     constants.h
-    data_decoder.h
-    data_encoder.h
+    decoder.h
+    encoder.h
     tmc_events.h
     tmc_locations_italy.h
 )

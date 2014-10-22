@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-	<name>RDS Data Source</name>
-	<key>gr_rds_data_encoder</key>
+	<name>RDS Encoder</name>
+	<key>gr_rds_encoder</key>
 	<category>RDS</category>
 	<import>import rds</import>
-	<make>rds.data_encoder()</make>
+	<make>rds.encoder()</make>
 	<sink>
 		<name>rds in</name>
 		<type>message</type>

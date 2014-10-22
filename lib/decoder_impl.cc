@@ -1,23 +1,19 @@
-/* -*- c++ -*- */
 /*
- * Copyright 2014 Free Software Foundation, Inc.
- * 
- * GNU Radio is free software; you can redistribute it and/or modify
+ * Copyright (C) 2014 Bastian Bloessl <bloessl@ccs-labs.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * GNU Radio is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with GNU Radio; see the file COPYING.  If not, write to
- * the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -28,7 +24,7 @@
 #define DBG(x)
 #endif
 
-#include <rds/data_decoder.h>
+#include "decoder_impl.h"
 #include <rds/constants.h>
 #include <rds/tmc_events.h>
 #include <gnuradio/io_signature.h>
@@ -36,13 +32,13 @@
 
 using namespace gr::rds;
 
-data_decoder::sptr
-data_decoder::make() {
-  return gnuradio::get_initial_sptr(new data_decoder());
+decoder::sptr
+decoder::make() {
+  return gnuradio::get_initial_sptr(new decoder_impl());
 }
 
-data_decoder::data_decoder()
-	: gr::sync_block ("gr_rds_data_decoder",
+decoder_impl::decoder_impl()
+	: gr::sync_block ("gr_rds_decoder",
 			gr::io_signature::make (1, 1, sizeof (char)),
 			gr::io_signature::make (0, 0, 0))
 {
@@ -51,13 +47,13 @@ data_decoder::data_decoder()
 	reset();
 }
 
-data_decoder::~data_decoder() {
+decoder_impl::~decoder_impl() {
 }
 
 
 ////////////////////////// HELPER FUNTIONS /////////////////////////
 
-void data_decoder::reset() {
+void decoder_impl::reset() {
 	gr::thread::scoped_lock lock(d_mutex);
 	bit_counter = 0;
 	reg = 0;
@@ -65,7 +61,7 @@ void data_decoder::reset() {
 	enter_no_sync();
 }
 
-void data_decoder::reset_rds_data() {
+void decoder_impl::reset_rds_data() {
 
 	memset(radiotext, ' ', sizeof(radiotext));
 	memset(program_service_name, ' ', sizeof(program_service_name));
@@ -86,12 +82,12 @@ void data_decoder::reset_rds_data() {
 	static_pty                     = false;
 }
 
-void data_decoder::enter_no_sync() {
+void decoder_impl::enter_no_sync() {
 	presync = false;
 	d_state = ST_NO_SYNC;
 }
 
-void data_decoder::enter_sync(unsigned int sync_block_number) {
+void decoder_impl::enter_sync(unsigned int sync_block_number) {
 	wrong_blocks_counter   = 0;
 	blocks_counter         = 0;
 	block_bit_counter      = 0;
@@ -107,7 +103,7 @@ void data_decoder::enter_sync(unsigned int sync_block_number) {
  * type 4 = RadioText 
  * type 5 = ClockTime
  * type 6 = Alternative Frequencies */
-void data_decoder::send_message(long msgtype, std::string msgtext) {
+void decoder_impl::send_message(long msgtype, std::string msgtext) {
 	pmt::pmt_t msg  = pmt::mp(msgtext);
 	pmt::pmt_t type = pmt::from_long(msgtype);
 	message_port_pub(pmt::mp("out"), pmt::make_tuple(type, msg));
@@ -115,7 +111,7 @@ void data_decoder::send_message(long msgtype, std::string msgtext) {
 }
 
 /* see Annex B, page 64 of the standard */
-unsigned int data_decoder::calc_syndrome(unsigned long message,
+unsigned int decoder_impl::calc_syndrome(unsigned long message,
 		unsigned char mlen) {
 	unsigned long reg = 0;
 	unsigned int i;
@@ -138,7 +134,7 @@ unsigned int data_decoder::calc_syndrome(unsigned long message,
 
 
 /* BASIC TUNING: see page 21 of the standard */
-void data_decoder::decode_type0(unsigned int *group, bool version_code) {
+void decoder_impl::decode_type0(unsigned int *group, bool version_code) {
 	unsigned int af_code_1 = 0;
 	unsigned int af_code_2 = 0;
 	unsigned int  no_af    = 0;
@@ -219,7 +215,7 @@ void data_decoder::decode_type0(unsigned int *group, bool version_code) {
 
 /* see page 41 in the standard
  * this is an implementation of AF method A */
-double data_decoder::decode_af(unsigned int af_code) {
+double decoder_impl::decode_af(unsigned int af_code) {
 	static unsigned int number_of_freqs;
 	double alt_frequency=0;				// in kHz
 	static bool vhf_or_lfmf=0;			// 0 = vhf, 1 = lf/mf
@@ -263,7 +259,7 @@ double data_decoder::decode_af(unsigned int af_code) {
  * for extended country codes see page 69, Annex D.2 in the standard
  * for language codes see page 84, Annex J in the standard
  * for emergency warning systems (EWS) see page 53 in the standard */
-void data_decoder::decode_type1(unsigned int *group, bool version_code){
+void decoder_impl::decode_type1(unsigned int *group, bool version_code){
 	int ecc=0, paging=0;
 
 	char country_code=(group[0]>>12)&0x0f;
@@ -310,7 +306,7 @@ void data_decoder::decode_type1(unsigned int *group, bool version_code){
 }
 
 /* RADIOTEXT: page 25 in the standard */
-void data_decoder::decode_type2(unsigned int *group, bool version_code){
+void decoder_impl::decode_type2(unsigned int *group, bool version_code){
 	unsigned char text_segment_address_code=group[1]&0x0f;
 
 /* when the A/B flag is toggled, flush your current radiotext */
@@ -336,7 +332,7 @@ void data_decoder::decode_type2(unsigned int *group, bool version_code){
 }
 
 /* AID: page 27 in the standard */
-void data_decoder::decode_type3a(unsigned int *group){
+void decoder_impl::decode_type3a(unsigned int *group){
 	int application_group=(group[1]>>1)&0xf;
 	int group_type=group[1]&0x1;
 	int message=group[2];
@@ -373,7 +369,7 @@ void data_decoder::decode_type3a(unsigned int *group){
 }
 
 /* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
-void data_decoder::decode_type4a(unsigned int *group){
+void decoder_impl::decode_type4a(unsigned int *group){
 	unsigned int hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
 	unsigned int minutes=(group[3]>>6)&0x3f;
 	double local_time_offset=((double)(group[3]&0x1f))/2;
@@ -400,7 +396,7 @@ void data_decoder::decode_type4a(unsigned int *group){
 /* TMC: see page 32 of the standard
    initially defined in CEN standard ENV 12313-1
    superseded by ISO standard 14819:2003 */
-void data_decoder::decode_type8a(unsigned int *group){
+void decoder_impl::decode_type8a(unsigned int *group){
 	bool T=(group[1]>>4)&0x1;		// 0 = user message, 1 = tuning info
 	bool F=(group[1]>>3)&0x1;		// 0 = multi-group, 1 = single-group
 	bool D=(group[2]>15)&0x1;		// 1 = diversion recommended
@@ -448,7 +444,7 @@ void data_decoder::decode_type8a(unsigned int *group){
 	}
 }
 
-void data_decoder::decode_optional_content(int no_groups, unsigned long int *free_format){
+void decoder_impl::decode_optional_content(int no_groups, unsigned long int *free_format){
 	int label=0;
 	int content=0;
 	int content_length=0;
@@ -469,7 +465,7 @@ void data_decoder::decode_optional_content(int no_groups, unsigned long int *fre
 }
 
 /* EON: see pages 38 and 46 in the standard */
-void data_decoder::decode_type14(unsigned int *group, bool version_code){
+void decoder_impl::decode_type14(unsigned int *group, bool version_code){
 	
 	bool tp_on=(group[1]>>4)&0x01;
 	char variant_code=group[1]&0x0f;
@@ -540,13 +536,13 @@ void data_decoder::decode_type14(unsigned int *group, bool version_code){
 }
 
 /* FAST BASIC TUNING: see page 39 in the standard */
-void data_decoder::decode_type15b(unsigned int *group){
+void decoder_impl::decode_type15b(unsigned int *group){
 /* here we get twice the first two blocks... nothing to be done */
 	printf("\n");
 }
 
 /* See page 17 Table 3 in paragraph 3.1.3 of the standard. */
-void data_decoder::decode_group(unsigned int *group) {
+void decoder_impl::decode_group(unsigned int *group) {
 	unsigned int group_type=(unsigned int)((group[1]>>12)&0xf);
 	bool version_code=(group[1]>>11)&0x1;
 	printf("%02i%c ", group_type, (version_code?'B':'A'));
@@ -619,9 +615,9 @@ void data_decoder::decode_group(unsigned int *group) {
 	}
 }
 
-int data_decoder::work (int noutput_items,
-					gr_vector_const_void_star &input_items,
-					gr_vector_void_star &output_items)
+int decoder_impl::work (int noutput_items,
+		gr_vector_const_void_star &input_items,
+		gr_vector_void_star &output_items)
 {
 	gr::thread::scoped_lock lock(d_mutex);
 	const bool *in = (const bool *) input_items[0];

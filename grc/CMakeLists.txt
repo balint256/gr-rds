@@ -18,8 +18,8 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    rds_data_decoder.xml
-    rds_data_encoder.xml
+    rds_decoder.xml
+    rds_encoder.xml
     rds_panel.xml
     DESTINATION share/gnuradio/grc/blocks
 )

@@ -1,40 +1,40 @@
-/* -*- c++ -*- */
 /*
- * Copyright 2004 Free Software Foundation, Inc.
- * 
- * GNU Radio is free software; you can redistribute it and/or modify
+ * Copyright (C) 2014 Bastian Bloessl <bloessl@ccs-labs.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- * 
- * GNU Radio is distributed in the hope that it will be useful,
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with GNU Radio; see the file COPYING.  If not, write to
- * the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef INCLUDED_RDS_ENCODER_IMPL_H
+#define INCLUDED_RDS_ENCODER_IMPL_H
 
-
-#ifndef INCLUDED_GR_RDS_DATA_ENCODER_H
-#define INCLUDED_GR_RDS_DATA_ENCODER_H
-
-#include <rds/api.h>
-#include <gnuradio/sync_block.h>
+#include <rds/encoder.h>
 #include <gnuradio/thread/thread.h>
-#include <string.h>
-#include <vector>
-#include <iostream>
 
 namespace gr {
 namespace rds {
 
-class RDS_API data_encoder : public gr::sync_block
+class encoder_impl : public encoder
 {
+public:
+	encoder_impl();
+
 private:
+	~encoder_impl();
+
+	int work(int noutput_items,
+			gr_vector_const_void_star &input_items,
+			gr_vector_void_star &output_items);
+
 	unsigned int  infoword[4];
 	unsigned int  checkword[4];
 	unsigned int  block[4];
@@ -74,7 +74,6 @@ private:
 	int nbuffers;
 
 // Functions
-	data_encoder ();  // private constructor
 	void rebuild();
 	void set_ms(bool ms);
 	void set_tp(bool tp);
@@ -88,7 +87,9 @@ private:
 	void count_groups();
 	void create_group(const int, const bool);
 	void prepare_group0(const bool);
+	void prepare_group1a();
 	void prepare_group2(const bool);
+	void prepare_group3a();
 	void prepare_group4a();
 	void prepare_group8a();
 	void prepare_buffer(int);
@@ -97,16 +98,12 @@ private:
 	void rds_in(pmt::pmt_t msg);
 	void assign_value(const char *field, const char *value);
 
-public:
-	typedef boost::shared_ptr<data_encoder> sptr;
-	static sptr make();
-	~data_encoder();  // public destructor
-	int work (int noutput_items,
-			gr_vector_const_void_star &input_items,
-			gr_vector_void_star &output_items);
+
 };
 
-}
-}
+} /* namespace rds */
+} /* namespace gr */
 
-#endif /* INCLUDED_GR_RDS_DATA_ENCODER_H */
+#endif /* INCLUDED_RDS_ENCODER_IMPL_H */
+
+

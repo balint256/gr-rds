@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<block>
+	<name>RDS Decoder</name>
+	<key>gr_rds_decoder</key>
+	<category>RDS</category>
+	<import>import rds</import>
+	<make>rds.decoder()</make>
+	<callback>reset();$reset;</callback>
+	<param>
+		<name>Reset</name>
+		<key>reset</key>
+		<value>0</value>
+		<type>raw</type>
+		<hide>part</hide>
+	</param>
+	<sink>
+		<name>in</name>
+		<type>byte</type>
+	</sink>
+	<source>
+		<name>out</name>
+		<type>message</type>
+		<optional>1</optional>
+	</source>
+</block>

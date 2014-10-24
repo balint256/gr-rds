@@ -97,9 +97,6 @@ private:
 	unsigned int encode_af(double);
 	unsigned int calc_syndrome(unsigned long, unsigned char);
 	void rds_in(pmt::pmt_t msg);
-	void assign_value(const char *field, const char *value);
-
-
 };
 
 } /* namespace rds */

@@ -54,6 +54,10 @@ encoder_impl::encoder_impl ()
 	MS                   = true;   // music/speech switch (1=music)
 	AF1                  = 89.8;
 	AF2                  = 102.3;
+	DP                   = 3;
+	extent               = 2;
+	event                = 1340;
+	location             = 11023;
 
 	set_radiotext(std::string("GNU Radio <3"));
 	set_ps(std::string("WDR 3"));
@@ -66,12 +70,6 @@ encoder_impl::encoder_impl ()
 	groups[ 4] = 1; // clock time
 	groups[ 8] = 1; // tmc
 	groups[11] = 1;
-
-	// set some default values
-	assign_value("DP", "3");
-	assign_value("extent", "2");
-	assign_value("event", "724");
-	assign_value("location", "11023");
 
 	rebuild();
 }
@@ -275,25 +273,6 @@ void encoder_impl::set_ps(std::string text) {
 		std::memcpy(PS, text.c_str(), len);
 }
 
-void encoder_impl::assign_value (const char *field, const char *value) {
-	int length = strlen(value);
-	if(!strcmp(field, "PI")) {
-		if(length!=4) printf("invalid PI string length: %i\n", length);
-		else PI=strtol(value, NULL, 16);
-	}
-	else if(!strcmp(field, "DP"))
-		DP=atol(value);
-	else if(!strcmp(field, "extent"))
-		extent=atol(value);
-	else if(!strcmp(field, "event"))
-		event=atol(value);
-	else if(!strcmp(field, "location"))
-		location=atol(value);
-	else printf("unrecognized field type: %s\n", field);
-}
-
-//////////////////////  CREATE DATA GROUPS  ///////////////////////
-
 /* see Annex B, page 64 of the standard */
 unsigned int encoder_impl::calc_syndrome(unsigned long message, 
 		unsigned char mlen) {
@@ -464,12 +443,9 @@ void encoder_impl::prepare_group4a(void) {
 
 // for now single-group only
 void encoder_impl::prepare_group8a(void) {
-	//infoword[1] = infoword[1] | (1 << 3) | (DP & 0x7);
-	//infoword[2] = (1 << 15) | ((extent & 0x7) << 11) | (event & 0x7ff);
-	//infoword[3] = location;
-	infoword[1] = infoword[1] | (0x81c8 & 0x1f);
-	infoword[2] = 0x5068;
-	infoword[3] = 11023;
+	infoword[1] = infoword[1] | (1 << 3) | (DP & 0x7);
+	infoword[2] = (1 << 15) | ((extent & 0x7) << 11) | (event & 0x7ff);
+	infoword[3] = location;
 }
 
 // for now single-group only

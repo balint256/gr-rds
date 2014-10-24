@@ -60,7 +60,6 @@ private:
 	unsigned char  pi_area_coverage;
 	unsigned char  pi_program_reference_number;
 	char           radiotext[65];
-	char           clocktime_string[33];
 	char           af1_string[10];
 	char           af2_string[10];
 	char           af_string[21];

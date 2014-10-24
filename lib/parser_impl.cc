@@ -51,9 +51,8 @@ void parser_impl::reset() {
 	gr::thread::scoped_lock lock(d_mutex);
 
 	memset(radiotext, ' ', sizeof(radiotext));
-	memset(program_service_name, ' ', sizeof(program_service_name));
+	memset(program_service_name, '.', sizeof(program_service_name));
 
-	radiotext[64]                  = '\0';
 	radiotext_AB_flag              = 0;
 	traffic_program                = false;
 	traffic_announcement           = false;
@@ -62,7 +61,6 @@ void parser_impl::reset() {
 	pi_country_identification      = 0;
 	pi_area_coverage               = 0;
 	pi_program_reference_number    = 0;
-	program_service_name[8]        = '\0';
 	mono_stereo                    = false;
 	artificial_head                = false;
 	compressed                     = false;
@@ -152,102 +150,100 @@ void parser_impl::decode_type0(unsigned int *group, bool B) {
 		}
 	}
 
-/* let's print out what we've got so far */
-	std::cout << "==>" << program_service_name << "<== -" << (traffic_program?"TP":"  ") 
-		<< '-' << (traffic_announcement?"TA":"  ") << '-' << (music_speech?"Music":"Speech") 
-		<< '-' << (mono_stereo?"MONO":"STEREO") << " - AF:" << af_string << std::endl;
+	std::cout << "==>" << std::string(program_service_name, 8)
+		<< "<== -" << (traffic_program ? "TP" : "  ")
+		<< '-' << (traffic_announcement ? "TA" : "  ")
+		<< '-' << (music_speech ? "Music" : "Speech")
+		<< '-' << (mono_stereo ? "MONO" : "STEREO")
+		<< " - AF:" << af_string << std::endl;
 
-/* sending the messages to the queue */
-	send_message(1,program_service_name);
+	send_message(1,std::string(program_service_name, 8));
 	send_message(3,flagstring);
 	send_message(6,af_string);
 }
 
-/* see page 41 in the standard
- * this is an implementation of AF method A */
 double parser_impl::decode_af(unsigned int af_code) {
-	static unsigned int number_of_freqs;
-	double alt_frequency=0;				// in kHz
-	static bool vhf_or_lfmf=0;			// 0 = vhf, 1 = lf/mf
+	static unsigned int number_of_freqs = 0;
+	static bool vhf_or_lfmf             = 0; // 0 = vhf, 1 = lf/mf
+	double alt_frequency                = 0; // in kHz
 
-/* in all the following cases the message either tells us
- * that there are no alternative frequencies, or it indicates
- * the number of AF to follow, which is not relevant at this
- * stage, since we're not actually re-tuning */
-	if ((af_code == 0)||					// not to be used
-		(af_code == 205)||				// filler code
-		((af_code >= 206)&&(af_code <= 223))||		// not assigned
-		(af_code == 224)||				// No AF exists
-		(af_code >= 251)){				// not assigned
+	if((af_code == 0) ||                              // not to be used
+		( af_code == 205) ||                      // filler code
+		((af_code >= 206) && (af_code <= 223)) || // not assigned
+		( af_code == 224) ||                      // No AF exists
+		( af_code >= 251)) {                      // not assigned
 			number_of_freqs = 0;
-			alt_frequency=0;
+			alt_frequency   = 0;
 	}
-	if ((af_code >= 225)&&(af_code <= 249)){	// VHF frequencies follow
+	if((af_code >= 225) && (af_code <= 249)) {        // VHF frequencies follow
 		number_of_freqs = af_code - 224;
-		alt_frequency=0;
-		vhf_or_lfmf = 1;
+		alt_frequency   = 0;
+		vhf_or_lfmf     = 1;
 	}
-	if (af_code == 250) {				// an LF/MF frequency follows
+	if(af_code == 250) {                              // an LF/MF frequency follows
 		number_of_freqs = 1;
-		alt_frequency=0;
-		vhf_or_lfmf = 0;
+		alt_frequency   = 0;
+		vhf_or_lfmf     = 0;
 	}
 
-/* here we're actually decoding the alternative frequency */
-	if ((af_code > 0) && (af_code < 205) && vhf_or_lfmf)
-		alt_frequency = (double)(af_code+875)*100;		// VHF (87.6-107.9MHz)
-	else if ((af_code > 0) && (af_code < 16) && !vhf_or_lfmf)
-		alt_frequency = (double)((af_code-1)*9 + 153);		// LF (153-279kHz)
-	else if ((af_code > 15) && (af_code < 136) && !vhf_or_lfmf)
-		alt_frequency = (double)((af_code-16)*9 + 531);		// MF (531-1602kHz)
+	if((af_code > 0) && (af_code < 205) && vhf_or_lfmf)
+		alt_frequency = 100.0 * (af_code + 875);          // VHF (87.6-107.9MHz)
+	else if((af_code > 0) && (af_code < 16) && !vhf_or_lfmf)
+		alt_frequency = 153.0 + (af_code - 1) * 9;        // LF (153-279kHz)
+	else if((af_code > 15) && (af_code < 136) && !vhf_or_lfmf)
+		alt_frequency = 531.0 + (af_code - 16) * 9 + 531; // MF (531-1602kHz)
 
-	return alt_frequency;						// in kHz
+	return alt_frequency;
 }
 
-/* SLOW LABELLING: see page 23 in the standard 
- * for paging see page 90, Annex M in the standard (NOT IMPLEMENTED)
- * for extended country codes see page 69, Annex D.2 in the standard
- * for language codes see page 84, Annex J in the standard
- * for emergency warning systems (EWS) see page 53 in the standard */
 void parser_impl::decode_type1(unsigned int *group, bool B){
-	int ecc=0, paging=0;
+	int ecc    = 0;
+	int paging = 0;
+	char country_code           = (group[0] >> 12) & 0x0f;
+	char radio_paging_codes     =  group[1]        & 0x1f;
+	int variant_code            = (group[2] >> 12) & 0x7;
+	unsigned int slow_labelling =  group[2]        & 0xfff;
+	int day    = (int)((group[3] >> 11) & 0x1f);
+	int hour   = (int)((group[3] >>  6) & 0x1f);
+	int minute = (int) (group[3]        & 0x3f);
 
-	char country_code=(group[0]>>12)&0x0f;
-	char radio_paging_codes=group[1]&0x1f;
-	//bool linkage_actuator=(group[2]>>15)&0x1;
-	int variant_code=(group[2]>>12)&0x7;
-	unsigned int slow_labelling=group[2]&0xfff;
-	int day=(int)((group[3]>>11)&0x1f);
-	int hour=(int)((group[3]>>6)&0x1f);
-	int minute=(int)(group[3]&0x3f);
-
-	if (radio_paging_codes)
-		printf("paging codes: %i ", (int)radio_paging_codes);
-	if (day||hour||minute)
-		printf("program item: %id, %i:%i ", day, hour, minute);
+	if(radio_paging_codes) {
+		lout << "paging codes: " << int(radio_paging_codes) << " ";
+	}
+	if(day || hour || minute) {
+		lout << boost::format("program item: %id, %i, %i ") % day % hour % minute;
+	}
 
 	if(!B){
 		switch(variant_code){
-			case 0:			// paging + ecc
-				paging=(slow_labelling>>8)&0x0f;
-				ecc=slow_labelling&0xff;
-				if(paging) printf("paging:%x ", paging);
-				if((ecc>223)&&(ecc<229))
-					std::cout << "extended country code:" << 
-						pi_country_codes[country_code-1][ecc-224] << std::endl;
-				else printf("invalid extended country code:%i\n", ecc);
+			case 0: // paging + ecc
+				paging = (slow_labelling >> 8) & 0x0f;
+				ecc    =  slow_labelling       & 0xff;
+				if(paging) {
+					lout << "paging: " << paging << " ";
+				}
+				if((ecc > 223) && (ecc < 229)) {
+					lout << "extended country code: "
+						<< pi_country_codes[country_code-1][ecc-224]
+						<< std::endl;
+				} else {
+					lout << "invalid extended country code: " << ecc << std::endl;
+				}
 				break;
-			case 1:			// TMC identification
-				printf("TMC identification code received\n");
+			case 1: // TMC identification
+				lout << "TMC identification code received" << std::endl;
 				break;
-			case 2:			// Paging identification
-				printf("Paging identification code received\n");
+			case 2: // Paging identification
+				lout << "Paging identification code received" << std::endl;
 				break;
-			case 3:			// language codes
-				if (slow_labelling<44)
-					std::cout << "language: " << language_codes[slow_labelling] << std::endl;
-				else
-					printf("language: invalid language code (%i)\n", slow_labelling);
+			case 3: // language codes
+				if(slow_labelling < 44) {
+					lout << "language: " << language_codes[slow_labelling]
+						<< std::endl;
+				} else {
+					lout << "language: invalid language code " << slow_labelling
+						<< std::endl;
+				}
 				break;
 			default:
 				break;
@@ -255,101 +251,100 @@ void parser_impl::decode_type1(unsigned int *group, bool B){
 	}
 }
 
-/* RADIOTEXT: page 25 in the standard */
 void parser_impl::decode_type2(unsigned int *group, bool B){
-	unsigned char text_segment_address_code=group[1]&0x0f;
+	unsigned char text_segment_address_code = group[1] & 0x0f;
 
-/* when the A/B flag is toggled, flush your current radiotext */
-	if (radiotext_AB_flag!=((group[1]>>4)&0x01)) {
-//		send_message(4,radiotext);
-		for(int i=0; i<64; i++) radiotext[i]=' ';
-		radiotext[64] = '\0';
+	// when the A/B flag is toggled, flush your current radiotext
+	if(radiotext_AB_flag != ((group[1] >> 4) & 0x01)) {
+		std::memset(radiotext, ' ', sizeof(radiotext));
 	}
-	radiotext_AB_flag=(group[1]>>4)&0x01;
+	radiotext_AB_flag = (group[1] >> 4) & 0x01;
 
-	if (!B) {
-		radiotext[text_segment_address_code*4]=(group[2]>>8)&0xff;
-		radiotext[text_segment_address_code*4+1]=group[2]&0xff;
-		radiotext[text_segment_address_code*4+2]=(group[3]>>8)&0xff;
-		radiotext[text_segment_address_code*4+3]=group[3]&0xff;
+	if(!B) {
+		radiotext[text_segment_address_code *4     ] = (group[2] >> 8) & 0xff;
+		radiotext[text_segment_address_code * 4 + 1] =  group[2]       & 0xff;
+		radiotext[text_segment_address_code * 4 + 2] = (group[3] >> 8) & 0xff;
+		radiotext[text_segment_address_code * 4 + 3] =  group[3]       & 0xff;
+	} else {
+		radiotext[text_segment_address_code * 2    ] = (group[3] >> 8) & 0xff;
+		radiotext[text_segment_address_code * 2 + 1] =  group[3]       & 0xff;
 	}
-	else {
-		radiotext[text_segment_address_code*2]=(group[3]>>8)&0xff;
-		radiotext[text_segment_address_code*2+1]=group[3]&0xff;
-	}
-	printf("Radio Text %c: %s\n", (radiotext_AB_flag?'B':'A'), radiotext);
-	send_message(4,radiotext);
+	lout << "Radio Text " << (radiotext_AB_flag ? 'B' : 'A')
+		<< ": " << std::string(radiotext, sizeof(radiotext))
+		<< std::endl;
+	send_message(4,std::string(radiotext, sizeof(radiotext)));
 }
 
-/* AID: page 27 in the standard */
 void parser_impl::decode_type3(unsigned int *group, bool B){
 	if(B) {
 		dout << "type 3B not implemented yet" << std::endl;
 		return;
 	}
 
-	int application_group=(group[1]>>1)&0xf;
-	int group_type=group[1]&0x1;
-	int message=group[2];
-	int aid=group[3];
+	int application_group = (group[1] >> 1) & 0xf;
+	int group_type        =  group[1] & 0x1;
+	int message           =  group[2];
+	int aid               =  group[3];
 	
-	printf("aid group: %i%c - ", application_group, group_type?'B':'A');
-	if((application_group==8)&&(group_type==false)){	// 8A
-		int variant_code=(message>>14)&0x3;
-		if(variant_code==0){
-			int ltn=(message>>6)&0x3f;	// location table number
-			bool afi=(message>>5)&0x1;	// alternative freq. indicator
-			bool M=(message>>4)&0x1;	// mode of transmission
-			bool I=(message>>3)&0x1;	// international
-			bool N=(message>>2)&0x1;	// national
-			bool R=(message>>1)&0x1;	// regional
-			bool U=message&0x1;			// urban
-			std::cout << "location table: " << ltn << " - "
-				<< (afi?"AFI-ON":"AFI-OFF") << " - "
-				<< (M?"enhanced mode":"basic mode") << " - "
-				<< (I?"international ":"")
-				<< (N?"national ":"")
-				<< (R?"regional ":"")
-				<< (U?"urban":"") 
+	lout << "aid group: " << application_group
+		<< " " << (group_type ? 'B' : 'A');
+	if((application_group == 8) && (group_type == false)) { // 8A
+		int variant_code = (message >> 14) & 0x3;
+		if(variant_code == 0) {
+			int ltn  = (message >> 6) & 0x3f; // location table number
+			bool afi = (message >> 5) & 0x1;  // alternative freq. indicator
+			bool M   = (message >> 4) & 0x1;  // mode of transmission
+			bool I   = (message >> 3) & 0x1;  // international
+			bool N   = (message >> 2) & 0x1;  // national
+			bool R   = (message >> 1) & 0x1;  // regional
+			bool U   =  message       & 0x1;  // urban
+			lout << "location table: " << ltn << " - "
+				<< (afi ? "AFI-ON" : "AFI-OFF") << " - "
+				<< (M   ? "enhanced mode" : "basic mode") << " - "
+				<< (I   ? "international " : "")
+				<< (N   ? "national " : "")
+				<< (R   ? "regional " : "")
+				<< (U   ? "urban" : "")
 				<< " aid: " << aid << std::endl;
-		}
-		else if(variant_code==1){
-			int G=(message>>12)&0x3;	// gap
-			int sid=(message>>6)&0x3f;	// service identifier
-			int gap_no[4]={3,5,8,11};
-			printf("gap:%i groups, SID:%02X\n", gap_no[G], sid);
+
+		} else if(variant_code==1) {
+			int G   = (message >> 12) & 0x3;  // gap
+			int sid = (message >>  6) & 0x3f; // service identifier
+			int gap_no[4] = {3, 5, 8, 11};
+			lout << "gap: " << gap_no[G] << " groups, SID: "
+				<< sid << " ";
 		}
 	}
-	else printf("message: %04X - aid: %04X\n", message, aid);
+	lout << "message: " << message << " - aid: " << aid << std::endl;;
 }
 
-/* CLOCKTIME: see page 28 of the standard, as well as annex G, page 81 */
 void parser_impl::decode_type4(unsigned int *group, bool B){
 	if(B) {
 		dout << "type 4B not implemented yet" << std::endl;
 		return;
 	}
-	unsigned int hours=((group[2]&0x1)<<4)|((group[3]>>12)&0x0f);
-	unsigned int minutes=(group[3]>>6)&0x3f;
-	double local_time_offset=((double)(group[3]&0x1f))/2;
-	if((group[3]>>5)&0x1) local_time_offset *= -1;
-	double modified_julian_date=((group[1]&0x03)<<15)|((group[2]>>1)&0x7fff);
 
-	/* MJD -> Y-M-D */
-	unsigned int year=(int)((modified_julian_date-15078.2)/365.25);
-	unsigned int month=(int)((modified_julian_date-14956.1-(int)(year*365.25))/30.6001);
-	unsigned int day_of_month=modified_julian_date-14956-(int)(year*365.25)-(int)(month*30.6001);
-	bool K=((month==14)||(month==15))?1:0;
-	year+=K;
-	month-=1+K*12;
+	unsigned int hours   = ((group[2] & 0x1) << 4) | ((group[3] >> 12) & 0x0f);
+	unsigned int minutes =  (group[3] >> 6) & 0x3f;
+	double local_time_offset = .5 * (group[3] & 0x1f);
 
-	// concatenate into a string, print and send message
-	for (int i=0; i<32; i++) clocktime_string[i]=' ';
-	clocktime_string[32]='\0';
-	sprintf(clocktime_string, "%02i.%02i.%4i, %02i:%02i (%+.1fh)",
-		(int)day_of_month, month, (1900+year), hours, minutes, local_time_offset);
-	std::cout << "Clocktime: " << clocktime_string << std::endl;
-	send_message(5,clocktime_string);
+	if((group[3] >> 5) & 0x1) {
+		local_time_offset *= -1;
+	}
+	double modified_julian_date = ((group[1] & 0x03) << 15) | ((group[2] >> 1) & 0x7fff);
+
+	unsigned int year  = int((modified_julian_date - 15078.2) / 365.25);
+	unsigned int month = int((modified_julian_date - 14956.1 - int(year * 365.25)) / 30.6001);
+	unsigned int day   =               modified_julian_date - 14956 - int(year * 365.25) - int(month * 30.6001);
+	bool K = ((month == 14) || (month == 15)) ? 1 : 0;
+	year += K;
+	month -= 1 + K * 12;
+
+	std::string time = str(boost::format("%02i.%02i.%4i, %02i:%02i (%+.1fh)")\
+		% day % month % (1900 + year) % hours % minutes % local_time_offset);
+	lout << "Clocktime: " << time << std::endl;
+
+	send_message(5,time);
 }
 
 void parser_impl::decode_type5(unsigned int *group, bool B){
@@ -364,9 +359,6 @@ void parser_impl::decode_type7(unsigned int *group, bool B){
 	dout << "type 7 not implemented yet" << std::endl;
 }
 
-/* TMC: see page 32 of the standard
-   initially defined in CEN standard ENV 12313-1
-   superseded by ISO standard 14819:2003 */
 void parser_impl::decode_type8(unsigned int *group, bool B){
 	if(B) {
 		dout << "type 8B not implemented yet" << std::endl;

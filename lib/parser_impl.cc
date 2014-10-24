@@ -78,7 +78,6 @@ void parser_impl::send_message(long msgtype, std::string msgtext) {
 	pmt::pmt_t msg  = pmt::mp(msgtext);
 	pmt::pmt_t type = pmt::from_long(msgtype);
 	message_port_pub(pmt::mp("out"), pmt::make_tuple(type, msg));
-        //std::cout << "RDS: " << msgtext << std::endl;
 }
 
 /* BASIC TUNING: see page 21 of the standard */
@@ -124,42 +123,55 @@ void parser_impl::decode_type0(unsigned int *group, bool B) {
 	flagstring[4] = artificial_head        ? '1' : '0';
 	flagstring[5] = compressed             ? '1' : '0';
 	flagstring[6] = static_pty             ? '1' : '0';
-	if(!B) {     // type 0A
-		af_code_1 = (int)(group[2] >> 8) & 0xff;
-		af_code_2 = (int) group[2]       & 0xff;
+	static std::string af_string;
 
-		if((af_1 = decode_af(af_code_1))) no_af += 1;
-		if((af_2 = decode_af(af_code_2))) no_af += 2;
-/* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
-		memset(af1_string, ' ', sizeof(af1_string));
-		memset(af2_string, ' ', sizeof(af2_string));
-		memset(af_string, ' ', sizeof(af_string));
-		af1_string[9]=af2_string[9]=af_string[20]='\0';
-		if (no_af) {
-			if (af_1>80e3) sprintf(af1_string, "%2.2fMHz", af_1/1e3);
-			else if ((af_1<2e3)&&(af_1>100)) sprintf(af1_string, "%ikHz", (int)af_1);
-			if (af_2>80e3) sprintf(af2_string, "%2.2fMHz", af_2/1e3);
-			else if ((af_2<2e3)&&(af_2>100)) sprintf(af2_string, "%ikHz", (int)af_2);
+	if(!B) { // type 0A
+		af_code_1 = int(group[2] >> 8) & 0xff;
+		af_code_2 = int(group[2])      & 0xff;
+		af_1 = decode_af(af_code_1);
+		af_2 = decode_af(af_code_2);
+
+		if(af_1) {
+			no_af += 1;
 		}
-		if (no_af==1) strcpy(af_string, af1_string);
-		else if (no_af==2) strcpy(af_string, af2_string);
-		else if (no_af==3){
-			strcpy(af_string, af1_string);
-			strcat(af_string, ", ");
-			strcat(af_string, af2_string);
+		if(af_2) {
+			no_af += 2;
+		}
+
+		std::string af1_string;
+		std::string af2_string;
+		/* only AF1 => no_af==1, only AF2 => no_af==2, both AF1 and AF2 => no_af==3 */
+		if(no_af) {
+			if(af_1 > 80e3) {
+				af1_string = str(boost::format("%2.2fMHz") % (af_1/1e3));
+			} else if((af_1<2e3)&&(af_1>100)) {
+				af1_string = str(boost::format("%ikHz") % int(af_1));
+			}
+			if(af_2 > 80e3) {
+				af2_string = str(boost::format("%2.2fMHz") % (af_2/1e3));
+			} else if ((af_2 < 2e3) && (af_2 > 100)) {
+				af2_string = str(boost::format("%ikHz") % int(af_2));
+			}
+		}
+		if(no_af == 1) {
+			af_string = af1_string;
+		} else if(no_af == 2) {
+			af_string = af2_string;
+		} else if(no_af == 3) {
+			af_string = str(boost::format("%s, %s") % af1_string %af2_string);
 		}
 	}
 
-	std::cout << "==>" << std::string(program_service_name, 8)
+	lout << "==>" << std::string(program_service_name, 8)
 		<< "<== -" << (traffic_program ? "TP" : "  ")
 		<< '-' << (traffic_announcement ? "TA" : "  ")
 		<< '-' << (music_speech ? "Music" : "Speech")
 		<< '-' << (mono_stereo ? "MONO" : "STEREO")
 		<< " - AF:" << af_string << std::endl;
 
-	send_message(1,std::string(program_service_name, 8));
-	send_message(3,flagstring);
-	send_message(6,af_string);
+	send_message(1, std::string(program_service_name, 8));
+	send_message(3, flagstring);
+	send_message(6, af_string);
 }
 
 double parser_impl::decode_af(unsigned int af_code) {
@@ -364,68 +376,73 @@ void parser_impl::decode_type8(unsigned int *group, bool B){
 		dout << "type 8B not implemented yet" << std::endl;
 		return;
 	}
-	bool T=(group[1]>>4)&0x1;		// 0 = user message, 1 = tuning info
-	bool F=(group[1]>>3)&0x1;		// 0 = multi-group, 1 = single-group
-	bool D=(group[2]>15)&0x1;		// 1 = diversion recommended
+	bool T = (group[1] >> 4) & 0x1; // 0 = user message, 1 = tuning info
+	bool F = (group[1] >> 3) & 0x1; // 0 = multi-group, 1 = single-group
+	bool D = (group[2] > 15) & 0x1; // 1 = diversion recommended
 	static unsigned long int free_format[4];
-	static int no_groups=0;
+	static int no_groups = 0;
 
-	if(T==true){	// tuning info
-		printf("#tuning info# ");
-		int variant=group[1]&0xf;
-		if((variant>3)&&(variant<10)){
-			printf("variant: %i - ", variant);
-			printf("%04X %04X\n", group[2], group[3]);
+	if(T) { // tuning info
+		lout << "#tuning info# ";
+		int variant = group[1] & 0xf;
+		if((variant > 3) && (variant < 10)) {
+			lout << "variant: " << variant << " - "
+				<< group[2] << " " << group[3] << std::endl;
+		} else {
+			lout << "invalid variant: " << variant << std::endl;
 		}
-		else printf("invalid variant: %i\n", variant);
-	}
-	else if((F==true)||((F==false)&&(D==true))){		// single-group or 1st of multi-group
-		unsigned int dp_ci=group[1]&0x7;		// duration & persistence or continuity index
-		bool sign=(group[2]>>14)&0x1;			// event direction, 0 = +, 1 = -
-		unsigned int extent=(group[2]>>11)&0x7;		// number of segments affected
-		unsigned int event=group[2]&0x7ff; 		// event code, defined in ISO 14819-2
-		unsigned int location=group[3];			// location code, defined in ISO 14819-3
-		std::cout << "#user msg# " << (D?"diversion recommended, ":"");
-		if(F)
-			std::cout << "single-grp, duration:" << tmc_duration[dp_ci][0];
-		else
-			std::cout << "multi-grp, continuity index:" << dp_ci;
-		int event_line=tmc_event_code_index[event][1];
-		std::cout << ", extent:" << (sign?"-":"") << extent+1 << " segments"
+
+	} else if(F || D) { // single-group or 1st of multi-group
+		unsigned int dp_ci    =  group[1]        & 0x7;   // duration & persistence or continuity index
+		bool sign             = (group[2] >> 14) & 0x1;   // event direction, 0 = +, 1 = -
+		unsigned int extent   = (group[2] >> 11) & 0x7;   // number of segments affected
+		unsigned int event    =  group[2]        & 0x7ff; // event code, defined in ISO 14819-2
+		unsigned int location =  group[3];                // location code, defined in ISO 14819-3
+		lout << "#user msg# " << (D ? "diversion recommended, " : "");
+		if(F) {
+			lout << "single-grp, duration:" << tmc_duration[dp_ci][0];
+		} else {
+			lout << "multi-grp, continuity index:" << dp_ci;
+		}
+		int event_line = tmc_event_code_index[event][1];
+		lout << ", extent:" << (sign ? "-" : "") << extent + 1 << " segments"
 			<< ", event" << event << ":" << tmc_events[event_line][1]
 			<< ", location:" << location << std::endl;
-	}
-	else{	// 2nd or more of multi-group
-		unsigned int ci=group[1]&0x7;			// countinuity index
-		bool sg=(group[2]>>14)&0x1;			// second group
-		unsigned int gsi=(group[2]>>12)&0x3;		// group sequence
-		std::cout << "#user msg# multi-grp, continuity index:" << ci
-			<< (sg?", second group":"") << ", gsi:" << gsi;
-		printf(", free format: %03X %04X\n", (group[2]&0xfff), group[3]);
+
+	} else { // 2nd or more of multi-group
+		unsigned int ci = group[1] & 0x7;          // countinuity index
+		bool sg = (group[2] >> 14) & 0x1;          // second group
+		unsigned int gsi = (group[2] >> 12) & 0x3; // group sequence
+		lout << "#user msg# multi-grp, continuity index:" << ci
+			<< (sg ? ", second group" : "") << ", gsi:" << gsi;
+		lout << ", free format: " << (group[2] & 0xfff) << " "
+			<< group[3] << std::endl;
 		// it's not clear if gsi=N-2 when gs=true
-		if(sg)
-			no_groups=gsi;
-		free_format[gsi]=((group[2]&0xfff)<<12)|group[3];
-		if (gsi==0)
+		if(sg) {
+			no_groups = gsi;
+		}
+		free_format[gsi] = ((group[2] & 0xfff) << 12) | group[3];
+		if(gsi == 0) {
 			decode_optional_content(no_groups, free_format);
+		}
 	}
 }
 
 void parser_impl::decode_optional_content(int no_groups, unsigned long int *free_format){
-	int label=0;
-	int content=0;
-	int content_length=0;
-	int ff_pointer;
+	int label          = 0;
+	int content        = 0;
+	int content_length = 0;
+	int ff_pointer     = 0;
 	
-	for (int i=no_groups;i==0;i--){
-		ff_pointer=12+16;
-		while(ff_pointer>0){
-			ff_pointer-=4;
-			label=(free_format[i]&&(0xf<<ff_pointer));
-			content_length=optional_content_lengths[label];
-			ff_pointer-=content_length;
-			content=(free_format[i]&&((int)(pow(2, content_length)-1)<<ff_pointer));
-			std::cout << "TMC optional content (" << label_descriptions[label]
+	for (int i = no_groups; i == 0; i--){
+		ff_pointer = 12 + 16;
+		while(ff_pointer > 0){
+			ff_pointer -= 4;
+			label = (free_format[i] && (0xf << ff_pointer));
+			content_length = optional_content_lengths[label];
+			ff_pointer -= content_length;
+			content = (free_format[i] && (int(pow(2, content_length) - 1) << ff_pointer));
+			lout << "TMC optional content (" << label_descriptions[label]
 				<< "):" << content << std::endl;
 		}
 	}
@@ -453,72 +470,79 @@ void parser_impl::decode_type13(unsigned int *group, bool B){
 
 void parser_impl::decode_type14(unsigned int *group, bool B){
 	
-	bool tp_on=(group[1]>>4)&0x01;
-	char variant_code=group[1]&0x0f;
-	unsigned int information=group[2];
-	unsigned int pi_on=group[3];
+	bool tp_on               = (group[1] >> 4) & 0x01;
+	char variant_code        = group[1] & 0x0f;
+	unsigned int information = group[2];
+	unsigned int pi_on       = group[3];
 	
-	char pty_on=0;
-	bool ta_on=0;
-	static char ps_on[9]={' ',' ',' ',' ',' ',' ',' ',' ','\0'};
-	double af_1=0, af_2=0;
+	char pty_on = 0;
+	bool ta_on = 0;
+	static char ps_on[8] = {' ',' ',' ',' ',' ',' ',' ',' '};
+	double af_1 = 0;
+	double af_2 = 0;
 	
 	if (!B){
 		switch (variant_code){
-			case 0:			// PS(ON)
-			case 1:			// PS(ON)
-			case 2:			// PS(ON)
-			case 3:			// PS(ON)
-				ps_on[variant_code*2]=(information>>8)&0xff;
-				ps_on[variant_code*2+1]=information&0xff;
-				printf("PS(ON): ==>%8s<==", ps_on);
+			case 0: // PS(ON)
+			case 1: // PS(ON)
+			case 2: // PS(ON)
+			case 3: // PS(ON)
+				ps_on[variant_code * 2    ] = (information >> 8) & 0xff;
+				ps_on[variant_code * 2 + 1] =  information       & 0xff;
+				lout << "PS(ON): ==>" << std::string(ps_on, 8) << "<==";
 			break;
-			case 4:			// AF
-				af_1 = (double)(((information>>8)&0xff)+875)*100;
-				af_2 = (double)((information&0xff)+875)*100;
-				printf("AF:%3.2fMHz %3.2fMHz", af_1/1000, af_2/1000);
+			case 4: // AF
+				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
+				af_2 = 100.0 * ((information & 0xff) + 875);
+				lout << boost::format("AF:%3.2fMHz %3.2fMHz") % (af_1/1000) % (af_2/1000);
 			break;
-			case 5:			// mapped frequencies
-			case 6:			// mapped frequencies
-			case 7:			// mapped frequencies
-			case 8:			// mapped frequencies
-				af_1 = (double)(((information>>8)&0xff)+875)*100;
-				af_2 = (double)((information&0xff)+875)*100;
-				printf("TN:%3.2fMHz - ON:%3.2fMHz", af_1/1000, af_2/1000);
+			case 5: // mapped frequencies
+			case 6: // mapped frequencies
+			case 7: // mapped frequencies
+			case 8: // mapped frequencies
+				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
+				af_2 = 100.0 * ((information & 0xff) + 875);
+				lout << boost::format("TN:%3.2fMHz - ON:%3.2fMHz") % (af_1/1000) % (af_2/1000);
 			break;
-			case 9:			// mapped frequencies (AM)
-				af_1 = (double)(((information>>8)&0xff)+875)*100;
-				af_2 = (double)(((information&0xff)-16)*9 + 531);
-				printf("TN:%3.2fMHz - ON:%ikHz", af_1/1000, (int)af_2);
+			case 9: // mapped frequencies (AM)
+				af_1 = 100.0 * (((information >> 8) & 0xff) + 875);
+				af_2 = 9.0 * ((information & 0xff) - 16) + 531;
+				lout << boost::format("TN:%3.2fMHz - ON:%ikHz") % (af_1/1000) % int(af_2);
 			break;
-			case 10:		// unallocated
+			case 10: // unallocated
 			break;
-			case 11:		// unallocated
+			case 11: // unallocated
 			break;
-			case 12:		// linkage information
-				printf("Linkage information: %x%x", ((information>>8)&0xff), (information&0xff));
+			case 12: // linkage information
+				lout << boost::format("Linkage information: %x%x")
+					% ((information >> 8) & 0xff) % (information & 0xff);
 			break;
-			case 13:		// PTY(ON), TA(ON)
-				ta_on=information&0x01;
-				pty_on=(information>>11)&0x1f;
-				std::cout << "PTY(ON):" << pty_table[(int)pty_on];
-				if (ta_on) printf(" - TA");
+			case 13: // PTY(ON), TA(ON)
+				ta_on = information & 0x01;
+				pty_on = (information >> 11) & 0x1f;
+				lout << "PTY(ON):" << pty_table[int(pty_on)];
+				if(ta_on) {
+					lout << " - TA";
+				}
 			break;
-			case 14:		// PIN(ON)
-				printf("PIN(ON):%x%x", ((information>>8)&0xff), (information&0xff));
+			case 14: // PIN(ON)
+				lout << boost::format("PIN(ON):%x%x")
+					% ((information >> 8) & 0xff) % (information & 0xff);
 			break;
-			case 15:		// Reserved for broadcasters use
+			case 15: // Reserved for broadcasters use
 			break;
 			default:
-				printf("invalid variant code:%i", variant_code);
+				dout << "invalid variant code:" << variant_code;
 			break;
 		}
 	}
 	if (pi_on){
-		printf(" PI(ON):%i", pi_on);
-		if (tp_on) printf("-TP-");
+		lout << " PI(ON):" << pi_on;
+		if (tp_on) {
+			lout << "-TP-";
+		}
 	}
-	std::cout << std::endl;
+	lout << std::endl;
 }
 
 void parser_impl::decode_type15(unsigned int *group, bool B){
@@ -527,10 +551,10 @@ void parser_impl::decode_type15(unsigned int *group, bool B){
 
 void parser_impl::parse(pmt::pmt_t msg) {
 	if(!pmt::is_blob(msg)) {
-		lout << "wrong input message (no blob)" << std::endl;
+		dout << "wrong input message (no blob)" << std::endl;
 	}
 	if(pmt::blob_length(msg) != 4 * sizeof(unsigned long)) {
-		lout << "input message has wrong size ("
+		dout << "input message has wrong size ("
 			<< pmt::blob_length(msg) << ")" << std::endl;
 	}
 	unsigned int *group = (unsigned int*)pmt::blob_data(msg);
@@ -538,27 +562,26 @@ void parser_impl::parse(pmt::pmt_t msg) {
 	unsigned int group_type = (unsigned int)((group[1] >> 12) & 0xf);
 	bool ab = (group[1] >> 11 ) & 0x1;
 
-	printf("%02i%c ", group_type, (ab ? 'B' :'A'));
-	std::cout << "(" << rds_group_acronyms[group_type] << ")";
+	lout << boost::format("%02i%c ") % group_type % (ab ? 'B' :'A');
+	lout << "(" << rds_group_acronyms[group_type] << ")";
 
-	program_identification=group[0];			// "PI"
-	program_type=(group[1]>>5)&0x1f;			// "PTY"
-	int pi_country_identification=(program_identification>>12)&0xf;
-	int pi_area_coverage=(program_identification>>8)&0xf;
-	unsigned char pi_program_reference_number=program_identification&0xff;
-	char pistring[5];
-	sprintf(pistring,"%04X",program_identification);
-	send_message(0,pistring);
-	send_message(2,pty_table[program_type]);
+	program_identification = group[0];     // "PI"
+	program_type = (group[1] >> 5) & 0x1f; // "PTY"
+	int pi_country_identification = (program_identification >> 12) & 0xf;
+	int pi_area_coverage = (program_identification >> 8) & 0xf;
+	unsigned char pi_program_reference_number = program_identification & 0xff;
+	std::string pistring = str(boost::format("%04X") % program_identification);
+	send_message(0, pistring);
+	send_message(2, pty_table[program_type]);
 
-	std::cout << " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type];
-	std::cout << " (country:" << pi_country_codes[pi_country_identification-1][0];
-	std::cout << "/" << pi_country_codes[pi_country_identification-1][1];
-	std::cout << "/" << pi_country_codes[pi_country_identification-1][2];
-	std::cout << "/" << pi_country_codes[pi_country_identification-1][3];
-	std::cout << "/" << pi_country_codes[pi_country_identification-1][4];
-	std::cout << ", area:" << coverage_area_codes[pi_area_coverage];
-	std::cout << ", program:" << (int)pi_program_reference_number << ")" << std::endl;
+	lout << " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type];
+	lout << " (country:" << pi_country_codes[pi_country_identification - 1][0];
+	lout << "/" << pi_country_codes[pi_country_identification - 1][1];
+	lout << "/" << pi_country_codes[pi_country_identification - 1][2];
+	lout << "/" << pi_country_codes[pi_country_identification - 1][3];
+	lout << "/" << pi_country_codes[pi_country_identification - 1][4];
+	lout << ", area:" << coverage_area_codes[pi_area_coverage];
+	lout << ", program:" << int(pi_program_reference_number) << ")" << std::endl;
 
 	switch (group_type) {
 		case 0:

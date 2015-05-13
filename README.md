@@ -4,7 +4,7 @@ GNU Radio v3.7.
 
 packets from your packet manager:
 ```
-sudo apt-get install cmake libboost-all-dev libcppunit-dev liblog4cpp5-dev swig
+sudo apt-get install cmake libboost-all-dev liblog4cpp5-dev swig
 ```
 
 

@@ -99,11 +99,6 @@ if(NOT GNURADIO_RUNTIME_FOUND)
     message(FATAL_ERROR "GnuRadio Runtime required to compile gr-rds")
 endif()
 
-find_package(CppUnit)
-if(NOT CPPUNIT_FOUND)
-    message(FATAL_ERROR "CppUnit required to compile ieee802-11")
-endif()
-
 find_package(Doxygen)
 
 find_package(PythonLibs 2)
@@ -136,13 +131,11 @@ endif(APPLE)
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
-    ${CPPUNIT_INCLUDE_DIRS}
     ${GNURADIO_ALL_INCLUDE_DIRS}
 )
 
 link_directories(
     ${Boost_LIBRARY_DIRS}
-    ${CPPUNIT_LIBRARY_DIRS}
     ${GNURADIO_ALL_LIBRARY_DIRS}
 )
 

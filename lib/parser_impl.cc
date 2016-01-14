@@ -520,7 +520,7 @@ void parser_impl::decode_type14(unsigned int *group, bool B){
 			case 13: // PTY(ON), TA(ON)
 				ta_on = information & 0x01;
 				pty_on = (information >> 11) & 0x1f;
-				lout << "PTY(ON):" << pty_table[int(pty_on)];
+				lout << "PTY(ON):" << pty_table[int(pty_on)][pty_locale];
 				if(ta_on) {
 					lout << " - TA";
 				}
@@ -572,9 +572,9 @@ void parser_impl::parse(pmt::pmt_t msg) {
 	unsigned char pi_program_reference_number = program_identification & 0xff;
 	std::string pistring = str(boost::format("%04X") % program_identification);
 	send_message(0, pistring);
-	send_message(2, pty_table[program_type]);
+	send_message(2, pty_table[program_type][pty_locale]);
 
-	lout << " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type];
+	lout << " - PI:" << pistring << " - " << "PTY:" << pty_table[program_type][pty_locale];
 	lout << " (country:" << pi_country_codes[pi_country_identification - 1][0];
 	lout << "/" << pi_country_codes[pi_country_identification - 1][1];
 	lout << "/" << pi_country_codes[pi_country_identification - 1][2];

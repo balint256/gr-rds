@@ -239,7 +239,7 @@ void encoder_impl::set_pty(unsigned int pty) {
 		std::cout << "warning: ignoring invalid pty: " << std::endl;
 	} else {
 		PTY = pty;
-		std::cout << "setting pty to " << pty << " (" << pty_table[pty] << ")" << std::endl;
+		std::cout << "setting pty to " << pty << " (" << pty_table[pty][pty_locale] << ")" << std::endl;
 	}
 }
 

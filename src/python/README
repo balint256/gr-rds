@@ -1,6 +1,0 @@
-1) The script usrp_rds_rx.py is the RDS receiver, which uses rdspanel.py and rdspanel.wxg for the GUI.
-2) The script rds_no_gui.py is (obviously) the same receiver, without the GUI (prints everything to the console).
-3) The scripts fm_tx_mono.py and fm_tx_stereo.py are FM transmitters taking their input from uncompressed audio files.
-4) The script usrp_rds_tx.py is the RDS transmitter (INCOMPLETE).
-5) The script txrx.py is a loopback TX-RX for testing purposes (no USRP required).
-6) The script newrx.py is an attempt to replace the custom freq_divider and bpsk_demod blocks with gr blocks (INCOMPLETE).

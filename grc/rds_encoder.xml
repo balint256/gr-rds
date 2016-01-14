@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<block>
+	<name>RDS Encoder</name>
+	<key>gr_rds_encoder</key>
+	<category>RDS</category>
+	<import>import rds</import>
+	<make>rds.encoder()</make>
+	<sink>
+		<name>rds in</name>
+		<type>message</type>
+		<optional>1</optional>
+	</sink>
+	<source>
+		<name>out</name>
+		<type>byte</type>
+	</source>
+</block>
